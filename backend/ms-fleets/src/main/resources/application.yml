@@ -32,7 +32,68 @@ spring:
 server:
   port: 8080
 
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+# Controls how and where application logs are written.
+# Similar to configuring winston/morgan in Express.js
+# ============================================
+
 logging:
+  
+  # ============================================
+  # LOG LEVELS (Filters)
+  # ============================================
+  # Defines which log messages are displayed.
+  # Priority order: TRACE < DEBUG < INFO < WARN < ERROR
+  # 
+  # When set to INFO: shows INFO, WARN, ERROR (hides DEBUG and TRACE)
+  # When set to DEBUG: shows DEBUG, INFO, WARN, ERROR
+  # ============================================
   level:
-    org.hibernate.SQL: DEBUG
+    # Application packages
+    com.fleets: DEBUG                              # Base package - shows all app logs
+    com.fleets.controller: INFO                    # Controllers - only important operations
+    com.fleets.service: DEBUG                      # Services - detailed business logic
+    
+    # Hibernate (ORM) logs
+    org.hibernate.SQL: DEBUG                       # Shows SQL statements executed
     org.hibernate.tool.hbm2ddl: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Shows SQL parameter values (use only in dev)
+  
+  # ============================================
+  # LOG PATTERNS (Format)
+  # ============================================
+  # Defines the structure of each log entry.
+  # Similar to custom formatters in Express (morgan 'combined', 'tiny', etc.)
+  # ============================================
+  pattern:
+    # Console output format (human-readable, color-friendly)
+    # %d{pattern} - timestamp (yyyy-MM-dd HH:mm:ss)
+    # %level      - log level (INFO, DEBUG, ERROR, etc.)
+    # %msg        - the actual log message
+    # %n          - new line
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
+    
+    # File output format (more detailed for debugging)
+    # %thread     - name of the thread that generated the log
+    # %logger{36} - source class name (limited to 36 chars)
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n"
+  
+  # ============================================
+  # FILE APPENDER (Persistent logs)
+  # ============================================
+  # Writes logs to a file for long-term storage and debugging.
+  # Useful for production environments.
+  # ============================================
+  file:
+    # Path where log files are stored (relative to application root)
+    name: logs/ms-fleets.log
+    
+    # Maximum size per file (10MB)
+    # When file reaches this size, it's rotated (renamed and a new one is created)
+    max-size: 10MB
+    
+    # Number of rotated log files to keep
+    # Example: ms-fleets.log, ms-fleets.1.log, ms-fleets.2.log, ... up to 7
+    max-history: 7

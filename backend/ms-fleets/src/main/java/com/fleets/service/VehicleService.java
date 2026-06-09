@@ -1,5 +1,7 @@
 package com.fleets.service;
 
+import com.fleets.dto.request.VehicleRequestDTO;
+import com.fleets.exception.AppException;
 import com.fleets.model.Vehicle;
 import java.util.List;
 
@@ -19,31 +21,32 @@ public interface VehicleService {
      * Finds a vehicle by its unique ID.
      * @param id the vehicle ID
      * @return the vehicle if found
-     * @throws RuntimeException if vehicle not found
+     * @throws AppException if vehicle not found (status 404)
      */
     Vehicle getVehicleById(Long id);
     
     /**
-     * Creates a new vehicle.
-     * @param vehicle the vehicle to create
+     * Creates a new vehicle from the request DTO.
+     * @param request the DTO containing vehicle data
      * @return the created vehicle with generated ID
-     * @throws RuntimeException if license plate already exists
+     * @throws AppException if license plate already exists (status 409)
      */
-    Vehicle createVehicle(Vehicle vehicle);
+    Vehicle createVehicle(VehicleRequestDTO request);
     
     /**
-     * Updates an existing vehicle.
+     * Updates an existing vehicle from the request DTO.
      * @param id the ID of the vehicle to update
-     * @param vehicle the updated vehicle data
+     * @param request the DTO containing updated vehicle data
      * @return the updated vehicle
-     * @throws RuntimeException if vehicle not found
+     * @throws AppException if vehicle not found (status 404)
+     * @throws AppException if license plate already exists on another vehicle (status 409)
      */
-    Vehicle updateVehicle(Long id, Vehicle vehicle);
+    Vehicle updateVehicle(Long id, VehicleRequestDTO request);
     
     /**
      * Deletes a vehicle by its ID.
      * @param id the ID of the vehicle to delete
-     * @throws RuntimeException if vehicle not found
+     * @throws AppException if vehicle not found (status 404)
      */
     void deleteVehicle(Long id);
     
