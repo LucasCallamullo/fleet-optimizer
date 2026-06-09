@@ -1,5 +1,7 @@
 package com.fleets.service;
 
+import com.fleets.dto.request.CategoryRequestDTO;
+import com.fleets.exception.AppException;
 import com.fleets.model.Category;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public interface CategoryService {
      * Finds a category by its unique ID.
      * @param id the category ID
      * @return the category if found
-     * @throws RuntimeException if category not found
+     * @throws AppException if category not found (status 404)
      */
     Category getCategoryById(Long id);
     
@@ -31,28 +33,30 @@ public interface CategoryService {
     Category getCategoryByName(String name);
     
     /**
-     * Creates a new category.
-     * @param category the category to create
+     * Creates a new category from the request DTO.
+     * @param request the DTO containing category data
      * @return the created category with generated ID
-     * @throws RuntimeException if category name already exists
+     * @throws AppException if category name already exists (status 409)
      */
-    Category createCategory(Category category);
+    Category createCategory(CategoryRequestDTO request);
     
     /**
-     * Updates an existing category.
+     * Updates an existing category from the request DTO.
      * @param id the ID of the category to update
-     * @param categoryDetails the updated category data
+     * @param request the DTO containing updated category data
      * @return the updated category
-     * @throws RuntimeException if category not found or name already exists
+     * @throws AppException if category not found (status 404)
+     * @throws AppException if new name already exists on another category (status 409)
      */
-    Category updateCategory(Long id, Category categoryDetails);
+    Category updateCategory(Long id, CategoryRequestDTO request);
     
     /**
      * Deletes a category by its ID.
      * Vehicles belonging to this category will NOT be deleted.
      * Their category_id will be set to NULL.
      * @param id the ID of the category to delete
-     * @throws RuntimeException if category not found or has associated vehicles
+     * @throws AppException if category not found (status 404)
+     * @throws AppException if category has associated vehicles (status 409)
      */
     void deleteCategory(Long id);
     
