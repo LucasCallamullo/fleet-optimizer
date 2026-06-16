@@ -1,82 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
-	
+
+	<!-- =========================================== -->
+	<!-- PARENT: Spring Boot Starter Parent          -->
+	<!-- =========================================== -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.0.6</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
-	
+
+	<!-- =========================================== -->
+	<!-- PROJECT METADATA                            -->
+	<!-- =========================================== -->
 	<groupId>com.fleetoptimizer</groupId>
 	<artifactId>ms-fleets</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
+	<!-- =========================================== -->
+	<!-- PROPERTIES: Java version & library versions -->
+	<!-- =========================================== -->
 	<properties>
 		<java.version>17</java.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 	</properties>
-	
+
+	<!-- =========================================== -->
+	<!-- DEPENDENCIES                                -->
+	<!-- =========================================== -->
 	<dependencies>
-		<!-- Spring Boot Web (incluye Tomcat, REST, etc.) -->
+
+		<!-- Spring Boot Web Starter -->
+		<!-- Includes: Tomcat (embedded), Spring MVC, REST support -->
+		<!-- Required for building REST APIs -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		
-		<!-- Spring Data JPA (incluye Hibernate) -->
+
+		<!-- Spring Data JPA Starter -->
+		<!-- Includes: Hibernate (ORM), JPA, Database connectivity -->
+		<!-- Required for database operations -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		
-		<!-- H2 Database (en memoria) -->
+
+		<!-- H2 Database (In-memory database for development/testing) -->
+		<!-- scope: runtime → only needed at runtime, not for compilation -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
-		<!-- Lombok (getters, setters, builders) -->
+
+		<!-- Lombok: Reduces boilerplate code -->
+		<!-- Generates: getters, setters, builders, constructors, logs -->
+		<!-- Use @Data, @Slf4j, @Builder, etc. -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
-		<!-- Test dependencies -->
+
+		<!-- Spring Boot Test Starter -->
+		<!-- Includes: JUnit 5, Mockito, AssertJ, Testcontainers -->
+		<!-- scope: test → only needed for testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Bean Validation (para @Valid, @NotBlank, etc.) -->
+		<!-- Bean Validation (Hibernate Validator) -->
+		<!-- Annotations: @Valid, @NotBlank, @NotNull, @Size, @Min, @Max, @Pattern -->
+		<!-- Required for validating incoming DTOs in controllers -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- Swagger stuff for docs -->
+		<!-- Swagger / OpenAPI for API documentation -->
+		<!-- Access UI at: http://localhost:8080/swagger-ui.html -->
+		<!-- Auto-generates documentation from controllers and DTOs -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.6.0</version>
 		</dependency>
 
-		<!-- Mapper Structure -->
+		<!-- MapStruct: DTO to Entity mapping (compile-time, no reflection) -->
+		<!-- Generates type-safe mappers automatically -->
+		<!-- Use with @Mapper(componentModel = "spring") -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>${org.mapstruct.version}</version>
 		</dependency>
+
 	</dependencies>
-	
+
+	<!-- =========================================== -->
+	<!-- BUILD CONFIGURATION                         -->
+	<!-- =========================================== -->
 	<build>
 		<plugins>
+
+			<!-- Spring Boot Maven Plugin -->
+			<!-- Packages executable JAR with embedded Tomcat -->
+			<!-- Excludes Lombok from the final JAR (not needed at runtime) -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -90,22 +128,27 @@
 				</configuration>
 			</plugin>
 
-			<!-- Mapper Structure , dice como hacerlo al structure -->
+			<!-- Maven Compiler Plugin with Annotation Processors -->
+			<!-- Processes Lombok and MapStruct annotations at compile time -->
+			<!-- Order matters: Lombok must run before MapStruct -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<annotationProcessorPaths>
+						<!-- Lombok processor: generates getters, setters, builders, logs -->
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 							<version>${lombok.version}</version>
 						</path>
+						<!-- Bridges Lombok annotations with MapStruct -->
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok-mapstruct-binding</artifactId>
 							<version>${lombok-mapstruct-binding.version}</version>
 						</path>
+						<!-- MapStruct processor: generates mapper implementations -->
 						<path>
 							<groupId>org.mapstruct</groupId>
 							<artifactId>mapstruct-processor</artifactId>
@@ -114,6 +157,8 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
+
 </project>

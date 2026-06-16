@@ -92,11 +92,12 @@ public class MsFleetsApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")           // ← Solo endpoints /api/*
-                        .allowedOrigins("http://localhost:3000")  // ← React
+                registry.addMapping("/api/v1/**")           // ← Solo endpoints /api/*
+                        .allowedOrigins("*")  // ← React "http://localhost:5173"
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        // .allowCredentials(true); //
+                        .allowCredentials(false);
             }
         };
     }

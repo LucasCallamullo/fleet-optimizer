@@ -22,7 +22,7 @@ spring:
     # defer-datasource-initialization: true
     hibernate:
       ddl-auto: create
-    show-sql: true
+    # show-sql: true
 
     properties:
       hibernate:
@@ -52,14 +52,15 @@ logging:
   # ============================================
   level:
     # Application packages
-    com.fleets: DEBUG                              # Base package - shows all app logs
-    com.fleets.controller: INFO                    # Controllers - only important operations
-    com.fleets.service: DEBUG                      # Services - detailed business logic
+    # com.fleets: DEBUG                              # Base package - shows all app logs
+    com.fleets.controller: WARN                    # Controllers - only important operations
+    com.fleets.filter: INFO            # logging filter / middleware
+    # com.fleets.service: DEBUG                      # Services - detailed business logic
     
     # Hibernate (ORM) logs
-    org.hibernate.SQL: DEBUG                       # Shows SQL statements executed
-    org.hibernate.tool.hbm2ddl: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Shows SQL parameter values (use only in dev)
+    # org.hibernate.SQL: DEBUG                       # Shows SQL statements executed
+    # org.hibernate.tool.hbm2ddl: DEBUG
+    # org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Shows SQL parameter values (use only in dev)
   
   # ============================================
   # LOG PATTERNS (Format)
@@ -78,7 +79,7 @@ logging:
     # File output format (more detailed for debugging)
     # %thread     - name of the thread that generated the log
     # %logger{36} - source class name (limited to 36 chars)
-    file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
   
   # ============================================
   # FILE APPENDER (Persistent logs)

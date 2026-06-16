@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/api/v1/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
     

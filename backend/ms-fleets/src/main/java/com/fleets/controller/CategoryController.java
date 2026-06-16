@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     
