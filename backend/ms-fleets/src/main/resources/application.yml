@@ -56,6 +56,8 @@ logging:
     com.fleets.controller: WARN                    # Controllers - only important operations
     com.fleets.filter: INFO            # logging filter / middleware
     # com.fleets.service: DEBUG                      # Services - detailed business logic
+    # org.hibernate: WARN
+    # org.springframework.web: INFO
     
     # Hibernate (ORM) logs
     # org.hibernate.SQL: DEBUG                       # Shows SQL statements executed
@@ -74,7 +76,8 @@ logging:
     # %level      - log level (INFO, DEBUG, ERROR, etc.)
     # %msg        - the actual log message
     # %n          - new line
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
+    # console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %highlight(%-5level) - %msg%n"
     
     # File output format (more detailed for debugging)
     # %thread     - name of the thread that generated the log

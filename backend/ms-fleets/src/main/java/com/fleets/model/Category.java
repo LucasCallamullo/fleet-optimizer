@@ -25,6 +25,9 @@ public class Category {
     
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean active = true;
     
     /**
      * One-to-many relationship with Vehicle entity.    LAZY DEFAULT
