@@ -1,7 +1,5 @@
 package com.fleets.dto.request;
 
-import com.fleets.model.Vehicle;
-
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -37,18 +35,4 @@ public class VehicleRequestDTO {
      */
     @Positive(message = "Category ID must be positive")
     private Long categoryId;
-    
-    /**
-     * Converts this DTO to a Vehicle entity.
-     * Note: Category needs to be fetched separately in the service layer.
-     * 
-     * @return a new Vehicle entity with basic fields populated
-     */
-    public Vehicle toEntity() {
-        Vehicle vehicle = new Vehicle();
-        vehicle.setLicensePlate(this.licensePlate);
-        vehicle.setYear(this.year);
-        // Category is set separately in service to avoid lazy loading issues
-        return vehicle;
-    }
 }

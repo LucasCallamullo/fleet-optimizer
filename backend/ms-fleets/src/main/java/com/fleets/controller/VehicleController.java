@@ -2,7 +2,7 @@ package com.fleets.controller;
 
 import com.fleets.dto.request.VehicleRequestDTO;
 import com.fleets.dto.response.VehicleResponseDTO;
-import com.fleets.model.Vehicle;
+import com.fleets.dto.response.VehicleDetailDTO;
 import com.fleets.service.VehicleService;
 
 import jakarta.validation.Valid;
@@ -10,12 +10,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST controller for Vehicle endpoints.
  * Handles HTTP requests for vehicle operations.
+ * 
+ * ================================================================
+ * RESPONSIBILITIES:
+ * ================================================================
+ * 
+ * 1. Receive HTTP requests
+ * 2. Validate input (via @Valid)
+ * 3. Call the appropriate service method
+ * 4. Return the response (DTOs)
+ * 5. Handle HTTP status codes
+ * 
+ * The controller is THIN - all business logic is in the service layer.
+ * 
+ * ================================================================
  */
 @Slf4j
 @RestController
@@ -25,96 +39,132 @@ public class VehicleController {
     
     private final VehicleService vehicleService;
     
+    // ================================================================
+    // GET ENDPOINTS
+    // ================================================================
+    
     /**
-     * Retrieves all vehicles.
-     * GET /api/vehicles
+     * Retrieves all vehicles (basic info).
+     * GET /api/v1/vehicles
+     * 
+     * @return List of VehicleResponseDTO (only category ID)
      */
     @GetMapping
     public List<VehicleResponseDTO> getAllVehicles() {
-        log.info("GET /api/vehicles - Fetching all vehicles");
-        List<VehicleResponseDTO> result = vehicleService.getAllVehicles().stream()
-            .map(VehicleResponseDTO::fromEntity)
-            .collect(Collectors.toList());
-        log.info("GET /api/vehicles - Returned {} vehicles", result.size());
+        log.info("GET /api/v1/vehicles - Fetching all vehicles (basic)");
+        List<VehicleResponseDTO> result = vehicleService.getAllVehicles();
+        log.info("GET /api/v1/vehicles - Returned {} vehicles", result.size());
         return result;
     }
     
     /**
-     * Retrieves a vehicle by its ID.
-     * GET /api/vehicles/{id}
+     * Retrieves all vehicles with full category details.
+     * GET /api/v1/vehicles/detailed
+     * 
+     * @return List of VehicleDetailDTO (with full category)
+     */
+    @GetMapping("/detailed")
+    public List<VehicleDetailDTO> getAllVehiclesDetailed() {
+        log.info("GET /api/v1/vehicles/detailed - Fetching all vehicles with category details");
+        List<VehicleDetailDTO> result = vehicleService.getAllVehiclesWithCategory();
+        log.info("GET /api/v1/vehicles/detailed - Returned {} vehicles", result.size());
+        return result;
+    }
+    
+    /**
+     * Retrieves a vehicle by its ID with full details.
+     * GET /api/v1/vehicles/{id}
+     * 
+     * @param id the vehicle ID
+     * @return VehicleDetailDTO with full category
      */
     @GetMapping("/{id}")
-    public VehicleResponseDTO getVehicleById(@PathVariable Long id) {
-        log.info("GET /api/vehicles/{} - Fetching vehicle", id);
-        Vehicle vehicle = vehicleService.getVehicleById(id);
-        log.debug("Vehicle found - id: {}, plate: {}", vehicle.getId(), vehicle.getLicensePlate());
-        return VehicleResponseDTO.fromEntity(vehicle);
+    public VehicleDetailDTO getVehicleById(@PathVariable Long id) {
+        log.info("GET /api/v1/vehicles/{} - Fetching vehicle detail", id);
+        VehicleDetailDTO result = vehicleService.getVehicleById(id);
+        log.debug("Vehicle found - id: {}, plate: {}", result.id(), result.licensePlate());
+        return result;
     }
-
+    
+    /**
+     * Retrieves a vehicle by its license plate with full details.
+     * GET /api/v1/vehicles/license/{licensePlate}
+     * 
+     * @param licensePlate the license plate number
+     * @return VehicleDetailDTO with full category
+     */
+    @GetMapping("/license/{licensePlate}")
+    public VehicleDetailDTO getVehicleByLicensePlate(@PathVariable String licensePlate) {
+        log.info("GET /api/v1/vehicles/license/{} - Fetching vehicle by license plate", licensePlate);
+        VehicleDetailDTO result = vehicleService.getVehicleByLicensePlate(licensePlate);
+        log.debug("Vehicle found - id: {}, plate: {}", result.id(), result.licensePlate());
+        return result;
+    }
+    
+    /**
+     * Retrieves all vehicles by category ID with full details.
+     * GET /api/v1/vehicles/category/{categoryId}
+     * 
+     * @param categoryId the category ID
+     * @return List of VehicleDetailDTO with full category
+     */
+    @GetMapping("/category/{categoryId}")
+    public List<VehicleDetailDTO> getVehiclesByCategory(@PathVariable Long categoryId) {
+        log.info("GET /api/v1/vehicles/category/{} - Fetching vehicles by category", categoryId);
+        List<VehicleDetailDTO> result = vehicleService.getVehiclesByCategory(categoryId);
+        log.info("GET /api/v1/vehicles/category/{} - Returned {} vehicles", categoryId, result.size());
+        return result;
+    }
+    
+    // ================================================================
+    // CRUD OPERATIONS
+    // ================================================================
+    
     /**
      * Creates a new vehicle.
-     * POST /api/vehicles
+     * POST /api/v1/vehicles
+     * 
+     * @param request the vehicle data
+     * @return VehicleDetailDTO with created vehicle
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public VehicleResponseDTO createVehicle(@Valid @RequestBody VehicleRequestDTO request) {
-        log.info("POST /api/vehicles - Creating new vehicle with plate: {}", request.getLicensePlate());
-        Vehicle created = vehicleService.createVehicle(request);
-        log.info("Vehicle created successfully - id: {}", created.getId());
-        return VehicleResponseDTO.fromEntity(created);
+    public VehicleDetailDTO createVehicle(@Valid @RequestBody VehicleRequestDTO request) {
+        log.info("POST /api/v1/vehicles - Creating new vehicle with plate: {}", request.getLicensePlate());
+        VehicleDetailDTO result = vehicleService.createVehicle(request);
+        log.info("Vehicle created successfully - id: {}, plate: {}", result.id(), result.licensePlate());
+        return result;
     }
     
     /**
      * Updates an existing vehicle.
-     * PUT /api/vehicles/{id}
+     * PUT /api/v1/vehicles/{id}
+     * 
+     * @param id the vehicle ID
+     * @param request the updated vehicle data
+     * @return VehicleDetailDTO with updated vehicle
      */
     @PutMapping("/{id}")
-    public VehicleResponseDTO updateVehicle(@PathVariable Long id, @Valid @RequestBody VehicleRequestDTO request) {
-        log.info("PUT /api/vehicles/{} - Updating vehicle", id);
-        Vehicle updated = vehicleService.updateVehicle(id, request);
-        log.info("Vehicle updated successfully - id: {}", updated.getId());
-        return VehicleResponseDTO.fromEntity(updated);
-    }
-    
-    /**
-     * Deletes a vehicle by ID.
-     * DELETE /api/vehicles/{id}
-     */
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteVehicle(@PathVariable Long id) {
-        log.info("DELETE /api/vehicles/{} - Deleting vehicle", id);
-        vehicleService.deleteVehicle(id);
-        log.info("Vehicle deleted successfully - id: {}", id);
-    }
-    
-    /**
-     * Retrieves all vehicles by category ID.
-     * GET /api/vehicles/category/{categoryId}
-     */
-    @GetMapping("/category/{categoryId}")
-    public List<VehicleResponseDTO> getVehiclesByCategory(@PathVariable Long categoryId) {
-        log.info("GET /api/vehicles/category/{} - Fetching vehicles by category", categoryId);
-        List<VehicleResponseDTO> result = vehicleService.getVehiclesByCategory(categoryId).stream()
-            .map(VehicleResponseDTO::fromEntity)
-            .collect(Collectors.toList());
-        log.info("GET /api/vehicles/category/{} - Returned {} vehicles", categoryId, result.size());
+    public VehicleDetailDTO updateVehicle(
+            @PathVariable Long id, 
+            @Valid @RequestBody VehicleRequestDTO request) {
+        log.info("PUT /api/v1/vehicles/{} - Updating vehicle", id);
+        VehicleDetailDTO result = vehicleService.updateVehicle(id, request);
+        log.info("Vehicle updated successfully - id: {}", result.id());
         return result;
     }
     
     /**
-     * Retrieves a vehicle by its license plate.
-     * GET /api/vehicles/license/{licensePlate}
+     * Deletes a vehicle by ID.
+     * DELETE /api/v1/vehicles/{id}
+     * 
+     * @param id the vehicle ID
      */
-    @GetMapping("/license/{licensePlate}")
-    public VehicleResponseDTO getVehicleByLicensePlate(@PathVariable String licensePlate) {
-        log.info("GET /api/vehicles/license/{} - Fetching vehicle by license plate", licensePlate);
-        Vehicle vehicle = vehicleService.getVehicleByLicensePlate(licensePlate);
-        if (vehicle == null) {
-            log.warn("Vehicle not found with license plate: {}", licensePlate);
-            throw new RuntimeException("Vehicle not found with license plate: " + licensePlate);
-        }
-        log.debug("Vehicle found - id: {}, plate: {}", vehicle.getId(), vehicle.getLicensePlate());
-        return VehicleResponseDTO.fromEntity(vehicle);
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteVehicle(@PathVariable Long id) {
+        log.info("DELETE /api/v1/vehicles/{} - Deleting vehicle", id);
+        vehicleService.deleteVehicle(id);
+        log.info("Vehicle deleted successfully - id: {}", id);
     }
 }

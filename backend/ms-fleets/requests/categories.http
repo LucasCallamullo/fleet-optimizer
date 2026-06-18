@@ -1,136 +1,130 @@
 ### ============================================================
-### VEHICLE API - HTTP Requests
+### CATEGORY API - HTTP Requests
 ### ============================================================
 ### 
-### Base URL: http://localhost:8080/api/v1/vehicles
+### Base URL: http://localhost:8080/api/v1/categories
 ### 
 ### ============================================================
 
 ### Variables
 @baseUrl = http://localhost:8080
-@vehiclesUrl = {{baseUrl}}/api/v1/vehicles
 @categoriesUrl = {{baseUrl}}/api/v1/categories
 
 ### ============================================================
-### 1. GET ALL VEHICLES (Basic - only category ID)
+### 1. GET ALL CATEGORIES
 ### ============================================================
-GET {{vehiclesUrl}}
+GET {{categoriesUrl}}
 Accept: application/json
 
 ### ============================================================
-### 2. GET ALL VEHICLES DETAILED (with full category)
-### ============================================================
-GET {{vehiclesUrl}}/detailed
-Accept: application/json
-
-### ============================================================
-### 3. GET VEHICLE BY ID (with full category)
-### ============================================================
-### @prompt vehicleId Enter vehicle ID:
-GET {{vehiclesUrl}}/2
-Accept: application/json
-
-### ============================================================
-### 4. GET VEHICLE BY LICENSE PLATE (with full category)
-### ============================================================
-### @prompt licensePlate Enter license plate (e.g., ABC123):
-GET {{vehiclesUrl}}/license/ABC123
-Accept: application/json
-
-### ============================================================
-### 5. GET VEHICLES BY CATEGORY ID
+### 2. GET CATEGORY BY ID
 ### ============================================================
 ### @prompt categoryId Enter category ID:
-GET {{vehiclesUrl}}/category/1
+GET {{categoriesUrl}}/2
 Accept: application/json
 
 ### ============================================================
-### 6. CREATE VEHICLE (POST)
+### 3. GET CATEGORY BY NAME
 ### ============================================================
-POST {{vehiclesUrl}}
+### @prompt categoryName Enter category name:
+GET {{categoriesUrl}}/name/Truck
+Accept: application/json
+
+### ============================================================
+### 4. CHECK IF CATEGORY EXISTS BY NAME
+### ============================================================
+### @prompt existsName Enter category name to check:
+GET {{categoriesUrl}}/exists/Truck
+Accept: application/json
+
+### ============================================================
+### 5. CREATE CATEGORY
+### ============================================================
+POST {{categoriesUrl}}
 Content-Type: application/json
 Accept: application/json
 
 {
-  "licensePlate": "ABC123",
-  "year": 2023,
-  "categoryId": 1
+  "name": "Sedan",
+  "isActive": true
 }
 
 ### ============================================================
-### 7. CREATE VEHICLE - With different data
+### 6. CREATE CATEGORY - Another one
 ### ============================================================
-POST {{vehiclesUrl}}
+POST {{categoriesUrl}}
 Content-Type: application/json
 Accept: application/json
 
 {
-  "licensePlate": "XYZ789",
-  "year": 2024,
-  "categoryId": 2
+  "name": "SUV",
+  "isActive": true
 }
 
 ### ============================================================
-### 8. CREATE VEHICLE - Without category
+### 7. CREATE CATEGORY - Truck
 ### ============================================================
-POST {{vehiclesUrl}}
+POST {{categoriesUrl}}
 Content-Type: application/json
 Accept: application/json
 
 {
-  "licensePlate": "DEF456",
-  "year": 2022,
-  "categoryId": null
+  "name": "Truck",
+  "isActive": true
 }
 
 ### ============================================================
-### 9. UPDATE VEHICLE (PUT)
+### 8. CREATE CATEGORY - Van
 ### ============================================================
-### @prompt updateId Enter vehicle ID to update:
-PUT {{vehiclesUrl}}/2
+POST {{categoriesUrl}}
 Content-Type: application/json
 Accept: application/json
 
 {
-  "licensePlate": "GHI789",
-  "year": 2025,
-  "categoryId": 3
+  "name": "Furgón",
+  "isActive": true
 }
 
 ### ============================================================
-### 10. DELETE VEHICLE (DELETE)
+### 9. UPDATE CATEGORY
 ### ============================================================
-### @prompt deleteId Enter vehicle ID to delete:
-DELETE {{vehiclesUrl}}/20
-Accept: application/json
-
-### ============================================================
-### 11. GET VEHICLE BY ID - Invalid (should return 404)
-### ============================================================
-GET {{vehiclesUrl}}/9999
-Accept: application/json
-
-### ============================================================
-### 12. CREATE VEHICLE - Invalid data (validation errors)
-### ============================================================
-POST {{vehiclesUrl}}
+### @prompt updateCatId Enter category ID to update:
+PUT {{categoriesUrl}}/5
 Content-Type: application/json
 Accept: application/json
 
 {
-  "licensePlate": "A",  
-  "year": 1800        
+  "name": "SUV - Actualizado",
+  "isActive": true
 }
 
 ### ============================================================
-### 13. CREATE VEHICLE - Duplicate license plate (should return 409)
+### 10. DELETE CATEGORY
 ### ============================================================
-POST {{vehiclesUrl}}
+### @prompt deleteCatId Enter category ID to delete:
+DELETE {{categoriesUrl}}/5
+Accept: application/json
+
+### ============================================================
+### 11. CREATE CATEGORY - Duplicate (should return 409)
+### ============================================================
+POST {{categoriesUrl}}
 Content-Type: application/json
 Accept: application/json
 
 {
-  "licensePlate": "ABC123", 
-  "year": 2023,
-  "categoryId": 1
+  "name": "Sedán",
+  "isActive": true
+}
+
+### ============================================================
+### 12. CREATE CATEGORY - Invalid name (too short)
+### ============================================================
+POST {{categoriesUrl}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "A",
+  "isActive": true
 }
