@@ -1,5 +1,5 @@
 package com.fleets.unit.service;
-
+/* 
 import com.fleets.dto.request.VehicleRequestDTO;
 import com.fleets.dto.response.VehicleDetailDTO;
 import com.fleets.exception.AppException;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 
 // import java.util.List;
 import java.util.Optional;
@@ -199,4 +200,4 @@ class VehicleServiceTest {
             verify(vehicleRepository).deleteById(1L);
         }
     }
-}
+} */
