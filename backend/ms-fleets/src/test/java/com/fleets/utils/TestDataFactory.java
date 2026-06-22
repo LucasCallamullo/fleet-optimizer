@@ -1,6 +1,8 @@
 package com.fleets.utils;
 
-import com.fleets.dto.request.VehicleRequestDTO;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fleets.model.Category;
 import com.fleets.model.Vehicle;
 
@@ -12,36 +14,67 @@ import com.fleets.model.Vehicle;
  */
 public class TestDataFactory {
 
+    /**
+     * Creates a complete dataset for integration tests.
+     * Returns a list of vehicles ready to be saved to the database.
+     * This is useful for @BeforeEach setup methods.
+     */
+    public static List<Vehicle> createSeedVehicles() {
+        List<Vehicle> vehicles = new ArrayList<>();
+        
+        // Crear categorías primero
+        Category sedan = createDefaultCategory();
+        Category suv = createCategorySUV();
+        Category truck = createCategoryTruck();
+        
+        // Crear vehículos con diferentes categorías
+        vehicles.add(createVehicle("ABC123", 2023, sedan));
+        vehicles.add(createVehicle("XYZ789", 2024, suv));
+        vehicles.add(createVehicle("DEF456", 2025, truck));
+        vehicles.add(createVehicle("GHI789", 2022, sedan));
+        vehicles.add(createVehicle("JKL012", 2023, suv));
+        
+        return vehicles;
+    }
+
+    /**
+     * Creates a minimal dataset (just 2 vehicles) for simple tests.
+     */
+    public static List<Vehicle> createMinimalSeedVehicles() {
+        List<Vehicle> vehicles = new ArrayList<>();
+        vehicles.add(createDefaultVehicle());
+        vehicles.add(createVehicleWithSUVCategory());
+        return vehicles;
+    }
+
     // ================================================================
     // CATEGORY FACTORIES
     // ================================================================
     
-    public static Category createCategory(Long id, String name) {
+    public static Category createCategory(String name) {
         Category category = new Category();
-        category.setId(id);
         category.setName(name);
         return category;
     }
 
     public static Category createDefaultCategory() {
-        return createCategory(1L, "Sedan");
+        return createCategory("Sedan");
     }
 
     public static Category createCategorySUV() {
-        return createCategory(2L, "SUV");
+        return createCategory("SUV");
     }
 
     public static Category createCategoryTruck() {
-        return createCategory(3L, "Truck");
+        return createCategory("Truck");
     }
 
     // ================================================================
     // VEHICLE FACTORIES
     // ================================================================
     
-    public static Vehicle createVehicle(Long id, String licensePlate, Integer year, Category category) {
+    public static Vehicle createVehicle(String licensePlate, Integer year, Category category) {
         Vehicle vehicle = new Vehicle();
-        vehicle.setId(id);
         vehicle.setLicensePlate(licensePlate);
         vehicle.setYear(year);
         vehicle.setCategory(category);
@@ -49,42 +82,14 @@ public class TestDataFactory {
     }
 
     public static Vehicle createDefaultVehicle() {
-        return createVehicle(1L, "ABC123", 2023, createDefaultCategory());
+        return createVehicle("ABC123", 2023, createDefaultCategory());
     }
 
     public static Vehicle createVehicleWithoutCategory() {
-        return createVehicle(2L, "XYZ789", 2024, null);
+        return createVehicle("XYZ789", 2024, null);
     }
 
     public static Vehicle createVehicleWithSUVCategory() {
-        return createVehicle(3L, "DEF456", 2025, createCategorySUV());
-    }
-
-    // ================================================================
-    // VEHICLE REQUEST DTO FACTORIES
-    // ================================================================
-    
-    public static VehicleRequestDTO createVehicleRequestDTO(String licensePlate, Integer year, Long categoryId) {
-        VehicleRequestDTO dto = new VehicleRequestDTO();
-        dto.setLicensePlate(licensePlate);
-        dto.setYear(year);
-        dto.setCategoryId(categoryId);
-        return dto;
-    }
-
-    public static VehicleRequestDTO createDefaultVehicleRequestDTO() {
-        return createVehicleRequestDTO("ABC123", 2023, 1L);
-    }
-
-    public static VehicleRequestDTO createVehicleRequestDTOWithoutCategory() {
-        return createVehicleRequestDTO("XYZ789", 2024, null);
-    }
-
-    public static VehicleRequestDTO createVehicleRequestDTOInvalidPlate() {
-        return createVehicleRequestDTO("A", 2023, 1L);  // Too short
-    }
-
-    public static VehicleRequestDTO createVehicleRequestDTOInvalidYear() {
-        return createVehicleRequestDTO("ABC123", 1800, 1L);  // Too old
+        return createVehicle("DEF456", 2025, createCategorySUV());
     }
 }
