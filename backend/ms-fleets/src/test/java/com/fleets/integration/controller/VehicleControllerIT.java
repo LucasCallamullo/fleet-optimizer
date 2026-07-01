@@ -23,6 +23,8 @@ import com.fleets.model.Category;
 import com.fleets.model.Vehicle;
 import com.fleets.repository.CategoryRepository;
 import com.fleets.repository.VehicleRepository;
+import com.fleets.dto.request.VehicleRequestDTO;
+
 import com.fleets.utils.TestDataFactory;
 
 // TEST CLASS
@@ -79,7 +81,7 @@ class VehicleControllerIT {
         Vehicle vehicle2 = TestDataFactory.createVehicle("XYZ789", 2024, suvCategory);
         Vehicle vehicle3 = TestDataFactory.createVehicle("DEF456", 2025, truckCategory);
         Vehicle vehicle4 = TestDataFactory.createVehicle("GHI789", 2022, sedanCategory);
-        Vehicle vehicle5 = TestDataFactory.createVehicle("JKL012", 2023, suvCategory);
+        Vehicle vehicle5 = TestDataFactory.createVehicle("JKL012", 2023, null);
 
         // Step 5: Persist vehicles
         seedVehicles = vehicleRepository.saveAll(List.of(
@@ -115,30 +117,38 @@ class VehicleControllerIT {
                 .andExpect(jsonPath("$[1].id").isNumber());
     }
 
-    // ================================================================
-    // TEST 2: GET VEHICLE BY ID
-    // ================================================================
-    
     @Test
-    @DisplayName("GET /api/v1/vehicles/{id} - Should return vehicle by ID")
-    void shouldReturnVehicleById() throws Exception {
-        // Get the ID from the persisted vehicle
-        Long vehicleId = seedVehicles.get(0).getId();
-        Category category = seedVehicles.get(0).getCategory();
-
-        mockMvc.perform(get("/api/v1/vehicles/{id}", vehicleId)
+    @DisplayName("GET /api/v1/vehicles/detailed - Should return all vehicles with categories")
+    void shouldReturnAllVehiclesWithCategory() throws Exception {
+        mockMvc.perform(get("/api/v1/vehicles/detailed")
                 .contentType(MediaType.APPLICATION_JSON))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.licensePlate").value("ABC123")) 
-                .andExpect(jsonPath("$.year").value(2023))
-                .andExpect(jsonPath("$.category.id").value(category.getId()))
-                .andExpect(jsonPath("$.category.name").value(category.getName()));
+                .andExpect(jsonPath("$", hasSize(5)))
+                
+                // Validate first vehicle (ABC123)
+                .andExpect(jsonPath("$[0].licensePlate").value("ABC123"))
+                .andExpect(jsonPath("$[0].category.id").value(sedanCategory.getId()))
+                
+                // Validate second vehicle (XYZ789)
+                .andExpect(jsonPath("$[4].licensePlate").value("JKL012"))
+                // SI SABES QUE EL ELEMENTO [4] NO TIENE CATEGORIA (Es Null):
+                // Probás su nulidad explícitamente con cualquiera de estas dos opciones:
+                .andExpect(jsonPath("$[4].category").value(org.hamcrest.Matchers.nullValue()))
+                // o: .andExpect(jsonPath("$[4].category").doesNotExist());
+                
+                // Validate IDs exist (don't check exact values)
+                .andExpect(jsonPath("$[0].id").isNumber())
+                .andExpect(jsonPath("$[4].id").isNumber());
     }
+
+    // ================================================================
+    // TEST 2: GET VEHICLE BY ID
+    // ================================================================
 
     @Test
     @DisplayName("GET /api/v1/vehicles/{id} - Should return vehicle by ID")
-    void shouldReturnVehicleById2() throws Exception {
+    void shouldReturnVehicleById() throws Exception {
         // Get the ID from the persisted vehicle
         Long vehicleId = seedVehicles.get(1).getId();
         Category category = seedVehicles.get(1).getCategory();
@@ -153,11 +163,20 @@ class VehicleControllerIT {
                 .andExpect(jsonPath("$.category.name").value(category.getName()));
     }
 
+    @Test
+    @DisplayName("GET /api/v1/vehicles/{id} - Should return vehicle by ID")
+    void shouldReturnVehicleByIdAndCategoryNull() throws Exception {
+        // Get the ID from the persisted vehicle
+        Long vehicleId = seedVehicles.get(4).getId();
+        // Category category = seedVehicles.get(4).getCategory();
 
-    // ================================================================
-    // TEST 2: GET VEHICLE BY ID
-    // ================================================================
-    
+        mockMvc.perform(get("/api/v1/vehicles/{id}", vehicleId)
+                .contentType(MediaType.APPLICATION_JSON))
+                
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.category").value(org.hamcrest.Matchers.nullValue()));
+    }
+
     @Test
     @DisplayName("GET /api/v1/vehicles/{id} - Should return 404 Not Found if vehicle doesn't exist")
     void shouldReturnErrorVehicleById() throws Exception { 
@@ -179,28 +198,6 @@ class VehicleControllerIT {
             .andExpect(jsonPath("$.error").isString());
     }
 
-    // ================================================================
-    // TEST 3: GET VEHICLES FILTERED BY CATEGORY
-    // ================================================================
-
-
-
-    /**
-     * ================================================================
-     * TEST 4: GET VEHICLE BY ID - NOT FOUND
-     * ================================================================
-     * 
-     * Endpoint: GET /api/v1/vehicles/999
-     * Expected: HTTP 404 Not Found
-     
-    @Test
-    @DisplayName("GET /api/v1/vehicles/{id} - Should return 404 when not found")
-    void shouldReturn404WhenVehicleNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/vehicles/999")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-                // status().isNotFound(): HTTP 404
-    }*/
     
     /**
      * ================================================================
@@ -209,35 +206,35 @@ class VehicleControllerIT {
      * 
      * Endpoint: POST /api/v1/vehicles
      * Expected: HTTP 201 Created con el vehículo creado
-    
+    */
     @Test
     @DisplayName("POST /api/v1/vehicles - Should create vehicle")
     void shouldCreateVehicle() throws Exception {
         // Step 1: Preparar el request DTO
         VehicleRequestDTO request = new VehicleRequestDTO();
-        request.setLicensePlate("XYZ789");
+        request.setLicensePlate("FCD333");
         request.setYear(2024);
-        request.setCategoryId(category.getId());
+        request.setCategoryId(sedanCategory.getId());
 
         // Step 2: Hacer la petición POST con JSON
         mockMvc.perform(post("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                // ✅ objectMapper.writeValueAsString(): Convierte DTO a JSON
-                //    Resultado: {"licensePlate":"XYZ789","year":2024,"categoryId":1}
+                // objectMapper.writeValueAsString(): Convierte DTO a JSON
+                //    Resultado: {"licensePlate":"XYZ789","year":2024,"category": {"id": 1, name:"Sedan"}}
 
-        // Step 3: Validar respuesta
+                // Step 3: Validar respuesta
                 .andExpect(status().isCreated())
-                // ✅ status().isCreated(): HTTP 201 Created
+                // status().isCreated(): HTTP 201 Created
 
                 .andExpect(jsonPath("$.id").exists())
-                // ✅ exists(): El campo existe (no importa el valor)
+                // exists(): El campo existe (no importa el valor)
 
-                .andExpect(jsonPath("$.licensePlate").value("XYZ789"))
+                .andExpect(jsonPath("$.licensePlate").value("FCD333"))
                 .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.category.id").value(category.getId()));
+                .andExpect(jsonPath("$.category.id").value(sedanCategory.getId()));
     }
-  */
+
     /**
      * ================================================================
      * TEST 6: CREATE VEHICLE - DUPLICATE
@@ -245,23 +242,25 @@ class VehicleControllerIT {
      * 
      * Endpoint: POST /api/v1/vehicles
      * Expected: HTTP 409 Conflict (duplicate license plate)
-   
+    */
     @Test
     @DisplayName("POST /api/v1/vehicles - Should return 409 when duplicate license plate")
     void shouldReturn409WhenDuplicateLicensePlate() throws Exception {
         VehicleRequestDTO request = new VehicleRequestDTO();
-        request.setLicensePlate("ABC123"); // ← ¡Ya existe!
+        request.setLicensePlate("ABC123"); // ← exist
         request.setYear(2023);
-        request.setCategoryId(category.getId());
+        request.setCategoryId(sedanCategory.getId());
 
         mockMvc.perform(post("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict());
-                // status().isConflict(): HTTP 409 Conflict
+                .andExpect(status().isConflict())    // HTTP 409 Conflict
 
+                // 2. Validate the exact structure of your ErrorResponse record
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.path").value("/api/v1/vehicles"));
     }
-  */
+  
     /**
      * ================================================================
      * TEST 7: UPDATE VEHICLE (PUT)
@@ -269,24 +268,31 @@ class VehicleControllerIT {
      * 
      * Endpoint: PUT /api/v1/vehicles/{id}
      * Expected: HTTP 200 OK con vehículo actualizado
-    
+     */
     @Test
     @DisplayName("PUT /api/v1/vehicles/{id} - Should update vehicle")
     void shouldUpdateVehicle() throws Exception {
+
+        Long vehicleId = this.seedVehicles.get(3).getId();
+        Category category = this.seedVehicles.get(3).getCategory();
+
         VehicleRequestDTO request = new VehicleRequestDTO();
-        request.setLicensePlate("DEF456");
+        request.setLicensePlate("ASD666");
         request.setYear(2025);
         request.setCategoryId(category.getId());
 
-        mockMvc.perform(put("/api/v1/vehicles/{id}", vehicle.getId())
+        mockMvc.perform(put("/api/v1/vehicles/{id}", vehicleId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(vehicle.getId()))
-                .andExpect(jsonPath("$.licensePlate").value("DEF456"))  // ← Cambió
-                .andExpect(jsonPath("$.year").value(2025));            // ← Cambió
-    }
- */
+
+                // test resposne 
+                .andExpect(jsonPath("$.id").value(vehicleId))
+                .andExpect(jsonPath("$.licensePlate").value("ASD666"))  // Change
+                .andExpect(jsonPath("$.year").value(2025))            // Change
+                .andExpect(jsonPath("$.category.id").value(category.getId()));        // Dont Change
+    } 
+
     /**
      * ================================================================
      * TEST 8: DELETE VEHICLE (DELETE)

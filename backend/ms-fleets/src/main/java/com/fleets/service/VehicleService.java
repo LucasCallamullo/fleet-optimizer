@@ -44,13 +44,23 @@ public interface VehicleService {
     List<Vehicle> getAllVehiclesEntity();
     
     /**
+     * Finds a basic vehicle entity by its unique ID (LAZY loading).
+     * Category proxy is not initialized. Use for basic operations.
+     * 
+     * @param id the vehicle ID. 
+     * @return the Vehicle entity if found.
+     * @throws AppException if vehicle not found (status 404).
+     */
+    Vehicle getVehicleEntityById(Long id);
+
+    /**
      * Finds a vehicle entity by its unique ID.
      * 
      * @param id the vehicle ID
      * @return the Vehicle entity if found
      * @throws AppException if vehicle not found (status 404)
      */
-    Vehicle getVehicleEntityById(Long id);
+    Vehicle getVehicleEntityWithCategoryById(Long id);
     
     /**
      * Finds a vehicle entity by its license plate.
@@ -140,15 +150,4 @@ public interface VehicleService {
      */
     void deleteVehicle(Long id);
     
-    // ================================================================
-    // UTILITY METHODS
-    // ================================================================
-    
-    /**
-     * Checks if a vehicle exists by license plate.
-     * 
-     * @param licensePlate the license plate number
-     * @return true if exists, false otherwise
-     */
-    boolean existsByLicensePlate(String licensePlate);
 }
