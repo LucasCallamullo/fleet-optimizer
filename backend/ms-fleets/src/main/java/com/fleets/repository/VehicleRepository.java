@@ -54,13 +54,11 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findAllBasic();
     
     /**
-     * Find all vehicles with categories loaded (EAGER).
-     * Uses JOIN FETCH to load category in the same query.
-     * Use this when you need to display category details for all vehicles.
-     * 
-     * @return list of all vehicles with category loaded (EAGER)
+     * Find all vehicles with categories loaded (EAGER), including those without a category.
+     * Uses LEFT JOIN FETCH to ensure vehicles with null categories are not excluded.
+     * * @return list of all vehicles (with or without category loaded)
      */
-    @Query("SELECT v FROM Vehicle v JOIN FETCH v.category")
+    @Query("SELECT v FROM Vehicle v LEFT JOIN FETCH v.category")
     List<Vehicle> findAllWithCategory();
     
     // ================================================================
@@ -86,7 +84,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
      * @param id the vehicle ID
      * @return Optional containing the vehicle with category loaded (EAGER)
      */
-    @Query("SELECT v FROM Vehicle v JOIN FETCH v.category WHERE v.id = :id")
+    @Query("SELECT v FROM Vehicle v LEFT JOIN FETCH v.category WHERE v.id = :id")
     Optional<Vehicle> findByIdWithCategory(@Param("id") Long id);
     
     // ================================================================
@@ -111,7 +109,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
      * @param licensePlate the license plate number
      * @return Optional containing the vehicle with category loaded (EAGER)
      */
-    @Query("SELECT v FROM Vehicle v JOIN FETCH v.category WHERE v.licensePlate = :licensePlate")
+    @Query("SELECT v FROM Vehicle v LEFT JOIN FETCH v.category WHERE v.licensePlate = :licensePlate")
     Optional<Vehicle> findByLicensePlateWithCategory(@Param("licensePlate") String licensePlate);
     
     // ================================================================
@@ -136,7 +134,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
      * @param year the minimum year
      * @return list of vehicles with category loaded (EAGER)
      */
-    @Query("SELECT v FROM Vehicle v JOIN FETCH v.category WHERE v.year > :year")
+    @Query("SELECT v FROM Vehicle v LEFT JOIN FETCH v.category WHERE v.year > :year")
     List<Vehicle> findByYearAfterWithCategory(@Param("year") Integer year);
     
     // ================================================================

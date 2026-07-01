@@ -55,14 +55,21 @@ public class VehicleServiceImpl implements VehicleService {
         log.debug("Found {} vehicles in database", vehicles.size());
         return vehicles;
     }
-    
+
     @Override
     public Vehicle getVehicleEntityById(Long id) {
         log.debug("Fetching vehicle entity by id: {}", id);
         return vehicleRepository.findById(id)
             .orElseThrow(() -> new AppException("Vehicle not found with id: " + id, 404));
     }
-    
+
+    @Override
+    public Vehicle getVehicleEntityWithCategoryById(Long id) {
+        log.debug("Fetching vehicle entity by id: {}", id);
+        return vehicleRepository.findByIdWithCategory(id)
+            .orElseThrow(() -> new AppException("Vehicle not found with id: " + id, 404));
+    }
+
     @Override
     public Optional<Vehicle> getVehicleEntityByLicensePlate(String licensePlate) {
         log.debug("Fetching vehicle entity by license plate: {}", licensePlate);
@@ -75,56 +82,24 @@ public class VehicleServiceImpl implements VehicleService {
     
     @Override
     public List<VehicleResponseDTO> getAllVehicles() {
-
         // Get entities without category (no JOIN FETCH)
-        List<Vehicle> vehicles = vehicleRepository.findAll();
+        List<Vehicle> vehicles = this.getAllVehiclesEntity();
         
         // Map to DTOs (only category ID)
-        List<VehicleResponseDTO> dtos = vehicleMapper.toDtoList(vehicles);
-        
-        return dtos;
+        return vehicleMapper.toDtoList(vehicles);
     }
     
     @Override
     public List<VehicleDetailDTO> getAllVehiclesWithCategory() {
-        
-        // Get entities with category (JOIN FETCH)
+        // Get entities with category (LEFT JOIN FETCH)
         List<Vehicle> vehicles = vehicleRepository.findAllWithCategory();
         
         // Map to Detail DTOs (full category)
-        List<VehicleDetailDTO> dtos = vehicles.stream()
+        return vehicles.stream()
             .map(vehicleMapper::toDetailDto)
             .toList();
-        
-        return dtos;
     }
-    
-    @Override
-    public VehicleDetailDTO getVehicleById(Long id) {
-        
-        // Get entity with category (JOIN FETCH)
-        Vehicle vehicle = vehicleRepository.findByIdWithCategory(id)
-            .orElseThrow(() -> new AppException("Vehicle not found with id: " + id, 404));
 
-        log.debug("Found vehicle - plate: {}, category: {}", 
-            vehicle.getLicensePlate(), 
-            vehicle.getCategory() != null ? vehicle.getCategory().getName() : "null");
-        
-        // Map to Detail DTO (full category)
-        return vehicleMapper.toDetailDto(vehicle);
-    }
-    
-    @Override
-    public VehicleDetailDTO getVehicleByLicensePlate(String licensePlate) {
-        log.debug("Fetching vehicle by license plate: {}", licensePlate);
-        
-        // Get vehicle by license plate (without category)
-        Vehicle vehicleWithCategory = vehicleRepository.findByLicensePlateWithCategory(licensePlate)
-            .orElseThrow(() -> new AppException("Vehicle not found with license plate: " + licensePlate, 404));
-        
-        return vehicleMapper.toDetailDto(vehicleWithCategory);
-    }
-    
     @Override
     public List<VehicleDetailDTO> getVehiclesByCategory(Long categoryId) {
         log.debug("Fetching vehicles by category id: {}", categoryId);
@@ -142,6 +117,29 @@ public class VehicleServiceImpl implements VehicleService {
             .toList();
         
         return dtos;
+    }
+    
+    @Override
+    public VehicleDetailDTO getVehicleById(Long id) {
+        // Get entity with category (JOIN FETCH)
+        Vehicle vehicle = this.getVehicleEntityWithCategoryById(id);
+
+        // Map to Detail DTO (full category)
+        return vehicleMapper.toDetailDto(vehicle);
+    }
+    
+    @Override
+    public VehicleDetailDTO getVehicleByLicensePlate(String licensePlate) {
+        log.debug("Fetching vehicle by license plate: {}", licensePlate);
+        
+        // Get vehicle by license plate (without category)
+        Vehicle vehicleWithCategory = vehicleRepository.findByLicensePlateWithCategory(licensePlate)
+            .orElseThrow(() -> new AppException(
+                "Vehicle not found with license plate: " + licensePlate, 
+                404)
+            );
+        
+        return vehicleMapper.toDetailDto(vehicleWithCategory);
     }
     
     // ================================================================
@@ -168,63 +166,62 @@ public class VehicleServiceImpl implements VehicleService {
             log.debug("Set category: {}", category.getName());
         }
         
-        // Step 4: Save entity
+        // STEP 4: Explicit .save() IS REQUIRED here for creation.
+        // Unlike the update process, this transient object does not exist yet in the 
+        // Hibernate persistence context (there is no initial snapshot to compare against).
+        // Calling .save() forces Hibernate to execute an INSERT statement and, most importantly,
+        // retrieves the database-generated auto-incremental primary key (ID).
         Vehicle saved = vehicleRepository.save(vehicle);
         log.info("Vehicle created successfully with id: {}", saved.getId());
         
-        // Step 5: Map Entity to DTO (for response)
-        // We need to fetch with category for the response
-        Vehicle savedWithCategory = vehicleRepository.findByIdWithCategory(saved.getId())
-            .orElseThrow(() -> new AppException("Vehicle not found after creation", 500));
-        
-        VehicleDetailDTO response = vehicleMapper.toDetailDto(savedWithCategory);
-        log.debug("Mapped saved entity to response DTO");
-        
-        return response;
+        // Step 5: Map directly to DTO (no need to fetch again from DB)
+        // The 'saved' managed entity in memory already contains the complete category object.
+        return vehicleMapper.toDetailDto(saved);
     }
     
     @Override
     @Transactional
     public VehicleDetailDTO updateVehicle(Long id, VehicleRequestDTO request) {
         log.info("Updating vehicle with id: {}", id);
-        log.debug("Update details - plate: {}, year: {}", 
-            request.getLicensePlate(), request.getYear());
         
         // Step 1: Check exists
-        Vehicle existingVehicle = this.getVehicleEntityById(id);
-        log.debug("Found existing vehicle - plate: {}, year: {}", 
-            existingVehicle.getLicensePlate(), existingVehicle.getYear());
+        // It does not matter that we fetch a LAZY relationship here because calling 
+        // getCategory().getId() will check the foreign key already present in the vehicle proxy.
+        // If we were to call getCategory().getName(), it would trigger an extra query (lazy loading initialization).
+        Vehicle v = this.getVehicleEntityById(id);
         
         // Step 2: Validate business rules
-        if (!existingVehicle.getLicensePlate().equals(request.getLicensePlate())) {
+        if (!v.getLicensePlate().equals(request.getLicensePlate())) {
             validateUniqueLicensePlate(request.getLicensePlate(), id);
         }
         
         // Step 3: Update entity fields
-        existingVehicle.setLicensePlate(request.getLicensePlate());
-        existingVehicle.setYear(request.getYear());
+        v.setLicensePlate(request.getLicensePlate());
+        v.setYear(request.getYear());
         
         // Step 4: Update category if provided
         if (request.getCategoryId() != null) {
-            Category category = categoryService.getCategoryEntityById(request.getCategoryId());
-            existingVehicle.setCategory(category);
-            log.debug("Updated category to: {}", category.getName());
+            // Check if it is the same category to avoid an unnecessary database select.
+            // v.getCategory().getId() does not trigger another query because Hibernate resolves this
+            // using the foreign key value already stored within the Vehicle proxy object.
+            Long currentId = (v.getCategory() != null) ? v.getCategory().getId() : null;
+            if (!request.getCategoryId().equals(currentId)) {
+                Category c = categoryService.getCategoryEntityById(request.getCategoryId());
+                v.setCategory(c);
+                log.debug("Updated category to: {}", c.getName());
+            }
         } else {
-            existingVehicle.setCategory(null);
+            v.setCategory(null);
             log.debug("Removed category");
         }
         
-        // Step 5: Save entity
-        Vehicle updated = vehicleRepository.save(existingVehicle);
-        log.info("Vehicle updated successfully - id: {}, plate: {}", 
-            updated.getId(), updated.getLicensePlate());
+        // STEP 5 OMITTED: Manual .save() is not required thanks to @Transactional.
+        // This is because the transaction mechanism automatically saves changes by comparing two snapshots:
+        // the initial state captured when the vehicle was retrieved, and the modified state up to this point.
+        // Spring/Hibernate then performs an automatic flush, meaning an implicit save/update is executed.
         
-        // Step 6: Map Entity to DTO (for response)
-        // We need to fetch with category for the response
-        Vehicle updatedWithCategory = vehicleRepository.findByIdWithCategory(updated.getId())
-            .orElseThrow(() -> new AppException("Vehicle not found after update", 500));
-        
-        VehicleDetailDTO response = vehicleMapper.toDetailDto(updatedWithCategory);
+        // The managed entity currently in memory is ready to be mapped and returned as the response.
+        VehicleDetailDTO response = vehicleMapper.toDetailDto(v);
         log.debug("Mapped updated entity to response DTO");
         
         return response;
@@ -243,18 +240,6 @@ public class VehicleServiceImpl implements VehicleService {
         vehicleRepository.deleteById(id);
         log.info("Vehicle deleted successfully - id: {}, plate: {}", 
             id, vehicle.getLicensePlate());
-    }
-    
-    // ================================================================
-    // UTILITY METHODS
-    // ================================================================
-    
-    @Override
-    public boolean existsByLicensePlate(String licensePlate) {
-        log.debug("Checking if vehicle exists by license plate: {}", licensePlate);
-        boolean exists = vehicleRepository.existsByLicensePlate(licensePlate);
-        log.debug("Vehicle exists: {} - {}", licensePlate, exists);
-        return exists;
     }
     
     // ================================================================
@@ -293,8 +278,10 @@ public class VehicleServiceImpl implements VehicleService {
             log.warn("License plate conflict - plate '{}' already exists on vehicle id: {}", 
                 licensePlate, vehicle.getId());
             throw new AppException(
-                String.format("License plate '%s' is already used by another vehicle (id: %d)", 
-                    licensePlate, vehicle.getId()), 
+                String.format(
+                    "License plate '%s' is already used by another vehicle (id: %d)", 
+                    licensePlate, vehicle.getId()
+                ), 
                 409
             );
         }
