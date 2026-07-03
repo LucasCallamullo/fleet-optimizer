@@ -19,31 +19,21 @@ public class TestDataFactory {
      * Returns a list of vehicles ready to be saved to the database.
      * This is useful for @BeforeEach setup methods.
      */
-    public static List<Vehicle> createSeedVehicles() {
+    public static List<Vehicle> createSeedVehicles(List<Category> categories) {
         List<Vehicle> vehicles = new ArrayList<>();
         
         // Crear categorías primero
-        Category sedan = createDefaultCategory();
-        Category suv = createCategorySUV();
-        Category truck = createCategoryTruck();
+        Category sedanCategory = categories.get(0);
+        Category suvCategory = categories.get(1);
+        Category truckCategory = categories.get(2);
         
         // Crear vehículos con diferentes categorías
-        vehicles.add(createVehicle("ABC123", 2023, sedan));
-        vehicles.add(createVehicle("XYZ789", 2024, suv));
-        vehicles.add(createVehicle("DEF456", 2025, truck));
-        vehicles.add(createVehicle("GHI789", 2022, sedan));
-        vehicles.add(createVehicle("JKL012", 2023, suv));
+        vehicles.add(createVehicle("ABC123", 2023, sedanCategory));
+        vehicles.add(createVehicle("XYZ789", 2024, suvCategory));
+        vehicles.add(createVehicle("DEF456", 2025, truckCategory));
+        vehicles.add(createVehicle("GHI789", 2022, sedanCategory));
+        vehicles.add(createVehicle("JKL012", 2023, null));
         
-        return vehicles;
-    }
-
-    /**
-     * Creates a minimal dataset (just 2 vehicles) for simple tests.
-     */
-    public static List<Vehicle> createMinimalSeedVehicles() {
-        List<Vehicle> vehicles = new ArrayList<>();
-        vehicles.add(createDefaultVehicle());
-        vehicles.add(createVehicleWithSUVCategory());
         return vehicles;
     }
 
@@ -79,17 +69,5 @@ public class TestDataFactory {
         vehicle.setYear(year);
         vehicle.setCategory(category);
         return vehicle;
-    }
-
-    public static Vehicle createDefaultVehicle() {
-        return createVehicle("ABC123", 2023, createDefaultCategory());
-    }
-
-    public static Vehicle createVehicleWithoutCategory() {
-        return createVehicle("XYZ789", 2024, null);
-    }
-
-    public static Vehicle createVehicleWithSUVCategory() {
-        return createVehicle("DEF456", 2025, createCategorySUV());
     }
 }
