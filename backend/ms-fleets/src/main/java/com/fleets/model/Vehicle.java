@@ -1,7 +1,11 @@
 package com.fleets.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+// import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,14 +45,52 @@ public class Vehicle {
      * 
      * @JoinColumn(name = "category_id") - Specifies the foreign key column name in the 'vehicles' table.
      *                                     This column stores the ID of the associated Category.
-     * 
-     * nullable = true (implied by @ManyToOne default) - The category can be null.
-     *                                                     A vehicle does NOT require a category.
-     *                                                     To make it required, add: @JoinColumn(nullable = false)
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = true)    // solo por ser explicito --> optional = true
     @JoinColumn(name = "category_id")
     @JsonIgnoreProperties({"vehicles", "hibernateLazyInitializer"})  // ← Ignora "vehicles" y los proxies de Hibernate
-    // @JsonIgnore  // ← Agregar este import: com.fasterxml.jackson.annotation.JsonIgnore
     private Category category;
+
+    // ================================================================
+    // PHYSICAL CAPACITIES
+    // ================================================================
+
+    @Column(name = "max_weight_kg")
+    private Double maxWeightKg;  // Maximum cargo capacity in kilograms
+
+    @Column(name = "max_volume_cbm")
+    private Double maxVolumeCbm;  // Maximum volumetric capacity in cubic meters
+
+    // ================================================================
+    // EFFICIENCY AND COSTS
+    // ================================================================
+
+    @Column(name = "fuel_consumption_per_km")
+    private Double fuelConsumptionPerKm;  // Fuel consumption in liters per kilometer
+
+    @Column(name = "cost_per_km")
+    private Double costPerKm;  // Operational cost per kilometer
+
+    @Column(name = "price_per_km")
+    private Double pricePerKm;  // Sale price per kilometer
+
+    // ================================================================
+    // VEHICLE STATUS
+    // ================================================================
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private VehicleStatus status = VehicleStatus.AVAILABLE;  // Current vehicle state
+
+    // ================================================================
+    // Time Stamps
+    // ================================================================
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
