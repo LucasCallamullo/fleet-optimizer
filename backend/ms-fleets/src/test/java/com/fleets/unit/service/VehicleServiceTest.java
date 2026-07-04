@@ -7,6 +7,7 @@ import com.fleets.exception.AppException;
 import com.fleets.mapper.VehicleMapper;
 import com.fleets.model.Category;
 import com.fleets.model.Vehicle;
+import com.fleets.model.VehicleStatus;
 import com.fleets.repository.CategoryRepository;
 import com.fleets.repository.VehicleRepository;
 import com.fleets.service.CategoryService;
@@ -101,7 +102,8 @@ class VehicleServiceTest {
         // Step 4: Create category response DTO (Record)
         categoryResponse = new CategoryResponseDTO(
             1L,
-            "Sedan"
+            "Sedan",
+            "some description"
         );
 
         // Step 5: Create vehicle detail response DTO (Record)
@@ -111,7 +113,13 @@ class VehicleServiceTest {
             2023,
             LocalDateTime.now(),
             LocalDateTime.now(),
-            categoryResponse
+            categoryResponse,
+            null,
+            null,
+            null,
+            null,
+            null,
+            VehicleStatus.AVAILABLE
         );
     }
 
@@ -597,7 +605,7 @@ class VehicleServiceTest {
             category = new Category();
             category.setId(categoryId);
             category.setName("Sedan");
-            categoryResponse = new CategoryResponseDTO(categoryId, "Sedan");
+            categoryResponse = new CategoryResponseDTO(categoryId, "Sedan", "stupid description");
         }
         
         // Step 3: Create vehicle to save (without ID)
@@ -620,7 +628,13 @@ class VehicleServiceTest {
             2023,
             LocalDateTime.now(),
             LocalDateTime.now(),
-            categoryResponse
+            categoryResponse,
+            null,
+            null,
+            null,
+            null,
+            null,
+            VehicleStatus.AVAILABLE
         );
         
         return new TestScenario(request, vehicleToSave, savedVehicle, expectedResponse, category);

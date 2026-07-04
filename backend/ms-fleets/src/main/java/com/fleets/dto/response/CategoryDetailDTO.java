@@ -7,6 +7,7 @@ package com.fleets.dto.response;
 public record CategoryDetailDTO(
     Long id,
     String name,
+    String description,
     boolean isActive
 ) {
     

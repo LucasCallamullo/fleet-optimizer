@@ -57,6 +57,10 @@ public interface VehicleMapper {
      * @param dto - The DTO containing input data from the client
      * @return Vehicle - New entity ready for persistence
      */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)  // setting on service
+    @Mapping(target = "createdAt", ignore = true) // ← @CreationTimestamp
+    @Mapping(target = "updatedAt", ignore = true) // ← @UpdateTimestamp
     Vehicle toEntity(VehicleRequestDTO dto);
     
     /**
@@ -80,20 +84,11 @@ public interface VehicleMapper {
      * 
      * @param dto - The DTO with update data
      * @param entity - The existing entity to update (from database)
-     * 
-     * @Mapping CONFIGURATION:
-     * 
-     * @Mapping(target = "id", ignore = true)
-     *   → Do NOT update the ID field
-     *   → The entity's ID should remain unchanged
-     * 
-     * @Mapping(target = "category", ignore = true)
-     *   → Do NOT update the category automatically
-     *   → Service layer handles category resolution
-     *   → Prevents lazy loading issues
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "category", ignore = true) // Service layer handles category resolution
+    @Mapping(target = "createdAt", ignore = true) // ← @CreationTimestamp
+    @Mapping(target = "updatedAt", ignore = true) // ← @UpdateTimestamp
     void updateEntity(
         @MappingTarget Vehicle entity,  // The entity to update
         VehicleRequestDTO dto           // The source data

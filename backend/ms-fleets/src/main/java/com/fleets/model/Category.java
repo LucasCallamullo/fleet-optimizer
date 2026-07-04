@@ -28,6 +28,14 @@ public class Category {
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean active = true;
+
+    /**
+     * Optional description for the category.
+     * Maximum length of 200 characters.
+     * Can be null if not provided.
+     */
+    @Column(name = "description", length = 200)
+    private String description;
     
     /**
      * One-to-many relationship with Vehicle entity.    LAZY DEFAULT

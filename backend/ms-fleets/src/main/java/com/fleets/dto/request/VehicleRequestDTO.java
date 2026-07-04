@@ -1,5 +1,6 @@
 package com.fleets.dto.request;
 
+import com.fleets.model.VehicleStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -35,4 +36,57 @@ public class VehicleRequestDTO {
      */
     @Positive(message = "Category ID must be positive")
     private Long categoryId;
+
+    // ================================================================
+    // PHYSICAL CAPACITIES - Optional fields
+    // ================================================================
+
+    /**
+     * Maximum cargo capacity in kilograms.
+     * Optional - can be null if not defined.
+     */
+    @Positive(message = "Max weight must be positive")
+    private Double maxWeightKg;
+
+    /**
+     * Maximum volumetric capacity in cubic meters.
+     * Optional - can be null if not defined.
+     */
+    @Positive(message = "Max volume must be positive")
+    private Double maxVolumeCbm;
+
+    // ================================================================
+    // EFFICIENCY AND COSTS - Optional fields
+    // ================================================================
+
+    /**
+     * Fuel consumption in liters per kilometer.
+     * Optional - can be null if not defined.
+     */
+    @Positive(message = "Fuel consumption must be positive")
+    private Double fuelConsumptionPerKm;
+
+    /**
+     * Operational cost per kilometer.
+     * Optional - can be null if not defined.
+     */
+    @Positive(message = "Cost per km must be positive")
+    private Double costPerKm;
+
+    /**
+     * Sale price per kilometer.
+     * Optional - can be null if not defined.
+     */
+    @Positive(message = "Price per km must be positive")
+    private Double pricePerKm;
+
+    // ================================================================
+    // VEHICLE STATUS - Optional field
+    // ================================================================
+
+    /**
+     * Current vehicle status.
+     * If not provided, defaults to AVAILABLE in the entity.
+     */
+    private VehicleStatus status;
 }
