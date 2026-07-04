@@ -1,0 +1,81 @@
+spring:
+  server:
+    port: 8082
+
+  application:
+    name: ms-routes
+  
+  datasource:
+    # url: jdbc:h2:mem:fleetdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    # driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:routesdb
+    username: sa
+    password: 
+  
+  h2:
+    console:
+      enabled: true
+  
+  jpa:
+    # defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+      dialect: org.hibernate.dialect.H2Dialect
+    # show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
+    # database-platform: org.hibernate.dialect.H2Dialect
+
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+logging:
+  
+  # LOG LEVELS (Filters)
+  # Priority order: TRACE < DEBUG < INFO < WARN < ERROR
+  level:
+    # com.routes: DEBUG                              # Base package - shows all app logs
+    com.routes.controller: WARN                    # Controllers - only important operations
+    com.routes.filter: INFO            # logging filter / middleware
+    # com.routes.service: DEBUG                      # Services - detailed business logic
+    # org.hibernate: WARN
+    # org.springframework.web: INFO
+    
+    # Hibernate (ORM) logs
+    # org.hibernate.SQL: DEBUG                       # Shows SQL statements executed
+    # org.hibernate.tool.hbm2ddl: DEBUG
+    # org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Shows SQL parameter values (use only in dev)
+  
+  # ============================================
+  # LOG PATTERNS (Format)
+  # ============================================
+  pattern:
+    # Console output format (human-readable, color-friendly)
+    # %d{pattern} - timestamp (yyyy-MM-dd HH:mm:ss)
+    # %level      - log level (INFO, DEBUG, ERROR, etc.)
+    # %msg        - the actual log message
+    # %n          - new line
+    # console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %highlight(%-5level) - %msg%n"
+    
+    # File output format (more detailed for debugging)
+    # %thread     - name of the thread that generated the log
+    # %logger{36} - source class name (limited to 36 chars)
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
+  
+  # ============================================
+  # FILE APPENDER (Persistent logs)
+  # ============================================
+  file:
+    # Path where log files are stored (relative to application root)
+    name: logs/ms-routes.log
+    
+    # Maximum size per file (10MB)
+    # When file reaches this size, it's rotated (renamed and a new one is created)
+    max-size: 10MB
+    
+    # Number of rotated log files to keep
+    # Example: ms-fleets.log, ms-fleets.1.log, ms-fleets.2.log, ... up to 7
+    max-history: 7

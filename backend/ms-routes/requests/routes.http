@@ -1,0 +1,119 @@
+@baseUrl = http://localhost:8082/api/v1/routes
+
+
+### Create Route - Complete Example
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "name": "Buenos Aires - Cordoba - Mendoza",
+  "description": "Route delivering packages to Cordoba and Mendoza",
+  "legs": [
+    {
+      "sequence": 1,
+      "vehicleId": 10,
+      "packageId": 100,
+      "origin": {
+        "street": "Av. Libertador",
+        "streetNumber": "1000",
+        "city": "Buenos Aires",
+        "state": "CABA",
+        "country": "Argentina",
+        "postalCode": "1000",
+        "latitude": -34.6037,
+        "longitude": -58.3816
+      },
+      "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+      }
+    },
+    {
+      "sequence": 2,
+      "vehicleId": 15,
+      "packageId": 101,
+      "origin": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+      },
+      "destination": {
+        "street": "Av. San Martin",
+        "streetNumber": "100",
+        "city": "Mendoza",
+        "state": "Mendoza",
+        "country": "Argentina",
+        "postalCode": "5500",
+        "latitude": -32.8908,
+        "longitude": -68.8272
+      }
+    }
+  ]
+}
+
+### Create Route - Minimal Example (with default country)
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "name": "Buenos Aires - La Plata",
+  "description": "Short route",
+  "legs": [
+    {
+      "sequence": 1,
+      "vehicleId": 5,
+      "packageId": 200,
+      "origin": {
+        "street": "Av. 9 de Julio",
+        "city": "Buenos Aires",
+        "country": "",
+        "latitude": -34.6037,
+        "longitude": -58.3816
+      },
+      "destination": {
+        "street": "Calle 51",
+        "city": "La Plata",
+        "country": "",
+        "latitude": -34.9205,
+        "longitude": -57.9536
+      }
+    }
+  ]
+}
+
+### Create Route - With validation errors (missing sequence)
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "name": "Invalid Route",
+  "legs": [
+    {
+      "vehicleId": 5,
+      "packageId": 200,
+      "origin": {
+        "street": "Test",
+        "city": "Test City",
+        "latitude": -34.6037,
+        "longitude": -58.3816
+      },
+      "destination": {
+        "street": "Test 2",
+        "city": "Test City 2",
+        "latitude": -34.9205,
+        "longitude": -57.9536
+      }
+    }
+  ]
+}
