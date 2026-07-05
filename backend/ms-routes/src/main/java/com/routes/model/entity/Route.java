@@ -100,7 +100,7 @@ public class Route {
      * orphanRemoval = true - If a leg is removed from the list, it's deleted
      * OrderBy = "sequence ASC" - Legs are ordered by their sequence number
      */
-    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "route", orphanRemoval = true)
     @OrderBy("sequence ASC")
     private List<Leg> legs = new ArrayList<>();
 }

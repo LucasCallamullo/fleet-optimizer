@@ -1,6 +1,11 @@
 @baseUrl = http://localhost:8082/api/v1/routes
 
 
+### Get Route By Id - Complete Example
+GET {{baseUrl}}/1
+
+
+
 ### Create Route - Complete Example
 POST {{baseUrl}}
 Content-Type: application/json
