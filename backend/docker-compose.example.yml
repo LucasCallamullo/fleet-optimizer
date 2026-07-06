@@ -1,0 +1,208 @@
+# ================================================================
+# DOCKER COMPOSE - Fleet Optimization System
+# ================================================================
+# Version: 3.9
+# Description: Orchestrates all microservices for the fleet management system
+# 
+# How to use:
+#   1. Build images: docker-compose build
+#   2. Start services: docker-compose up -d
+#   3. View logs: docker-compose logs -f
+#   4. Stop services: docker-compose down
+#
+# Access points:
+#   - API Gateway: http://localhost:8080
+#   - Swagger (each MS): http://localhost:8081/swagger-ui.html
+#   - H2 Console (routes): http://localhost:8082/h2-console
+# ================================================================
+
+version: '3.9'
+
+services:
+  
+  # ================================================================
+  # 1. API GATEWAY (Single Entry Point)
+  # ================================================================
+  # Responsibilities:
+  #   - Route requests to microservices
+  #   - Authentication (JWT)
+  #   - Rate limiting
+  #   - Request/response logging
+  # ================================================================
+  gateway-service:
+    build: 
+      context: ./gateway                    # ← Gateway Dockerfile directory
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8080:8080"                         # ← Exposed to host (HTTP)
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - APP_FLEETS_URL=http://fleets-service:8081
+      - APP_ROUTES_URL=http://routes-service:8082
+    depends_on:
+      - fleets-service
+      - routes-service
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # ================================================================
+  # 2. FLEETS SERVICE (ms-fleets)
+  # ================================================================
+  # Responsibilities:
+  #   - Vehicle CRUD operations
+  #   - Category CRUD operations
+  #   - Capacity management (weight, volume)
+  #   - Vehicle status (AVAILABLE, IN_TRANSIT, etc.)
+  # ================================================================
+  fleets-service:
+    build:
+      context: ./ms-fleets                 # ← Project directory
+      dockerfile: Dockerfile
+    container_name: fleets-service
+    ports:
+      - "8081:8081"                         # ← Exposed for local debugging
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:logisticadb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - LOGGING_LEVEL_COM_FLEETS=DEBUG
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # ================================================================
+  # 3. ROUTES SERVICE (ms-routes)
+  # ================================================================
+  # Responsibilities:
+  #   - Route CRUD operations
+  #   - Leg (tramo) CRUD operations
+  #   - Distance calculation (GeocodingService)
+  #   - Vehicle and package validation
+  # ================================================================
+  routes-service:
+    build:
+      context: ./ms-routes                 # ← Project directory
+      dockerfile: Dockerfile
+    container_name: routes-service
+    ports:
+      - "8082:8082"                         # ← Exposed for local debugging
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:routesdb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - APP_CLIENTS_FLEETS_URL=http://fleets-service:8081  # ← Internal communication
+      - APP_CLIENTS_PACKAGES_URL=http://packages-service:8083
+      - LOGGING_LEVEL_COM_ROUTES=DEBUG
+    depends_on:
+      - fleets-service
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # ================================================================
+  # 4. PACKAGES SERVICE (ms-packages) - FUTURE
+  # ================================================================
+  # Responsibilities:
+  #   - Package CRUD operations
+  #   - Items management per package
+  #   - Total weight/volume calculation
+  #   - Package tracking
+  # ================================================================
+  # packages-service:
+  #   build:
+  #     context: ./ms-packages
+  #     dockerfile: Dockerfile
+  #   container_name: packages-service
+  #   ports:
+  #     - "8083:8083"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://packages-db:5432/packagesdb
+  #     - SPRING_DATASOURCE_USERNAME=postgres
+  #     - SPRING_DATASOURCE_PASSWORD=postgres
+  #   depends_on:
+  #     - packages-db
+  #   networks:
+  #     - backend-network
+  #   restart: unless-stopped
+
+  # ================================================================
+  # 5. GEOCODING SERVICE (ms-geocoding) - FUTURE
+  # ================================================================
+  # Responsibilities:
+  #   - Distance calculation between two coordinates
+  #   - Estimated travel time calculation
+  #   - Integration with OSRM / Google Maps / OpenStreetMap
+  # ================================================================
+  # geocoding-service:
+  #   build:
+  #     context: ./ms-geocoding
+  #     dockerfile: Dockerfile
+  #   container_name: geocoding-service
+  #   ports:
+  #     - "8084:8084"
+  #   environment:
+  #     - OSRM_URL=http://osrm:5000
+  #   networks:
+  #     - backend-network
+  #   restart: unless-stopped
+
+# ================================================================
+# DATABASES (PostgreSQL - for production)
+# ================================================================
+# Note: Currently using H2 in-memory for development.
+# Uncomment to use PostgreSQL in production.
+# ================================================================
+
+# routes-db:
+#   image: postgres:16-alpine
+#   container_name: routes-db
+#   environment:
+#     - POSTGRES_DB=routesdb
+#     - POSTGRES_USER=postgres
+#     - POSTGRES_PASSWORD=postgres
+#   ports:
+#     - "5432:5432"
+#   volumes:
+#     - routes-db-data:/var/lib/postgresql/data
+#   networks:
+#     - backend-network
+#   restart: unless-stopped
+
+# packages-db:
+#   image: postgres:16-alpine
+#   container_name: packages-db
+#   environment:
+#     - POSTGRES_DB=packagesdb
+#     - POSTGRES_USER=postgres
+#     - POSTGRES_PASSWORD=postgres
+#   ports:
+#     - "5433:5432"
+#   volumes:
+#     - packages-db-data:/var/lib/postgresql/data
+#   networks:
+#     - backend-network
+#   restart: unless-stopped
+
+# ================================================================
+# VOLUMES (Persistent data storage)
+# ================================================================
+
+# volumes:
+#   routes-db-data:
+#     driver: local
+#   packages-db-data:
+#     driver: local
+
+# ================================================================
+# NETWORKS
+# ================================================================
+
+networks:
+  backend-network:
+    driver: bridge
+    name: fleet-network

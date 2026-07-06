@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  gateway-service:
+    build: ./gateway
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_FLEETS_URL=${FLEETS_SERVICE_URL}
+      - APP_ROUTES_URL=${ROUTES_SERVICE_URL}
+    depends_on:
+      - fleets-service
+      - routes-service
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  fleets-service:
+    build: ./ms-fleets
+    container_name: fleets-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:logisticadb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  routes-service:
+    build: ./ms-routes
+    container_name: routes-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:routesdb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
+      - APP_CLIENTS_FLEETS_URL=${FLEETS_SERVICE_URL}
+      - APP_CLIENTS_PACKAGES_URL=${PACKAGES_SERVICE_URL}
+    depends_on:
+      - fleets-service
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+networks:
+  backend-network:
+    driver: bridge
+    name: fleet-network
