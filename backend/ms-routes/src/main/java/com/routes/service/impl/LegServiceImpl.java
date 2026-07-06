@@ -31,43 +31,89 @@ public class LegServiceImpl implements LegService {
     // CREATE
     // ================================================================
 
+    /**
+     * Creates Leg entities from requests (transient, not persisted).
+     */
     @Override
-    @Transactional
-    public List<Leg> createLegEntities(List<LegRequestDTO> requests, Route route) {
-        log.info("Creating {} legs for route: {}", requests.size(), route.getId());
+    public List<Leg> createLegsInMemory(List<LegRequestDTO> requests) {
+        log.debug("Creating {} legs in memory", requests.size());
 
-        // Step 1: Create all Leg objects (transient)
         List<Leg> legs = new ArrayList<>();
         for (LegRequestDTO request : requests) {
-            log.debug("Creating leg object with sequence: {} for route: {}", request.sequence(), route.getId());
-
             // Map DTO to Entity
             Leg leg = routeMapper.toLegEntity(request);
-            leg.setRoute(route);
             leg.setStatus(LegStatus.PENDING);
 
-            // add list
+            // NO seteo route aún (solo en memoria)
+            // leg.setRoute(route);
             legs.add(leg);
         }
 
-        // Step 2: Bulk save all legs in a single query
+        return legs;
+    }
+
+    /**
+     * Bulk saves legs to database.
+     * 
+     * Business rules:
+     * - Legs CANNOT exist without a Route (route must not be null)
+     * - Legs list CANNOT be empty (at least one leg required)
+     * 
+     * @param legs List of legs to persist
+     * @param route The route to associate with each leg
+     * @return List of persisted Leg entities
+     * @throws AppException if route is null or legs list is empty
+     */
+    @Override
+    @Transactional
+    public List<Leg> saveAllLegs(List<Leg> legs, Route route) {
+        
+        // Step 1: Validate that route is not null
+        if (route == null) {
+            log.error("Attempted to save legs without a route");
+            throw new AppException("Cannot save legs without an associated route", 400);
+        }
+
+        // Step 2: Validate that legs list is not empty
+        if (legs == null || legs.isEmpty()) {
+            log.error("Attempted to save empty legs list for route: {}", route.getId());
+            throw new AppException("Cannot save legs: at least one leg is required", 400);
+        }
+
+        // Step 3: Associate Route to each Leg (in memory)
+        for (Leg leg : legs) {
+            leg.setRoute(route);
+        }
+        log.debug("Associated {} legs to route: {}", legs.size(), route.getId());
+
+        // Step 4: Bulk save all legs
         List<Leg> savedLegs = legRepository.saveAll(legs);
-        log.info("Created {} legs successfully for route: {}", savedLegs.size(), route.getId());
+        log.info("Saved {} legs successfully for route: {}", savedLegs.size(), route.getId());
 
         return savedLegs;
     }
 
     // ================================================================
-    // READ
+    // READ ENTITIES
+    // ================================================================
+
+    @Override
+    public Leg getLegEntityById(Long id) {
+        log.debug("Fetching leg entity by id: {}", id);
+
+        return legRepository.findById(id)
+            .orElseThrow(() -> new AppException("Leg not found with id: " + id, 404));
+    }
+
+    // ================================================================
+    // READ DTOs
     // ================================================================
 
     @Override
     public LegDetailDTO getLegById(Long id) {
         log.debug("Fetching leg by id: {}", id);
 
-        Leg leg = legRepository.findById(id)
-            .orElseThrow(() -> new AppException("Leg not found with id: " + id, 404));
-
+        Leg leg = this.getLegEntityById(id);
         return routeMapper.toLegDetailDto(leg);
     }
 
@@ -91,8 +137,7 @@ public class LegServiceImpl implements LegService {
         log.info("Updating leg with id: {}", id);
 
         // Step 1: Find existing Leg
-        Leg existingLeg = legRepository.findById(id)
-            .orElseThrow(() -> new AppException("Leg not found with id: " + id, 404));
+        Leg existingLeg = this.getLegEntityById(id);
 
         // Step 2: Update fields
         existingLeg.setSequence(request.sequence());
@@ -117,8 +162,7 @@ public class LegServiceImpl implements LegService {
     public void deleteLeg(Long id) {
         log.info("Deleting leg with id: {}", id);
 
-        Leg leg = legRepository.findById(id)
-            .orElseThrow(() -> new AppException("Leg not found with id: " + id, 404));
+        Leg leg = this.getLegEntityById(id);
 
         legRepository.delete(leg);
         log.info("Leg deleted successfully with id: {}", id);

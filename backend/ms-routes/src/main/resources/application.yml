@@ -1,6 +1,16 @@
 server:
   port: 8082
 
+# ================================================================
+# EXTERNAL SERVICES CONFIGURATION
+# ================================================================
+app:
+  clients:
+    fleets:
+      url: http://localhost:8081
+    packages:
+      url: http://localhost:8083
+
 spring:
   application:
     name: ms-routes
