@@ -1,0 +1,48 @@
+### ================================================================
+### LEG ENDPOINTS
+### ================================================================
+
+@baseUrl = http://localhost:8082/api/v1/legs
+
+
+### Get Leg by ID
+GET {{baseUrl}}/2
+Content-Type: application/json
+
+### Get Legs by Route ID
+GET {{baseUrl}}/route/1
+Content-Type: application/json
+
+### Update Leg
+PUT {{baseUrl}}/1
+Content-Type: application/json
+
+{
+  "sequence": 1,
+  "vehicleId": 20,
+  "packageId": 200,
+  "origin": {
+    "street": "Av. Libertador",
+    "streetNumber": "1500",
+    "city": "Buenos Aires",
+    "state": "CABA",
+    "country": "Argentina",
+    "postalCode": "1000",
+    "latitude": -34.6037,
+    "longitude": -58.3816
+  },
+  "destination": {
+    "street": "Av. Colon",
+    "streetNumber": "700",
+    "city": "Cordoba",
+    "state": "Cordoba",
+    "country": "Argentina",
+    "postalCode": "5000",
+    "latitude": -31.4201,
+    "longitude": -64.1888
+  }
+}
+
+### Delete Leg
+DELETE {{baseUrl}}/1
+Content-Type: application/json
