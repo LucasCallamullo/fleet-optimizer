@@ -4,6 +4,9 @@
 # =======================================================================
 pruebas/
 proofs/
+docker-compose.override.yml
+.env
+*.env
 
 # mvn stuff
 .mvn/

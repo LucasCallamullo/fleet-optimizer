@@ -5,6 +5,7 @@ server:
 # EXTERNAL SERVICES CONFIGURATION
 # ================================================================
 app:
+  # Las URLs de los clientes se sobrescriben con variables de entorno
   clients:
     fleets:
       url: http://localhost:8081
