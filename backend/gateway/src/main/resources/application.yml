@@ -1,0 +1,99 @@
+server:
+  port: 8080
+
+app:
+  keycloak:
+    uri: ${KEYCLOAK_URI:https://labsys.frc.utn.edu.ar/aim}
+    realm: ${KEYCLOAK_REALM:dds-materia}
+    jwks-uri: ${KEYCLOAK_JWKS_URI:${app.keycloak.uri}/realms/${app.keycloak.realm}/protocol/openid-connect/certs}
+
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    gateway:
+      routes:
+        # ================================================================
+        # ROUTE: FLEETS SERVICE
+        # ================================================================
+        - id: fleets-service
+          uri: ${FLEETS_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/fleets/**, /api/v1/vehicles/**, /api/v1/categories/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: fleetsService
+                fallbackUri: forward:/fallback/fleets
+            - StripPrefix=0
+            - AddRequestHeader=X-Service-Name, fleets-service
+
+        # ================================================================
+        # ROUTE: ROUTES SERVICE
+        # ================================================================
+        - id: routes-service
+          uri: ${ROUTES_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/routes/**, /api/v1/legs/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: routesService
+                fallbackUri: forward:/fallback/routes
+            - StripPrefix=0
+            - AddRequestHeader=X-Service-Name, routes-service
+
+        # ================================================================
+        # AUTH: AUTH SERVICE
+        # ================================================================
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: authService
+                fallbackUri: forward:/fallback/auth
+            - StripPrefix=0
+            - AddRequestHeader=X-Service-Name, auth-service
+
+        # ================================================================
+        # ROUTE: PACKAGES SERVICE (futuro)
+        # ================================================================
+        # - id: packages-service
+        #   uri: ${PACKAGES_SERVICE_URL:http://packages-service:8083}
+        #   predicates:
+        #     - Path=/api/v1/packages/**
+        #   filters:
+        #     - StripPrefix=0
+
+    # CIRCUIT BREAKER CONFIG
+    # Resilience4J
+    circuitbreaker:
+      resilience4j:
+        enabled: true
+
+# ACTUATOR (para monitoreo)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+# ================================================================
+# LOGGING
+# ================================================================
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.fleetoptimizer.gateway: DEBUG
