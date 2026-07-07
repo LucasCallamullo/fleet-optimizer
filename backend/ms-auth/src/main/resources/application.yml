@@ -1,0 +1,20 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ms-auth
+
+app:
+  keycloak:
+    uri: ${KEYCLOAK_URI:https://labsys.frc.utn.edu.ar/aim}
+    realm: ${KEYCLOAK_REALM:dds-materia}
+    client-id: ${KEYCLOAK_CLIENT_ID:tpi-dds-client}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET:tpi-dds-client}
+    admin-user: ${KEYCLOAK_ADMIN_USER:Dds-admin}
+    admin-password: ${KEYCLOAK_ADMIN_PASSWORD:dds12345}
+
+logging:
+  level:
+    com.auth: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG

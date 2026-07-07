@@ -1,0 +1,315 @@
+### ================================================================
+### AUTH TESTS - ms-auth endpoints through Gateway
+### ================================================================
+### BASE URL: http://localhost:8080 (Gateway)
+### ================================================================
+
+@baseUrl = http://localhost:8080
+@authBaseUrl = {{baseUrl}}/api/v1/auth
+
+### ================================================================
+### USERS FOR TESTING
+### ================================================================
+### Regular User:
+###   Email: user_regular@gmail.com
+###   Password: pass1234
+###   Role: usuario
+###
+### Admin User:
+###   Email: admin_regular@gmail.com
+###   Password: pass1234
+###   Role: admin
+### ================================================================
+
+### ================================================================
+### 1. LOGIN - Regular User
+### ================================================================
+# @name loginUser
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### ================================================================
+### 2. LOGIN - Admin User
+### ================================================================
+# @name loginAdmin
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### ================================================================
+### 3. REGISTER - New User
+### ================================================================
+POST {{authBaseUrl}}/register
+Content-Type: application/json
+
+{
+    "email": "newuser@example.com",
+    "password": "pass1234",
+    "firstName": "New",
+    "lastName": "User",
+    "rol": "usuario"
+}
+
+### ================================================================
+### 4. REGISTER - New Admin
+### ================================================================
+POST {{authBaseUrl}}/register
+Content-Type: application/json
+
+{
+    "email": "newadmin@example.com",
+    "password": "pass1234",
+    "firstName": "New",
+    "lastName": "Admin",
+    "rol": "admin"
+}
+
+### ================================================================
+### 5. REGISTER - Missing password (should fail 400)
+### ================================================================
+POST {{authBaseUrl}}/register
+Content-Type: application/json
+
+{
+    "email": "invalid@test.com"
+}
+
+### ================================================================
+### 6. REGISTER - Duplicate email (should fail 409)
+### ================================================================
+POST {{authBaseUrl}}/register
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### ================================================================
+### SAVE TOKENS FROM LOGIN RESPONSES
+### ================================================================
+@userToken = {{loginUser.response.body.accessToken}}
+@userRefreshToken = {{loginUser.response.body.refreshToken}}
+@adminToken = {{loginAdmin.response.body.accessToken}}
+@adminRefreshToken = {{loginAdmin.response.body.refreshToken}}
+
+### ================================================================
+### 7. REFRESH TOKEN - Regular User
+### ================================================================
+POST {{authBaseUrl}}/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "{{userRefreshToken}}"
+}
+
+### ================================================================
+### 8. REFRESH TOKEN - Admin User
+### ================================================================
+POST {{authBaseUrl}}/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "{{adminRefreshToken}}"
+}
+
+### ================================================================
+### 9. REFRESH TOKEN - Invalid token (should fail 401)
+### ================================================================
+POST {{authBaseUrl}}/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "invalid-token-123"
+}
+
+### ================================================================
+### 10. LOGOUT - Regular User
+### ================================================================
+POST {{authBaseUrl}}/logout
+Content-Type: application/json
+
+{
+    "refreshToken": "{{userRefreshToken}}"
+}
+
+### ================================================================
+### 11. LOGOUT - Without refresh token (client-side only)
+### ================================================================
+POST {{authBaseUrl}}/logout
+Content-Type: application/json
+
+{}
+
+### ================================================================
+### ================================================================
+### TEST ENDPOINTS (different authorization levels)
+### ================================================================
+### ================================================================
+
+### ================================================================
+### 12. PUBLIC - No authentication required
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/public
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 13. INFO - No authentication required
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/info
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 14. AUTHENTICATED - Regular user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 15. AUTHENTICATED - Admin user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 16. USER ROLE - Regular user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/user
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 17. USER ROLE - Admin user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/user
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 18. ADMIN ROLE - Regular user (should FAIL 403)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/admin
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 19. ADMIN ROLE - Admin user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/admin
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 20. MULTI-ROLE - Regular user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/multi-role
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 21. MULTI-ROLE - Admin user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/multi-role
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 22. PROFILE - Regular user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/profile
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 23. PROFILE - Admin user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/profile
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 24. WITHOUT TOKEN - Should return 401
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+
+### ================================================================
+### 25. INVALID TOKEN - Should return 401
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+Authorization: Bearer invalid.token.here
+
+### ================================================================
+### LOGIN WITH INVALID CREDENTIALS (should fail 401)
+### ================================================================
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "wrongpassword"
+}
+
+### ================================================================
+### LOGIN WITHOUT EMAIL (should fail 400)
+### ================================================================
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "password": "pass1234"
+}
+
+### ================================================================
+### LOGIN WITHOUT PASSWORD (should fail 400)
+### ================================================================
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com"
+}
+
+### ================================================================
+### ================================================================
+### EXPECTED RESPONSES SUMMARY
+### ================================================================
+### 
+### SUCCESS (200/201):
+### {
+###   "accessToken": "eyJ...",
+###   "refreshToken": "eyJ...",
+###   "expiresIn": 300,
+###   "user": {
+###     "id": "...",
+###     "username": "user_regular",
+###     "email": "user_regular@gmail.com",
+###     "name": null,
+###     "givenName": null,
+###     "familyName": null,
+###     "emailVerified": false,
+###     "roles": ["usuario"]
+###   }
+### }
+###
+### VALIDATION ERROR (400):
+### {
+###   "status": 400,
+###   "error": "Email is required, Password is required",
+###   "path": "/api/v1/auth/login"
+### }
+###
+### UNAUTHORIZED (401):
+### {
+###   "status": 401,
+###   "error": "Invalid credentials",
+###   "path": "/api/v1/auth/login"
+### }
+###
+### CONFLICT (409):
+### {
+###   "status": 409,
+###   "error": "Email already registered",
+###   "path": "/api/v1/auth/register"
+### }
+### ================================================================
