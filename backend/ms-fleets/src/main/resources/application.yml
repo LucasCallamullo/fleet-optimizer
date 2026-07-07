@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: ms-fleets
@@ -9,15 +12,6 @@ spring:
     username: sa
     password: 
   
-  h2:
-    console:
-      enabled: true
-  
-  # sql:
-    # init:
-      # mode: never
-      # data-locations: classpath:data.sql
-  
   jpa:
     # defer-datasource-initialization: true
     hibernate:
@@ -28,9 +22,6 @@ spring:
       hibernate:
         format_sql: true
     # database-platform: org.hibernate.dialect.H2Dialect
-
-server:
-  port: 8080
 
 # ============================================
 # LOGGING CONFIGURATION
@@ -52,12 +43,9 @@ logging:
   # ============================================
   level:
     # Application packages
-    # com.fleets: DEBUG                              # Base package - shows all app logs
+    # com.fleets: DEBUG                            # Base package - shows all app logs
     com.fleets.controller: WARN                    # Controllers - only important operations
-    com.fleets.filter: INFO            # logging filter / middleware
-    # com.fleets.service: DEBUG                      # Services - detailed business logic
-    # org.hibernate: WARN
-    # org.springframework.web: INFO
+    com.fleets.filter: INFO                        # logging filter / middleware
     
     # Hibernate (ORM) logs
     # org.hibernate.SQL: DEBUG                       # Shows SQL statements executed

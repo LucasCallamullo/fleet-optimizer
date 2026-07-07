@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.security.access.AccessDeniedException;
 
 /**
  * Global exception handler that acts as centralized error-handling middleware.
@@ -123,6 +124,41 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles Spring Security AccessDeniedException thrown when an authenticated user
+     * attempts to access a resource they are not authorized for.
+     * 
+     * This exception occurs when:
+     * - @PreAuthorize("hasRole('ADMIN')") is used but the user only has USER role
+     * - @PreAuthorize("hasAuthority('CREATE')") is used but user lacks that authority
+     * - Any authorization rule defined with @PreAuthorize fails
+     * 
+     * The exception is thrown by Spring Security's authorization filter after the
+     * Authentication object has been successfully established (by GatewayHeaderAuthenticationFilter)
+     * but the required roles/authorities are not present.
+     * 
+     * Returns HTTP 403 Forbidden with a descriptive error message.
+     *
+     * @param ex The AccessDeniedException containing the reason for denial
+     * @param request The HTTP request to extract the requested URI
+     * @return ResponseEntity with ErrorResponse containing status 403 and the denied path
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+        AccessDeniedException ex, 
+        jakarta.servlet.http.HttpServletRequest request) {
+
+        // Step 1: Create error response with status 403 (Forbidden)
+        // The message typically is "Forbidden: Access Denied"
+        ErrorResponse error = new ErrorResponse(
+            403,
+            "Forbidden: " + ex.getMessage(),
+            request.getRequestURI()
+        );
+        
+        // Step 2: Return response with HTTP 403 status
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
 
     /**
      * Handles custom AppException thrown from services.
