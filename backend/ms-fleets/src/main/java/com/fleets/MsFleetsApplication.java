@@ -9,8 +9,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 public class MsFleetsApplication {
@@ -81,24 +79,5 @@ public class MsFleetsApplication {
 			System.out.println("Seeded " + categoryRepository.count() + " categories");
 			System.out.println("Seeded " + vehicleRepository.count() + " vehicles");
 		};
-	} 
-
-
-	/**
-     * Configura CORS para permitir peticiones desde React (puerto 3000)
-     */
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/v1/**")           // ← Solo endpoints /api/*
-                        .allowedOrigins("*")  // ← React "http://localhost:5173"
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        // .allowCredentials(true); //
-                        .allowCredentials(false);
-            }
-        };
-    }
+	}
 } 

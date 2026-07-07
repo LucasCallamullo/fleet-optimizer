@@ -10,18 +10,38 @@
 @baseUrl = http://localhost:8080
 @categoriesUrl = {{baseUrl}}/api/v1/categories
 
+### 
+@authBaseUrl = {{baseUrl}}/api/v1/auth
+
+
+### ================================================================
+### 1. LOGIN - Regular User
+### ================================================================
+# @name loginUser
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### 
+@userToken = {{loginUser.response.body.accessToken}}
+@userRefreshToken = {{loginUser.response.body.refreshToken}}
+
 ### ============================================================
 ### 1. GET ALL CATEGORIES
 ### ============================================================
 GET {{categoriesUrl}}
-Accept: application/json
+Authorization: Bearer {{userToken}}
 
 ### ============================================================
 ### 2. GET CATEGORY BY ID
 ### ============================================================
 ### @prompt categoryId Enter category ID:
 GET {{categoriesUrl}}/2
-Accept: application/json
+Authorization: Bearer {{userToken}}
 
 ### ============================================================
 ### 3. GET CATEGORY BY NAME
@@ -35,14 +55,12 @@ Accept: application/json
 ### ============================================================
 ### @prompt existsName Enter category name to check:
 GET {{categoriesUrl}}/exists/Truck
-Accept: application/json
 
 ### ============================================================
 ### 5. CREATE CATEGORY
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
-Accept: application/json
 
 {
   "name": "Sedan",
@@ -54,7 +72,6 @@ Accept: application/json
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
-Accept: application/json
 
 {
   "name": "SUV",
@@ -66,7 +83,6 @@ Accept: application/json
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
-Accept: application/json
 
 {
   "name": "Truck",
@@ -78,7 +94,6 @@ Accept: application/json
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
-Accept: application/json
 
 {
   "name": "Furgón",
@@ -91,7 +106,6 @@ Accept: application/json
 ### @prompt updateCatId Enter category ID to update:
 PUT {{categoriesUrl}}/5
 Content-Type: application/json
-Accept: application/json
 
 {
   "name": "SUV - Actualizado",
@@ -103,14 +117,13 @@ Accept: application/json
 ### ============================================================
 ### @prompt deleteCatId Enter category ID to delete:
 DELETE {{categoriesUrl}}/5
-Accept: application/json
+Authorization: Bearer {{userToken}}
 
 ### ============================================================
 ### 11. CREATE CATEGORY - Duplicate (should return 409)
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
-Accept: application/json
 
 {
   "name": "Sedán",

@@ -2,6 +2,7 @@ package com.fleets.controller;
 
 import com.fleets.dto.request.CategoryRequestDTO;
 import com.fleets.dto.response.CategoryResponseDTO;
+import com.fleets.exception.AppException;
 import com.fleets.dto.response.CategoryDetailDTO;
 import com.fleets.service.CategoryService;
 
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +52,7 @@ public class CategoryController {
      * @return List of CategoryResponseDTO (id + name)
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<CategoryResponseDTO> getAllCategories() {
         log.info("GET /api/v1/categories - Fetching all categories");
         List<CategoryResponseDTO> result = categoryService.getAllCategories();
@@ -65,6 +68,7 @@ public class CategoryController {
      * @return CategoryDetailDTO with all fields
      */
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public CategoryDetailDTO getCategoryById(@PathVariable Long id) {
         CategoryDetailDTO result = categoryService.getCategoryById(id);
         log.debug("Category found: {} (id: {})", result.name(), result.id());
@@ -80,6 +84,7 @@ public class CategoryController {
      * @throws AppException if not found (handled by service)
      */
     @GetMapping("/name/{name}")
+    @PreAuthorize("isAuthenticated()")
     public CategoryDetailDTO getCategoryByName(@PathVariable String name) {
         log.info("GET /api/v1/categories/name/{} - Fetching category by name", name);
         CategoryDetailDTO result = categoryService.getCategoryByName(name);
@@ -95,6 +100,7 @@ public class CategoryController {
      * @return true if exists, false otherwise
      */
     @GetMapping("/exists/{name}")
+    @PreAuthorize("isAuthenticated()")
     public boolean existsByName(@PathVariable String name) {
         log.info("GET /api/v1/categories/exists/{} - Checking if category exists", name);
         boolean exists = categoryService.existsByName(name);
@@ -114,6 +120,7 @@ public class CategoryController {
      * @return CategoryDetailDTO with created category
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDetailDTO createCategory(@Valid @RequestBody CategoryRequestDTO request) {
         log.info("POST /api/v1/categories - Creating new category with name: {}", request.name());
@@ -131,6 +138,7 @@ public class CategoryController {
      * @return CategoryDetailDTO with updated category
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryDetailDTO updateCategory(
             @PathVariable Long id, 
             @Valid @RequestBody CategoryRequestDTO request) {
@@ -148,6 +156,7 @@ public class CategoryController {
      * @param id the category ID
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Long id) {
         log.info("DELETE /api/v1/categories/{} - Deleting category", id);
