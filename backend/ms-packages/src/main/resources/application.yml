@@ -1,0 +1,75 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ms-packages
+  
+  datasource:
+    # url: jdbc:h2:mem:fleetdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    # driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:packagesdb
+    username: sa
+    password: 
+  
+  jpa:
+    # defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+    # show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
+    # database-platform: org.hibernate.dialect.H2Dialect
+
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+logging:
+  
+  # ============================================
+  # LOG LEVELS (Filters)
+  # ============================================
+  # Defines which log messages are displayed.
+  # Priority order: TRACE < DEBUG < INFO < WARN < ERROR
+  # 
+  # When set to INFO: shows INFO, WARN, ERROR (hides DEBUG and TRACE)
+  # ============================================
+  level:
+    # Application packages
+    com.packages.controller: WARN                    # Controllers - only important operations
+    com.packages.filter: INFO                        # logging filter / middleware
+    
+  
+  # ============================================
+  # LOG PATTERNS (Format)
+  # ============================================
+  pattern:
+    # Console output format (human-readable, color-friendly)
+    # %d{pattern} - timestamp (yyyy-MM-dd HH:mm:ss)
+    # %level      - log level (INFO, DEBUG, ERROR, etc.)
+    # %msg        - the actual log message
+    # %n          - new line
+    # console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %highlight(%-5level) - %msg%n"
+    
+    # File output format (more detailed for debugging)
+    # %thread     - name of the thread that generated the log
+    # %logger{36} - source class name (limited to 36 chars)
+    file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
+  
+  # ============================================
+  # FILE APPENDER (Persistent logs)
+  # ============================================
+  file:
+    # Path where log files are stored (relative to application root)
+    name: logs/ms-packages.log
+    
+    # Maximum size per file (10MB)
+    # When file reaches this size, it's rotated (renamed and a new one is created)
+    max-size: 10MB
+    
+    # Number of rotated log files to keep
+    # Example: ms-packages.log, ms-packages.1.log, ms-packages.2.log, ... up to 7
+    max-history: 7
