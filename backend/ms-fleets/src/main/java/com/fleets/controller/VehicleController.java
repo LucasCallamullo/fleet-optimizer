@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class VehicleController {
      * @return List of VehicleResponseDTO (only category ID)
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<VehicleResponseDTO> getAllVehicles() {
         log.info("GET /api/v1/vehicles - Fetching all vehicles (basic)");
         List<VehicleResponseDTO> result = vehicleService.getAllVehicles();
@@ -64,6 +66,7 @@ public class VehicleController {
      * @return List of VehicleDetailDTO (with full category)
      */
     @GetMapping("/detailed")
+    @PreAuthorize("isAuthenticated()")
     public List<VehicleDetailDTO> getAllVehiclesDetailed() {
         log.info("GET /api/v1/vehicles/detailed - Fetching all vehicles with category details");
         List<VehicleDetailDTO> result = vehicleService.getAllVehiclesWithCategory();
@@ -79,6 +82,7 @@ public class VehicleController {
      * @return VehicleDetailDTO with full category
      */
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public VehicleDetailDTO getVehicleById(@PathVariable Long id) {
         log.info("GET /api/v1/vehicles/{} - Fetching vehicle detail", id);
         VehicleDetailDTO result = vehicleService.getVehicleById(id);
@@ -94,6 +98,7 @@ public class VehicleController {
      * @return VehicleDetailDTO with full category
      */
     @GetMapping("/license/{licensePlate}")
+    @PreAuthorize("isAuthenticated()")
     public VehicleDetailDTO getVehicleByLicensePlate(@PathVariable String licensePlate) {
         log.info("GET /api/v1/vehicles/license/{} - Fetching vehicle by license plate", licensePlate);
         VehicleDetailDTO result = vehicleService.getVehicleByLicensePlate(licensePlate);
@@ -109,6 +114,7 @@ public class VehicleController {
      * @return List of VehicleDetailDTO with full category
      */
     @GetMapping("/category/{categoryId}")
+    @PreAuthorize("isAuthenticated()")
     public List<VehicleDetailDTO> getVehiclesByCategory(@PathVariable Long categoryId) {
         log.info("GET /api/v1/vehicles/category/{} - Fetching vehicles by category", categoryId);
         List<VehicleDetailDTO> result = vehicleService.getVehiclesByCategory(categoryId);
@@ -129,6 +135,7 @@ public class VehicleController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public VehicleDetailDTO createVehicle(@Valid @RequestBody VehicleRequestDTO request) {
         log.info("POST /api/v1/vehicles - Creating new vehicle with plate: {}", request.getLicensePlate());
         VehicleDetailDTO result = vehicleService.createVehicle(request);
@@ -145,6 +152,7 @@ public class VehicleController {
      * @return VehicleDetailDTO with updated vehicle
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public VehicleDetailDTO updateVehicle(
             @PathVariable Long id, 
             @Valid @RequestBody VehicleRequestDTO request) {
@@ -162,6 +170,7 @@ public class VehicleController {
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteVehicle(@PathVariable Long id) {
         log.info("DELETE /api/v1/vehicles/{} - Deleting vehicle", id);
         vehicleService.deleteVehicle(id);
