@@ -10,7 +10,6 @@ import com.routes.model.entity.Leg;
 import com.routes.model.entity.Route;
 import com.routes.model.enums.RouteStatus;
 import com.routes.repository.RouteRepository;
-import com.routes.service.GeocodingService;
 import com.routes.service.LegService;
 import com.routes.service.RouteValidationService;
 import com.routes.service.impl.RouteServiceImpl;
@@ -46,9 +45,6 @@ class RouteServiceImplTest {
 
     @Mock
     private RouteValidationService validationService;
-
-    @Mock
-    private GeocodingService geocodingService;  // ← NUEVO
 
     @InjectMocks
     private RouteServiceImpl routeService;
@@ -133,7 +129,9 @@ class RouteServiceImplTest {
         when(routeMapper.toEntity(request)).thenReturn(route);
         when(routeRepository.save(route)).thenReturn(savedRoute);
         when(legService.createLegsInMemory(request.legs())).thenReturn(legs);
-        when(geocodingService.calculateLegDistances(legs)).thenReturn(calculatedLegs);
+
+        // old 
+        // when(geocodingService.calculateLegDistances(legs)).thenReturn(calculatedLegs);
         when(legService.saveAllLegs(calculatedLegs, savedRoute)).thenReturn(savedLegs);
         when(routeMapper.toDetailDto(savedRoute)).thenReturn(response);
 
@@ -148,7 +146,9 @@ class RouteServiceImplTest {
         verify(validationService).validateLegs(request.legs());
         verify(routeRepository).save(route);
         verify(legService).createLegsInMemory(request.legs());
-        verify(geocodingService).calculateLegDistances(legs);
+
+        // old
+        // verify(geocodingService).calculateLegDistances(legs);
         verify(legService).saveAllLegs(calculatedLegs, savedRoute);
         verify(routeMapper).toDetailDto(savedRoute);
     }
@@ -250,7 +250,9 @@ class RouteServiceImplTest {
             .thenReturn(Optional.of(existingRoute));
         when(routeRepository.save(existingRoute)).thenReturn(updatedRoute);
         when(legService.createLegsInMemory(request.legs())).thenReturn(legs);
-        when(geocodingService.calculateLegDistances(legs)).thenReturn(calculatedLegs);
+
+        // old
+        // when(geocodingService.calculateLegDistances(legs)).thenReturn(calculatedLegs);
         when(legService.saveAllLegs(calculatedLegs, updatedRoute)).thenReturn(savedLegs);
         when(routeMapper.toDetailDto(updatedRoute)).thenReturn(response);
 
@@ -265,7 +267,9 @@ class RouteServiceImplTest {
         verify(routeRepository).findByIdWithLegs(routeId);
         verify(routeRepository).save(existingRoute);
         verify(legService).createLegsInMemory(request.legs());
-        verify(geocodingService).calculateLegDistances(legs);
+
+        // old
+        // verify(geocodingService).calculateLegDistances(legs);
         verify(legService).saveAllLegs(calculatedLegs, updatedRoute);
     }
 

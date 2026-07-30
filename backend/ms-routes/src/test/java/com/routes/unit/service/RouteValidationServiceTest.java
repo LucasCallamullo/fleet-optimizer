@@ -71,10 +71,16 @@ class RouteValidationServiceTest {
         vehicle2 = new FleetVehicleDTO(2L, "DEF456", 200.0, 100.0, "AVAILABLE");
 
         // Step 3: Create packages
-        package1 = new PackageDTO(1L, "PKG-001", 10.0, 5.0);
-        package2 = new PackageDTO(2L, "PKG-002", 20.0, 10.0);
-        heavyPackage = new PackageDTO(3L, "PKG-003", 150.0, 10.0);  // > 100kg (vehicle1 capacity)
-        largePackage = new PackageDTO(4L, "PKG-004", 10.0, 60.0);   // > 50m³ (vehicle1 capacity)
+
+        LocationRequestDTO location = new LocationRequestDTO(
+            null, null, null, 
+            null, null, null, null, null
+        );
+
+        package1 = new PackageDTO(1L,  10.0, 5.0, location);
+        package2 = new PackageDTO(2L,  20.0, 10.0, location);
+        heavyPackage = new PackageDTO(3L, 150.0, 10.0, location);  // > 100kg (vehicle1 capacity)
+        largePackage = new PackageDTO(4L, 10.0, 60.0, location);   // > 50m³ (vehicle1 capacity)
 
         // Step 4: Create valid leg
         validLeg = new LegRequestDTO(1, 1L, 1L, origin, destination);
@@ -302,7 +308,7 @@ class RouteValidationServiceTest {
 
         // Package with null values
         PackageDTO packageWithNullValues = new PackageDTO(
-            1L, "PKG-001", null, null
+            1L, null, null, null
         );
 
         LegRequestDTO legWithNullValues = new LegRequestDTO(

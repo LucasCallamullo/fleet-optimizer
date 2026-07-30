@@ -9,7 +9,6 @@ import com.routes.model.entity.Leg;
 import com.routes.model.entity.Route;
 import com.routes.model.enums.RouteStatus;
 import com.routes.repository.RouteRepository;
-import com.routes.service.GeocodingService;
 import com.routes.service.LegService;
 import com.routes.service.RouteService;
 import com.routes.service.RouteValidationService;
@@ -32,7 +31,6 @@ public class RouteServiceImpl implements RouteService {
     private final RouteMapper routeMapper;
     private final LegService legService;
     private final RouteValidationService validationService;
-    private final GeocodingService geocodingService;
 
     // ================================================================
     // CREATE
@@ -134,7 +132,8 @@ public class RouteServiceImpl implements RouteService {
         List<Leg> legs = legService.createLegsInMemory(legRequests);
 
         // Step 2: Calculate distances and durations (OSRM)
-        List<Leg> calculatedLegs = geocodingService.calculateLegDistances(legs);
+        // List<Leg> calculatedLegs = geocodingService.calculateLegDistances(legs);
+        List<Leg> calculatedLegs = legs;
 
         // Step 3: Update route totals
         this.updateRouteTotals(route, calculatedLegs);
