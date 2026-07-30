@@ -1,8 +1,10 @@
 package com.routes.dto.external;
 
+import com.routes.dto.request.LocationRequestDTO;
+
 public record PackageDTO(
     Long id,
-    String trackingNumber,
     Double totalWeightKg,
-    Double totalVolumeCbm
+    Double totalVolumeCbm,
+    LocationRequestDTO origin
 ) {}

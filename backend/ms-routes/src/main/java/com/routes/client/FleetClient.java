@@ -4,6 +4,7 @@ import com.routes.config.FeignConfig;
 import com.routes.dto.external.FleetVehicleDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -42,4 +43,31 @@ public interface FleetClient {
      */
     @GetMapping("/api/v1/vehicles")
     List<FleetVehicleDTO> getVehiclesByIds(@RequestParam("ids") List<Long> ids);
+
+    /**
+     * Fetches a single vehicle by its ID from the Fleet MS.
+     * 
+     * Endpoint: GET /api/v1/vehicles/{id}
+     * 
+     * This method retrieves detailed information about a specific vehicle,
+     * including its capacities, costs, and current status.
+     * 
+     * Example response:
+     * {
+     *   "id": 1,
+     *   "licensePlate": "ABC123",
+     *   "maxWeightKg": 100.0,
+     *   "maxVolumeCbm": 50.0,
+     *   "status": "AVAILABLE",
+     *   "costPerKm": 1.50,
+     *   "pricePerKm": 2.50
+     * }
+     * 
+     * @param id The ID of the vehicle to fetch
+     * @return FleetVehicleDTO with all vehicle details
+     * @throws org.springframework.web.client.HttpClientErrorException if vehicle is not found (404)
+     * @throws org.springframework.web.client.HttpServerErrorException if Fleet MS returns an error (5xx)
+     */
+    @GetMapping("/api/v1/vehicles/{id}")
+    FleetVehicleDTO getVehicleById(@PathVariable("id") Long id);
 }

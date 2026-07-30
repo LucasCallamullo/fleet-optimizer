@@ -2,8 +2,12 @@ package com.routes.client;
 
 import com.routes.config.FeignConfig;
 import com.routes.dto.external.PackageDTO;
+import com.routes.dto.external.PackageStatusUpdateRequest;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -56,6 +60,24 @@ public interface PackageClient {
     @GetMapping("/api/v1/packages")
     List<PackageDTO> getPackagesByIds(@RequestParam("ids") List<Long> ids);
 
+    /**
+     * Updates the status of multiple packages.
+     * 
+     * Endpoint: PATCH /api/v1/packages/status
+     * 
+     * This is used by ms-routes when a shipment is created to update
+     * package statuses from READY_FOR_PICKUP to IN_TRANSIT.
+     * 
+     * Request body:
+     * {
+     *   "packageIds": [1, 2, 3],
+     *   "status": "IN_TRANSIT"
+     * }
+     * 
+     * @param request The status update request containing package IDs and new status
+     */
+    @PatchMapping("/api/v1/packages/status")
+    void updatePackageStatus(@RequestBody PackageStatusUpdateRequest request);
 
     /**
      * Hardcoded packages for testing purposes.
