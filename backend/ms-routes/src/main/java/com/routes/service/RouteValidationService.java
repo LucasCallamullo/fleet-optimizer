@@ -2,8 +2,8 @@ package com.routes.service;
 
 import com.routes.client.FleetClient;
 import com.routes.client.PackageClient;
-import com.routes.dto.external.FleetVehicleDTO;
-import com.routes.dto.external.PackageDTO;
+import com.routes.dto.client.fleets.FleetVehicleDTO;
+import com.routes.dto.client.packages.PackageDTO;
 import com.routes.dto.request.LegRequestDTO;
 import com.routes.exception.AppException;
 import lombok.RequiredArgsConstructor;

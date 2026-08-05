@@ -1,8 +1,9 @@
 package com.routes.client;
 
 import com.routes.config.FeignConfig;
-import com.routes.dto.external.BatchDistanceRequest;
-import com.routes.dto.external.BatchDistanceResponse;
+import com.routes.dto.client.geocoding.BatchDistanceRequest;
+import com.routes.dto.client.geocoding.BatchDistanceResponse;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

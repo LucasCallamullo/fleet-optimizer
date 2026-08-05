@@ -1,4 +1,4 @@
-package com.routes.dto.external;
+package com.routes.dto.client.geocoding;
 
 import java.util.List;
 

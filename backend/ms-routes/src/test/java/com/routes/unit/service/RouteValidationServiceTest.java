@@ -2,8 +2,9 @@ package com.routes.unit.service;
 
 import com.routes.client.FleetClient;
 import com.routes.client.PackageClient;
-import com.routes.dto.external.FleetVehicleDTO;
-import com.routes.dto.external.PackageDTO;
+import com.routes.dto.client.common.LocationDTO;
+import com.routes.dto.client.fleets.FleetVehicleDTO;
+import com.routes.dto.client.packages.PackageDTO;
 import com.routes.dto.request.LegRequestDTO;
 import com.routes.dto.request.LocationRequestDTO;
 import com.routes.exception.AppException;
@@ -67,12 +68,14 @@ class RouteValidationServiceTest {
         );
 
         // Step 2: Create vehicles
-        vehicle1 = new FleetVehicleDTO(1L, "ABC123", 100.0, 50.0, "AVAILABLE");
-        vehicle2 = new FleetVehicleDTO(2L, "DEF456", 200.0, 100.0, "AVAILABLE");
+        vehicle1 = new FleetVehicleDTO(1L, "ABC123", 0.0, 
+            0.0, 0.0, 100.0, 50.0, "AVAILABLE");
+        vehicle2 = new FleetVehicleDTO(2L, "DEF456", 0.0, 
+            0.0, 0.0, 200.0, 100.0, "AVAILABLE");
 
         // Step 3: Create packages
 
-        LocationRequestDTO location = new LocationRequestDTO(
+        LocationDTO location = new LocationDTO(
             null, null, null, 
             null, null, null, null, null
         );
@@ -303,7 +306,7 @@ class RouteValidationServiceTest {
     void shouldNotValidateCapacityWhenValuesAreNull() {
         // Step 1: Arrange - Vehicle with null capacities
         FleetVehicleDTO vehicleWithNullCapacity = new FleetVehicleDTO(
-            1L, "ABC123", null, null, "AVAILABLE"
+            1L, "ABC123", null, null, null, null, null, "AVAILABLE"
         );
 
         // Package with null values

@@ -1,12 +1,12 @@
-package com.routes.dto.external;
+package com.routes.dto.client.geocoding;
 
-import com.routes.dto.request.LocationRequestDTO;
+import com.routes.dto.client.common.LocationDTO;
 
 /**
  * A pair of origin and destination locations.
  */
 public record LocationPair(
     Long legId,           // Optional: to correlate response with leg
-    LocationRequestDTO origin,
-    LocationRequestDTO destination
+    LocationDTO origin,
+    LocationDTO destination
 ) {}
