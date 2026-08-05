@@ -1,7 +1,8 @@
 package com.routes.client;
 
 import com.routes.config.FeignConfig;
-import com.routes.dto.external.FleetVehicleDTO;
+import com.routes.dto.client.fleets.FleetVehicleDTO;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

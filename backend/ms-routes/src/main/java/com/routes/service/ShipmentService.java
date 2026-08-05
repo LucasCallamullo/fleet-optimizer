@@ -11,18 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.routes.client.FleetClient;
 import com.routes.client.GeocodingClient;
 import com.routes.client.PackageClient;
-import com.routes.dto.external.BatchDistanceRequest;
-import com.routes.dto.external.BatchDistanceResponse;
-import com.routes.dto.external.DistanceResult;
-import com.routes.dto.external.FleetVehicleDTO;
-import com.routes.dto.external.LocationPair;
-import com.routes.dto.external.PackageDTO;
-import com.routes.dto.external.PackageStatusUpdateRequest;
-import com.routes.dto.request.LocationRequestDTO;
+import com.routes.dto.client.fleets.FleetVehicleDTO;
+import com.routes.dto.client.geocoding.BatchDistanceRequest;
+import com.routes.dto.client.geocoding.BatchDistanceResponse;
+import com.routes.dto.client.geocoding.DistanceResult;
+import com.routes.dto.client.geocoding.LocationPair;
+import com.routes.dto.client.packages.PackageDTO;
+import com.routes.dto.client.packages.PackageStatusUpdateRequest;
 import com.routes.dto.request.ShipmentRequestDTO;
 import com.routes.dto.response.ShipmentLegDTO;
 import com.routes.dto.response.ShipmentResponseDTO;
 import com.routes.exception.AppException;
+import com.routes.mapper.LocationMapper;
 import com.routes.model.entity.Leg;
 import com.routes.model.entity.Location;
 import com.routes.model.entity.Route;
@@ -52,9 +52,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ShipmentService {
 
+    private final RouteRepository routeRepository;
+    private final LocationMapper locationMapper;
+    private final LegService legService;
+
     private final PackageClient packageClient;
     private final FleetClient fleetClient;
-    private final RouteRepository routeRepository;
     private final GeocodingClient geocodingClient;
 
     // ================================================================
@@ -109,13 +112,13 @@ public class ShipmentService {
         // ================================================================
         // STEP 4: Create one Leg per package and prepare batch request
         // ================================================================
-        Location destination = this.mapToLocation(request.destination());
+        Location destination = locationMapper.toEntity(request.destination());
         List<Leg> legs = new ArrayList<>();
         List<LocationPair> locationPairs = new ArrayList<>();
 
         for (int i = 0; i < packages.size(); i++) {
             PackageDTO pkg = packages.get(i);
-            Location origin = mapToLocation(pkg.origin());  // ← Store location
+            Location origin = locationMapper.toEntity(pkg.origin()); // ← Store location
 
             // Create Leg without distance (will be set after batch response)
             Leg leg = new Leg();
@@ -132,8 +135,8 @@ public class ShipmentService {
             // Prepare batch request data
             locationPairs.add(new LocationPair(
                 (long) i,  // Temporary leg ID (index in the list)
-                mapToLocationDTO(origin),
-                mapToLocationDTO(destination)
+                locationMapper.toDto(origin),
+                locationMapper.toDto(destination)
             ));
         }
 
@@ -163,15 +166,18 @@ public class ShipmentService {
             .mapToInt(Leg::getDurationMinutes)
             .sum();
 
-        route.setLegs(legs);
+        // dont use orm, is desactived, only save manual by service
+        route.setLegs(legs);    
         route.setEstimatedDistanceKm(totalDistance);
         route.setEstimatedDurationMinutes(totalDuration);
 
         // ================================================================
-        // STEP 8: Save Route
+        // STEP 8: Save Route n Legs
         // ================================================================
         Route savedRoute = routeRepository.save(route);
         log.info("Route created with id: {}", savedRoute.getId());
+
+        legService.saveAllLegs(legs, savedRoute);
 
         // ================================================================
         // STEP 9: Update packages to IN_TRANSIT
@@ -227,6 +233,7 @@ public class ShipmentService {
         double totalWeight = packages.stream()
             .mapToDouble(p -> p.totalWeightKg() != null ? p.totalWeightKg() : 0.0)
             .sum();
+
         double totalVolume = packages.stream()
             .mapToDouble(p -> p.totalVolumeCbm() != null ? p.totalVolumeCbm() : 0.0)
             .sum();
@@ -248,48 +255,6 @@ public class ShipmentService {
                 400
             );
         }
-    }
-
-    // ================================================================
-    // PRIVATE MAPPING METHODS
-    // ================================================================
-
-    /**
-     * Maps a LocationRequestDTO to a Location entity.
-     * 
-     * @param dto The DTO containing location data
-     * @return Location entity with all fields set
-     */
-    private Location mapToLocation(LocationRequestDTO dto) {
-        Location location = new Location();
-        location.setLatitude(dto.latitude());
-        location.setLongitude(dto.longitude());
-        location.setStreet(dto.street());
-        location.setStreetNumber(dto.streetNumber());
-        location.setCity(dto.city());
-        location.setState(dto.state());
-        location.setCountry(dto.country());
-        location.setPostalCode(dto.postalCode());
-        return location;
-    }
-
-    /**
-     * Maps a Location entity to a LocationRequestDTO.
-     * 
-     * @param location The entity to map
-     * @return LocationRequestDTO with all fields set
-     */
-    private LocationRequestDTO mapToLocationDTO(Location location) {
-        return new LocationRequestDTO(
-            location.getStreet(),
-            location.getStreetNumber(),
-            location.getCity(),
-            location.getState(),
-            location.getCountry(),
-            location.getPostalCode(),
-            location.getLatitude(),
-            location.getLongitude()
-        );
     }
 
     // ================================================================

@@ -1,4 +1,4 @@
-package com.routes.dto.external;
+package com.routes.dto.client.packages;
 
 import java.util.List;
 

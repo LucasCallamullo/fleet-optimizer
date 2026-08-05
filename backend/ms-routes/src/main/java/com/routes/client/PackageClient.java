@@ -1,8 +1,8 @@
 package com.routes.client;
 
 import com.routes.config.FeignConfig;
-import com.routes.dto.external.PackageDTO;
-import com.routes.dto.external.PackageStatusUpdateRequest;
+import com.routes.dto.client.packages.PackageDTO;
+import com.routes.dto.client.packages.PackageStatusUpdateRequest;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
