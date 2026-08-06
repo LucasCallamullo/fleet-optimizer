@@ -11,7 +11,6 @@ import com.routes.model.enums.RouteStatus;
 import com.routes.repository.RouteRepository;
 import com.routes.service.LegService;
 import com.routes.service.RouteService;
-import com.routes.service.RouteValidationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,39 +29,33 @@ public class RouteServiceImpl implements RouteService {
     private final RouteRepository routeRepository;
     private final RouteMapper routeMapper;
     private final LegService legService;
-    private final RouteValidationService validationService;
 
-    // ================================================================
-    // CREATE
-    // ================================================================
-
+    // Create 
     @Override
     @Transactional
-    public RouteDetailDTO createRoute(RouteRequestDTO request) {
-        log.info("Creating new route: {}", request.name());
+    public Route save(Route route) {
+        log.debug("Saving route: name={}, status={}", route.getName(), route.getStatus());
 
-        // Step 1: Validate request
-        this.validateRouteRequest(request);
+        // Step 1: Validate required fields
+        if (route.getName() == null || route.getName().isBlank()) {
+            throw new AppException("Route name is required", 400);
+        }
 
-        // Step 2: Validate vehicles and packages (external MS)
-        validationService.validateLegs(request.legs());
+        if (route.getStatus() == null) {
+            throw new AppException("Route status is required", 400);
+        }
 
-        // Step 3: Map DTO to Entity
-        Route route = routeMapper.toEntity(request);
-        route.setStatus(RouteStatus.PLANNED);
+        // Step 2: Validate status is PLANNED for new routes
+        if (route.getId() == null && route.getStatus() != RouteStatus.PLANNED) {
+            log.warn("New route created with status: {}, defaulting to PLANNED", route.getStatus());
+            route.setStatus(RouteStatus.PLANNED);
+        }
 
-        // Step 4: Save Route (generates ID)
-        Route savedRoute = routeRepository.save(route);
-        log.debug("Route saved with id: {}", savedRoute.getId());
+        // Step 3: Save and return
+        Route saved = routeRepository.save(route);
+        log.info("Route saved with id: {}, status: {}", saved.getId(), saved.getStatus());
 
-        // Step 5: Process legs (create, calculate, save, associate)
-        List<Leg> savedLegs = processLegs(request.legs(), savedRoute);
-
-        // Step 6: Update route with legs
-        savedRoute.getLegs().addAll(savedLegs);
-
-        log.info("Route created successfully with id: {}", savedRoute.getId());
-        return routeMapper.toDetailDto(savedRoute);
+        return saved;
     }
 
     // ================================================================

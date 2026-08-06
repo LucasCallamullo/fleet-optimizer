@@ -11,7 +11,6 @@ import com.routes.model.entity.Route;
 import com.routes.model.enums.RouteStatus;
 import com.routes.repository.RouteRepository;
 import com.routes.service.LegService;
-import com.routes.service.RouteValidationService;
 import com.routes.service.impl.RouteServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,8 +25,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,9 +39,6 @@ class RouteServiceImplTest {
 
     @Mock
     private LegService legService;
-
-    @Mock
-    private RouteValidationService validationService;
 
     @InjectMocks
     private RouteServiceImpl routeService;
@@ -116,64 +110,6 @@ class RouteServiceImplTest {
             1L, "Test Route", "Test description", RouteStatus.PLANNED,
             700.0, 480, null, null, List.of()
         );
-    }
-
-    // ================================================================
-    // TEST: CREATE ROUTE - Success
-    // ================================================================
-
-    @Test
-    @DisplayName("Should create route successfully with legs")
-    void shouldCreateRoute() {
-        // STEP 1: Arrange - Setup mocks
-        when(routeMapper.toEntity(request)).thenReturn(route);
-        when(routeRepository.save(route)).thenReturn(savedRoute);
-        when(legService.createLegsInMemory(request.legs())).thenReturn(legs);
-
-        // old 
-        // when(geocodingService.calculateLegDistances(legs)).thenReturn(calculatedLegs);
-        when(legService.saveAllLegs(calculatedLegs, savedRoute)).thenReturn(savedLegs);
-        when(routeMapper.toDetailDto(savedRoute)).thenReturn(response);
-
-        // STEP 2: Act
-        RouteDetailDTO result = routeService.createRoute(request);
-
-        // STEP 3: Assert
-        assertThat(result).isNotNull();
-        assertThat(result.id()).isEqualTo(1L);
-
-        // STEP 4: Verify
-        verify(validationService).validateLegs(request.legs());
-        verify(routeRepository).save(route);
-        verify(legService).createLegsInMemory(request.legs());
-
-        // old
-        // verify(geocodingService).calculateLegDistances(legs);
-        verify(legService).saveAllLegs(calculatedLegs, savedRoute);
-        verify(routeMapper).toDetailDto(savedRoute);
-    }
-
-    // ================================================================
-    // TEST: CREATE ROUTE - No legs
-    // ================================================================
-
-    @Test
-    @DisplayName("Should throw exception when route has no legs")
-    void shouldThrowExceptionWhenNoLegs() {
-        // STEP 1: Arrange
-        RouteRequestDTO invalidRequest = new RouteRequestDTO(
-            "Test Route", "Description", List.of()
-        );
-
-        // STEP 2: Act & Assert
-        assertThatThrownBy(() -> routeService.createRoute(invalidRequest))
-            .isInstanceOf(AppException.class)
-            .hasMessageContaining("Route must have at least one leg")
-            .hasFieldOrPropertyWithValue("statusCode", 400);
-
-        // STEP 3: Verify
-        verify(routeRepository, never()).save(any(Route.class));
-        verify(legService, never()).createLegsInMemory(anyList());
     }
 
     // ================================================================
