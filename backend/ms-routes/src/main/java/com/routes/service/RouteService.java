@@ -2,6 +2,7 @@ package com.routes.service;
 
 import com.routes.dto.request.RouteRequestDTO;
 import com.routes.dto.response.RouteDetailDTO;
+import com.routes.exception.AppException;
 import com.routes.model.entity.Route;
 
 /**
@@ -11,21 +12,35 @@ import com.routes.model.entity.Route;
 public interface RouteService {
     
     /**
-     * Creates a new route with its associated legs.
+     * Saves a Route entity to the database.
      * 
-     * Business logic:
-     * 1. Validates that the route has at least one leg
-     * 2. Saves the route entity
-     * 3. Creates and associates all legs to the route
-     * 4. Calculates total distance and duration from legs
-     * 5. Returns the complete route with all legs
-     *
-     * @param request The route creation request containing route data and legs
-     * @return The created route with all details and associated legs
-     * @throws com.routes.exception.AppException if route has no legs
+     * This method is used internally by other services (e.g., ShipmentService)
+     * to persist route data. It provides a single point of control for
+     * route persistence, allowing for:
+     * - Pre-save validation
+     * - Audit trail (createdAt, updatedAt)
+     * - Business rule enforcement
+     * 
+     * When to use this method:
+     * - Creating a new Route through ShipmentService
+     * - Persisting route data after business logic validation
+     * - Internal operations that require direct route persistence
+     * 
+     * Business Rules:
+     * - The route must have a non-null name and status
+     * - Legs associated with the route will be saved separately
+     * - Status must be PLANNED when creating a new route
+     * - CreatedAt and UpdatedAt timestamps are auto-managed by Hibernate
+     * 
+     * Note: This method does NOT cascade-save legs. Legs must be saved
+     * separately via LegService to maintain explicit control.
+     * 
+     * @param route The Route entity to persist
+     * @return The persisted Route entity with generated ID and timestamps
+     * @throws AppException if route data is invalid (e.g., missing required fields)
      */
-    RouteDetailDTO createRoute(RouteRequestDTO request);
-    
+    Route save(Route route);
+
     /**
      * Retrieves a route by its ID with all associated legs.
      *

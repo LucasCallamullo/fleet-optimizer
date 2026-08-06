@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,6 @@ import com.routes.model.entity.Location;
 import com.routes.model.entity.Route;
 import com.routes.model.enums.LegStatus;
 import com.routes.model.enums.RouteStatus;
-import com.routes.repository.RouteRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ShipmentService {
 
-    private final RouteRepository routeRepository;
+    private final RouteService routeService;
     private final LocationMapper locationMapper;
     private final LegService legService;
 
@@ -166,18 +168,19 @@ public class ShipmentService {
             .mapToInt(Leg::getDurationMinutes)
             .sum();
 
-        // dont use orm, is desactived, only save manual by service
-        route.setLegs(legs);    
+        // set totals calculated step 7
         route.setEstimatedDistanceKm(totalDistance);
         route.setEstimatedDurationMinutes(totalDuration);
 
         // ================================================================
         // STEP 8: Save Route n Legs
         // ================================================================
-        Route savedRoute = routeRepository.save(route);
+        Route savedRoute = routeService.save(route);
         log.info("Route created with id: {}", savedRoute.getId());
 
-        legService.saveAllLegs(legs, savedRoute);
+        // dont use orm, is desactived, only save manual by service
+        List<Leg> savedLegs = legService.saveAllLegs(legs, savedRoute);
+        savedRoute.setLegs(savedLegs);    
 
         // ================================================================
         // STEP 9: Update packages to IN_TRANSIT
@@ -229,16 +232,24 @@ public class ShipmentService {
      * @throws AppException if weight or volume exceeds vehicle capacity
      */
     private void validateVehicleCapacity(FleetVehicleDTO vehicle, List<PackageDTO> packages) {
-        // Calculate total weight and volume
+        // Step 1: Validate vehicle has capacity defined
+        if (vehicle.maxWeightKg() == null && vehicle.maxVolumeCbm() == null) {
+            log.warn("Vehicle {} has no capacity defined", vehicle.id());
+            // Opción A: Lanzar error (si la capacidad es obligatoria)
+            // throw new AppException("Vehicle has no capacity defined", 400);
+            // Opción B: Continuar (si la capacidad es opcional)
+            // return;
+        }
+
+        // Step 2: Calculate totals (null → 0.0)
         double totalWeight = packages.stream()
             .mapToDouble(p -> p.totalWeightKg() != null ? p.totalWeightKg() : 0.0)
             .sum();
-
         double totalVolume = packages.stream()
             .mapToDouble(p -> p.totalVolumeCbm() != null ? p.totalVolumeCbm() : 0.0)
             .sum();
 
-        // Validate weight capacity
+        // Step 3: Validate weight
         if (vehicle.maxWeightKg() != null && totalWeight > vehicle.maxWeightKg()) {
             throw new AppException(
                 String.format("Total weight (%.2f kg) exceeds vehicle capacity (%.2f kg)", 
@@ -247,7 +258,7 @@ public class ShipmentService {
             );
         }
 
-        // Validate volume capacity
+        // Step 4: Validate volume
         if (vehicle.maxVolumeCbm() != null && totalVolume > vehicle.maxVolumeCbm()) {
             throw new AppException(
                 String.format("Total volume (%.2f m³) exceeds vehicle capacity (%.2f m³)", 
@@ -280,13 +291,26 @@ public class ShipmentService {
     private ShipmentResponseDTO buildShipmentResponse(
         Route route, FleetVehicleDTO vehicle, List<PackageDTO> packages
     ) {
-        // Step 1: Build LegDetailDTOs for each leg
+        // Step 1: Build a map of packageId → PackageDTO for fast lookup
+        Map<Long, PackageDTO> packageMap = packages.stream()
+            .collect(Collectors.toMap(
+                PackageDTO::id,  // Key: package ID
+                Function.identity()  // Value: PackageDTO
+            ));
+
+        // Step 2: Build LegDetailDTOs for each leg
         List<ShipmentLegDTO> legDetails = new ArrayList<>();
         
-        for (int i = 0; i < route.getLegs().size() && i < packages.size(); i++) {
-
-            Leg leg = route.getLegs().get(i);
-            PackageDTO pkg = packages.get(i);
+        for (Leg leg : route.getLegs()) {
+            // Step 3: Find the package for this leg using the map
+            PackageDTO pkg = packageMap.get(leg.getPackageId());
+            
+            // If package not found, skip or log warning
+            if (pkg == null) {
+                log.warn("Package not found for leg {} with packageId: {}", 
+                    leg.getId(), leg.getPackageId());
+                continue;
+            }
 
             // Calculate estimated arrival for this leg
             LocalDateTime estimatedArrival = route.getCreatedAt()
@@ -309,17 +333,17 @@ public class ShipmentService {
             legDetails.add(legDetail);
         }
 
-        // Step 2: Calculate overall estimated arrival (based on total duration)
+        // Step 4: Calculate overall estimated arrival (based on total duration)
         LocalDateTime estimatedArrivalTotal = route.getCreatedAt()
             .plusMinutes(route.getEstimatedDurationMinutes() != null 
                 ? route.getEstimatedDurationMinutes() : 0);
 
-        // Step 3: Build and return the response
+        // Step 5: Build and return the response
         return new ShipmentResponseDTO(
             route.getId(),                           // Route ID
             route.getName(),                         // Route name
             route.getStatus(),                       // Route status (PLANNED, IN_PROGRESS, etc.)
-            vehicle.id(),                     // Vehicle ID used
+            vehicle.id(),                            // Vehicle ID used
             route.getEstimatedDistanceKm(),          // Total distance in km
             route.getEstimatedDurationMinutes(),     // Total duration in minutes
             legDetails,                              // List of leg details

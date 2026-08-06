@@ -30,29 +30,6 @@ public class RouteController {
     private final RouteService routeService;
 
     /**
-     * Creates a new route with its associated legs.
-     * 
-     * Endpoint: POST /api/v1/routes
-     * 
-     * Request body: RouteRequestDTO containing route name, description,
-     * and a list of LegRequestDTO with origin/destination locations.
-     * 
-     * Business logic:
-     * 1. Validates the request using @Valid annotation
-     * 2. Delegates to RouteService for creation
-     * 3. Returns the complete route with all legs and calculated totals
-     * 
-     * @param request The validated route creation request
-     * @return The created route with full details (HTTP 201 Created)
-     */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public RouteDetailDTO createRoute(@Valid @RequestBody RouteRequestDTO request) {
-        log.info("POST /api/v1/routes - Creating route with {} legs", request.legs().size());
-        return routeService.createRoute(request);
-    }
-
-    /**
      * Retrieves a route by its ID.
      * 
      * Endpoint: GET /api/v1/routes/{id}
