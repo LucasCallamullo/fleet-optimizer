@@ -74,11 +74,6 @@ public class PackageController {
         
         log.info("POST /api/v1/packages - Creating package with tracking: {}", request.trackingNumber());
         
-        // If ownerId not provided, use default or throw
-        if (ownerId == null || ownerId.isEmpty()) {
-            throw new RuntimeException("User not authenticated");
-        }
-        
         return packageService.createPackage(request, ownerId);
     }
 
