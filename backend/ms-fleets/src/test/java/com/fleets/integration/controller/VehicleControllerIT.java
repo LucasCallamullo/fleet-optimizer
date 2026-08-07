@@ -131,8 +131,8 @@ class VehicleControllerIT {
     void shouldReturn401WhenNotAuthenticated() throws Exception {
         // SIN @WithMockUser - debería fallar con 401
         mockMvc.perform(get("/api/v1/vehicles")
-                .contentType(MediaType.APPLICATION_JSON));
-                // .andExpect(status().isUnauthorized()); - 403
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 
     // ================================================================
@@ -223,6 +223,7 @@ class VehicleControllerIT {
     @DisplayName("POST /api/v1/vehicles - Should create vehicle with category as ADMIN")
     @WithMockUser(roles = "ADMIN")  // ← Simula ADMIN (requerido para crear)
     void shouldCreateVehicle() throws Exception {
+
         VehicleRequestDTO request = new VehicleRequestDTO();
         request.setLicensePlate("FCD333");
         request.setYear(2024);
@@ -232,12 +233,12 @@ class VehicleControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 
-                // .andExpect(status().isCreated()) - 404
+                .andExpect(status().isCreated())    // 404 ?
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.licensePlate").value("FCD333"))
                 .andExpect(jsonPath("$.year").value(2024))
                 .andExpect(jsonPath("$.category.id").value(sedanCategory.getId()))
-                .andExpect(jsonPath("$.category.name").value("Sedan"));
+                .andExpect(jsonPath("$.category.name").value("Sedan")); 
     }
 
     // ================================================================
@@ -276,7 +277,7 @@ class VehicleControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 
-                // .andExpect(status().isCreated()) - 404
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.licensePlate").value("FCD333"))
                 .andExpect(jsonPath("$.year").value(2024))

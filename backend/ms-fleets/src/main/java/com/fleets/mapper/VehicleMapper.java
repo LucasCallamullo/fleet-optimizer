@@ -61,6 +61,7 @@ public interface VehicleMapper {
     @Mapping(target = "category", ignore = true)  // setting on service
     @Mapping(target = "createdAt", ignore = true) // ← @CreationTimestamp
     @Mapping(target = "updatedAt", ignore = true) // ← @UpdateTimestamp
+    @Mapping(target = "status", ignore = true)    // use default value on entity
     Vehicle toEntity(VehicleRequestDTO dto);
     
     /**

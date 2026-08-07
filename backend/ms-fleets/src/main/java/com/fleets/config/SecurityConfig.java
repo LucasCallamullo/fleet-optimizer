@@ -48,6 +48,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity // Enables @PreAuthorize for method-level security in imperative controllers
 public class SecurityConfig {
 
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
+    public SecurityConfig(CustomAuthenticationEntryPoint authenticationEntryPoint) {
+        this.authenticationEntryPoint = authenticationEntryPoint;
+    }
+
     /**
      * Configures the security filter chain for this microservice.
      * 
@@ -85,6 +91,11 @@ public class SecurityConfig {
                 // The Authentication must be present in the Security Context
                 // This is provided by GatewayHeaderAuthenticationFilter
                 .anyRequest().authenticated()
+            )
+
+            // step 3.5: handler 401 errors 
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(authenticationEntryPoint)  
             )
             
             // Step 4: Register custom header authentication filter
