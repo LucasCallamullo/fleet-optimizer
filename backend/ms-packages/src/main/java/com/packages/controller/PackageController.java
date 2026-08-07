@@ -1,8 +1,12 @@
 package com.packages.controller;
 
+import com.packages.dto.external.PackageDTO;
 import com.packages.dto.request.PackageRequestDTO;
+import com.packages.dto.request.PackageStatusUpdateRequest;
 import com.packages.dto.response.PackageDetailDTO;
 import com.packages.dto.response.PackageResponseDTO;
+import com.packages.exception.AppException;
+import com.packages.service.PackageExternalService;
 import com.packages.service.PackageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,33 @@ import java.util.List;
 public class PackageController {
 
     private final PackageService packageService;
+
+    private final PackageExternalService packageExternalService;
+
+
+    /**
+     * Updates the status of one or more packages.
+     * 
+     * Endpoint: PATCH /api/v1/packages/status
+     * 
+     * Request body:
+     * {
+     *   "packageIds": [1, 2, 3],
+     *   "status": "IN_TRANSIT"
+     * }
+     * 
+     * @param request The status update request
+     * @throws AppException if any package not found
+     * @throws AppException if status is invalid
+     * @throws AppException if packages are not in valid state
+     */
+    @PatchMapping("/status")
+    @PreAuthorize("isAuthenticated()")
+    public void updatePackageStatus(@Valid @RequestBody PackageStatusUpdateRequest request) {
+        log.info("PATCH /api/v1/packages/status - Updating {} packages to '{}'", 
+            request.packageIds().size(), request.status());
+        packageService.updatePackageStatus(request.packageIds(), request.status());
+    }
 
     // ================================================================
     // CREATE
@@ -153,5 +184,28 @@ public class PackageController {
     public void deletePackage(@PathVariable Long id) {
         log.info("DELETE /api/v1/packages/{} - Deleting package", id);
         packageService.deletePackage(id);
+    }
+
+
+    // ================================================================
+    // INTER-SERVICE COMMUNICATION (para ms-routes)
+    // ================================================================
+
+    /**
+     * Fetches package details by their IDs.
+     * Used exclusively by ms-routes for shipment creation.
+     * 
+     * Endpoint: GET /api/v1/packages?ids=1,2,3
+     * 
+     * This endpoint is called by ms-routes to get package details
+     * (weight, volume, origin location) for route planning.
+     * 
+     * @param ids List of package IDs (comma-separated)
+     * @return List of PackageDTO with package details
+     */
+    @GetMapping(params = "ids")  // ← Only responds if there is an "ids" parameter
+    public List<PackageDTO> getPackagesByIds(@RequestParam("ids") List<Long> ids) {
+        log.info("GET /api/v1/packages?ids={} - Fetching packages for ms-routes", ids);
+        return packageExternalService.getPackagesDto(ids);
     }
 }

@@ -2,7 +2,12 @@ package com.packages.dto.external;
 
 /**
  * Location DTO for inter-service communication.
- * Contains address and coordinates needed for route calculation.
+ * 
+ * This DTO is used exclusively for communication between microservices.
+ * It is separate from LocationRequestDTO (API) to avoid coupling.
+ * 
+ * Contains only the fields needed for geocoding and route calculation.
+ * No validation annotations (validation is handled by the receiving service).
  */
 public record LocationDTO(
     String street,
@@ -13,4 +18,13 @@ public record LocationDTO(
     String postalCode,
     Double latitude,
     Double longitude
-) {}
+) {
+    /**
+     * Creates a LocationDTO with default country "Argentina" if not provided.
+     */
+    public LocationDTO {
+        if (country == null || country.isBlank()) {
+            country = "Argentina";
+        }
+    }
+}

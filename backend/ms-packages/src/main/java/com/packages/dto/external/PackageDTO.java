@@ -14,5 +14,5 @@ public record PackageDTO(
     Long id,
     Double totalWeightKg,
     Double totalVolumeCbm,
-    LocationDTO origin  // ← Ubicación de la tienda (origen del paquete)
+    LocationDTO origin  // ← Store location (package origin)
 ) {}
