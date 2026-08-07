@@ -1,5 +1,8 @@
 package com.packages.model.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Represents the status of a package throughout its lifecycle.
  * 
@@ -44,5 +47,14 @@ public enum PackageStatus {
     /**
      * Package has been cancelled and will not be delivered.
      */
-    CANCELLED
+    CANCELLED;
+
+    /**
+     * Helper method to get all enum names (for error messages)
+     */
+    public static List<String> getAllNames() {
+        return Arrays.stream(values())
+            .map(Enum::name)
+            .toList();
+    }
 }

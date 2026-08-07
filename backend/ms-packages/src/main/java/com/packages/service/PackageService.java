@@ -22,6 +22,32 @@ import java.util.List;
  */
 public interface PackageService {
 
+
+    // ================================================================
+    // STATUS MANAGEMENT (specific business operation)
+    // ================================================================
+
+    /**
+     * Updates the status of multiple packages.
+     * 
+     * This is a specific business operation used by ms-routes when
+     * a shipment is created. It transitions packages from READY_FOR_PICKUP
+     * to IN_TRANSIT.
+     * 
+     * Business Rules:
+     * - All packages must exist (throws 404 if any not found)
+     * - Status must be a valid PackageStatus value
+     * - Only packages with status READY_FOR_PICKUP can be changed to IN_TRANSIT
+     * 
+     * @param packageIds List of package IDs to update
+     * @param status The new status (as String, e.g., "IN_TRANSIT")
+     * @throws AppException if any package not found (404)
+     * @throws AppException if status is invalid (400)
+     * @throws AppException if packages are not in valid state for transition (400)
+     */
+    void updatePackageStatus(List<Long> packageIds, String status);
+
+
     // ================================================================
     // CREATE
     // ================================================================
@@ -52,7 +78,7 @@ public interface PackageService {
     /**
      * Retrieves all packages with basic information (no store details).
      * 
-     * <p>This method does NOT load the store relationship (LAZY loading).
+     * This method does NOT load the store relationship (LAZY loading).
      * Use {@link #getAllPackagesWithStore()} for full store details.
      * 
      * @return List of PackageResponseDTO containing id, trackingNumber,
@@ -63,7 +89,7 @@ public interface PackageService {
     /**
      * Retrieves all packages with full store details.
      * 
-     * <p>This method uses JOIN FETCH to load the store relationship
+     * This method uses JOIN FETCH to load the store relationship
      * eagerly, avoiding LazyInitializationException. The response
      * includes the complete store information including location.
      * 
@@ -83,7 +109,7 @@ public interface PackageService {
     /**
      * Retrieves a package by ID with full store details.
      * 
-     * <p>This method uses JOIN FETCH to load the store relationship
+     * This method uses JOIN FETCH to load the store relationship
      * eagerly, avoiding LazyInitializationException. The response
      * includes the complete store information including location.
      * 
@@ -100,7 +126,7 @@ public interface PackageService {
     /**
      * Updates an existing package with new data.
      * 
-     * <p><strong>Business Rules:</strong>
+     * Business Rules:
      * <ul>
      *   <li>Package must exist (throws 404 if not found)</li>
      *   <li>Tracking number must be unique (throws 409 if conflict)</li>

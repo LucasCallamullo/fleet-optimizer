@@ -147,4 +147,120 @@ public class PackageServiceImpl implements PackageService {
         packageRepository.delete(pkg);
         log.info("Package deleted with id: {}", id);
     }
+
+    // ================================================================
+    // STATUS MANAGEMENT
+    // ================================================================
+
+    @Override
+    @Transactional
+    public void updatePackageStatus(List<Long> packageIds, String status) {
+        log.info("Updating {} packages to status: {}", packageIds.size(), status);
+
+        // STEP 1: Validate status
+        PackageStatus newStatus = validateAndParseStatus(status);
+
+        // STEP 2: Validate packages exist
+        List<Package> packages = validatePackagesExist(packageIds);
+
+        // STEP 3: Validate business rules
+        validateStatusTransition(packages, newStatus);
+
+        // STEP 4: Update
+        for (Package pkg : packages) {
+            pkg.setStatus(newStatus);
+        }
+        packageRepository.saveAll(packages);
+        log.info("Updated {} packages to status: {}", packages.size(), newStatus);
+    }
+
+    // ================================================================
+    // PRIVATE VALIDATION METHODS
+    // ================================================================
+
+    /**
+     * Validates and parses the status string to PackageStatus enum.
+     * 
+     * @param status The status string from the request
+     * @return PackageStatus enum value
+     * @throws AppException if status is invalid
+     */
+    private PackageStatus validateAndParseStatus(String status) {
+        try {
+            return PackageStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new AppException(
+                "Invalid status: " + status + ". Valid values: " +
+                    String.join(", ", PackageStatus.getAllNames()),
+                400
+            );
+        }
+    }
+
+    /**
+     * Validates that all packages exist.
+     * 
+     * @param packageIds List of package IDs
+     * @return List of found packages
+     * @throws AppException if any package not found
+     */
+    private List<Package> validatePackagesExist(List<Long> packageIds) {
+        List<Package> packages = packageRepository.findAllById(packageIds);
+        
+        if (packages.size() != packageIds.size()) {
+            List<Long> foundIds = packages.stream().map(Package::getId).toList();
+            List<Long> missingIds = packageIds.stream()
+                .filter(id -> !foundIds.contains(id))
+                .toList();
+            throw new AppException("Packages not found: " + missingIds, 404);
+        }
+        return packages;
+    }
+
+    /**
+     * Validates business rules for status transitions.
+     * 
+     * Business Rules:
+     * - Only READY_FOR_PICKUP packages can transition to IN_TRANSIT
+     * - Only IN_TRANSIT packages can transition to DELIVERED
+     * - Only CREATED/PROCESSING packages can transition to CANCELLED
+     * 
+     * @param packages List of packages to validate
+     * @param newStatus The new status
+     * @throws AppException if validation fails
+     */
+    private void validateStatusTransition(List<Package> packages, PackageStatus newStatus) {
+        for (Package pkg : packages) {
+            PackageStatus current = pkg.getStatus();
+            
+            // Only READY_FOR_PICKUP → IN_TRANSIT
+            if (newStatus == PackageStatus.IN_TRANSIT && current != PackageStatus.READY_FOR_PICKUP) {
+                throw new AppException(
+                    String.format("Package %d has status '%s' but must be 'READY_FOR_PICKUP' to transition to IN_TRANSIT",
+                        pkg.getId(), current),
+                    400
+                );
+            }
+            
+            // Only IN_TRANSIT → DELIVERED
+            if (newStatus == PackageStatus.DELIVERED && current != PackageStatus.IN_TRANSIT) {
+                throw new AppException(
+                    String.format("Package %d has status '%s' but must be 'IN_TRANSIT' to transition to DELIVERED",
+                        pkg.getId(), current),
+                    400
+                );
+            }
+            
+            // Only CREATED or PROCESSING → CANCELLED
+            if (newStatus == PackageStatus.CANCELLED && 
+                current != PackageStatus.CREATED && 
+                current != PackageStatus.PROCESSING) {
+                throw new AppException(
+                    String.format("Package %d has status '%s' but must be 'CREATED' or 'PROCESSING' to transition to CANCELLED",
+                        pkg.getId(), current),
+                    400
+                );
+            }
+        }
+    }
 }

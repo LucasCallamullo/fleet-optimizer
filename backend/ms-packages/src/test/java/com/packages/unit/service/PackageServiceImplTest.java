@@ -28,6 +28,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -498,5 +499,178 @@ class PackageServiceImplTest {
         // Step 3: Verify
         verify(packageRepository).findById(packageId);
         verify(packageRepository, never()).delete(any(Package.class));
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - SUCCESS
+    // ================================================================
+
+    @Test
+    @DisplayName("Should update package status to IN_TRANSIT when READY_FOR_PICKUP")
+    void shouldUpdateStatusToInTransit() {
+        // Step 1: Arrange - Package with READY_FOR_PICKUP status
+        Package readyPackage = new Package();
+        readyPackage.setId(1L);
+        readyPackage.setTrackingNumber("PKG-001");
+        readyPackage.setStatus(PackageStatus.READY_FOR_PICKUP);
+
+        when(packageRepository.findAllById(List.of(1L)))
+            .thenReturn(List.of(readyPackage));
+
+        // Step 2: Act
+        packageService.updatePackageStatus(List.of(1L), "IN_TRANSIT");
+
+        // Step 3: Assert
+        assertThat(readyPackage.getStatus()).isEqualTo(PackageStatus.IN_TRANSIT);
+
+        // Step 4: Verify
+        verify(packageRepository).findAllById(List.of(1L));
+        verify(packageRepository).saveAll(List.of(readyPackage));
+    }
+
+    @Test
+    @DisplayName("Should update multiple packages to IN_TRANSIT")
+    void shouldUpdateMultiplePackagesStatus() {
+        // Step 1: Arrange - Two packages with READY_FOR_PICKUP
+        Package pkg1 = new Package();
+        pkg1.setId(1L);
+        pkg1.setTrackingNumber("PKG-001");
+        pkg1.setStatus(PackageStatus.READY_FOR_PICKUP);
+
+        Package pkg2 = new Package();
+        pkg2.setId(2L);
+        pkg2.setTrackingNumber("PKG-002");
+        pkg2.setStatus(PackageStatus.READY_FOR_PICKUP);
+
+        when(packageRepository.findAllById(List.of(1L, 2L)))
+            .thenReturn(List.of(pkg1, pkg2));
+
+        // Step 2: Act
+        packageService.updatePackageStatus(List.of(1L, 2L), "IN_TRANSIT");
+
+        // Step 3: Assert
+        assertThat(pkg1.getStatus()).isEqualTo(PackageStatus.IN_TRANSIT);
+        assertThat(pkg2.getStatus()).isEqualTo(PackageStatus.IN_TRANSIT);
+
+        // Step 4: Verify
+        verify(packageRepository).findAllById(List.of(1L, 2L));
+        verify(packageRepository).saveAll(List.of(pkg1, pkg2));
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID STATUS
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw exception when status is invalid")
+    void shouldThrowExceptionWhenStatusInvalid() {
+        // Step 1: Arrange - NO mock necesario porque el método nunca llega al repository
+
+        // Step 2: Act & Assert
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "INVALID_STATUS"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("Invalid status: INVALID_STATUS")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify - El repository NUNCA se llama
+        verify(packageRepository, never()).findAllById(any());
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - PACKAGE NOT FOUND
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw exception when package not found")
+    void shouldThrowExceptionWhenPackageNotFoundPack() {
+        // Step 1: Arrange
+        when(packageRepository.findAllById(List.of(999L)))
+            .thenReturn(List.of());  // Empty list means not found
+
+        // Step 2: Act & Assert
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(999L), "IN_TRANSIT"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("Packages not found: [999]")
+            .hasFieldOrPropertyWithValue("statusCode", 404);
+
+        // Step 3: Verify
+        verify(packageRepository).findAllById(List.of(999L));
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID TRANSITION
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw exception when package is not READY_FOR_PICKUP for IN_TRANSIT")
+    void shouldThrowExceptionWhenPackageNotReadyForPickup() {
+        // Step 1: Arrange - Package with CREATED status (not READY_FOR_PICKUP)
+        Package createdPackage = new Package();
+        createdPackage.setId(1L);
+        createdPackage.setTrackingNumber("PKG-001");
+        createdPackage.setStatus(PackageStatus.CREATED);
+
+        when(packageRepository.findAllById(List.of(1L)))
+            .thenReturn(List.of(createdPackage));
+
+        // Step 2: Act & Assert
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "IN_TRANSIT"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("must be 'READY_FOR_PICKUP' to transition to IN_TRANSIT")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify
+        verify(packageRepository).findAllById(List.of(1L));
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - MIXED PACKAGES (one invalid)
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw exception when one package is not READY_FOR_PICKUP")
+    void shouldThrowExceptionWhenOnePackageNotReady() {
+        // Step 1: Arrange - One READY_FOR_PICKUP, one CREATED
+        Package readyPackage = new Package();
+        readyPackage.setId(1L);
+        readyPackage.setStatus(PackageStatus.READY_FOR_PICKUP);
+
+        Package createdPackage = new Package();
+        createdPackage.setId(2L);
+        createdPackage.setStatus(PackageStatus.CREATED);
+
+        when(packageRepository.findAllById(List.of(1L, 2L)))
+            .thenReturn(List.of(readyPackage, createdPackage));
+
+        // Step 2: Act & Assert
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L, 2L), "IN_TRANSIT"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("must be 'READY_FOR_PICKUP'")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify
+        verify(packageRepository).findAllById(List.of(1L, 2L));
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - NULL STATUS
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw exception when status is null")
+    void shouldThrowExceptionWhenStatusIsNull() {
+        // Step 1: Act & Assert - validation fails before repository
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), null))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("Invalid status: null")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 2: Verify - Repository never called
+        verify(packageRepository, never()).findAllById(any());
+        verify(packageRepository, never()).saveAll(any());
     }
 }
