@@ -4,8 +4,12 @@ import com.auth.dto.response.UserInfoDTO;
 import com.auth.service.KeycloakService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -94,16 +98,20 @@ public class TestAuthController {
      * Protected endpoint - any authenticated user can access.
      * Requires valid JWT token (any role).
      * 
-     * @param userId User ID from Gateway header
-     * @param username Username from Gateway header
-     * @param email Email from Gateway header
+     * NOTE: Headers (X-User-Id, X-User-Email) are injected by the API Gateway 
+     * after validating and propagating the incoming JWT token.
+     * 
+     * @param exchange ServerWebExchange to retrieve HTTP request headers injected by Gateway
      * @return Authenticated user greeting
      */
     @GetMapping("/authenticated")
     @PreAuthorize("isAuthenticated()")
-    public Mono<Map<String, Object>> authenticatedEndpoint(
-            @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @RequestHeader(value = "X-User-Email", required = false) String email) {
+    public Mono<Map<String, Object>> authenticatedEndpoint(ServerWebExchange exchange) {
+        
+        HttpHeaders headers = exchange.getRequest().getHeaders();
+        
+        String userId = headers.getFirst("X-User-Id");
+        String email = headers.getFirst("X-User-Email");
         
         log.info("Authenticated endpoint accessed by user: {}", userId);
         
@@ -113,8 +121,8 @@ public class TestAuthController {
             "success", true,
             "message", String.format("Hello authenticated %s! You have access because you are logged in", displayName),
             "user", Map.of(
-                "id", userId,
-                "email", email
+                "id", userId != null ? userId : "N/A",
+                "email", email != null ? email : "N/A"
             )
         ));
     }
@@ -123,19 +131,21 @@ public class TestAuthController {
      * User/Admin endpoint - requires USER or ADMIN role.
      * Uses @PreAuthorize with hasAnyRole.
      * 
-     * @param userId User ID from Gateway header
-     * @param username Username from Gateway header
-     * @param roles User roles from Gateway header
+     * NOTE: Headers (X-User-Id, X-User-Email, X-User-Roles) are injected by the API Gateway 
+     * after validating and propagating the incoming JWT token.
+     * 
+     * @param exchange ServerWebExchange to retrieve HTTP request headers injected by Gateway
      * @return User role greeting
      */
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public Mono<Map<String, Object>> userEndpoint(
-            @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @RequestHeader(value = "X-User-Email", required = false) String username,
-            @RequestHeader(value = "X-User-Roles", required = false) String roles) {
+    public Mono<Map<String, Object>> userEndpoint(ServerWebExchange exchange) {
         
-        log.info("User endpoint accessed by user: {} with roles: {}", userId, roles);
+        HttpHeaders headers = exchange.getRequest().getHeaders();
+        
+        String userId = headers.getFirst("X-User-Id");
+        String username = headers.getFirst("X-User-Email");
+        String roles = headers.getFirst("X-User-Roles");
         
         String displayName = username != null ? username : (userId != null ? userId : "User");
         String roleList = roles != null ? roles : "none";
@@ -144,8 +154,8 @@ public class TestAuthController {
             "success", true,
             "message", String.format("Hello user %s! This endpoint is for users (and admins too)", displayName),
             "user", Map.of(
-                "id", userId,
-                "username", username,
+                "id", userId != null ? userId : "N/A",
+                "username", username != null ? username : "N/A",
                 "roles", roleList
             )
         ));
