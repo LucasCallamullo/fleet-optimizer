@@ -1,0 +1,25 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ms-geocoding
+
+# ================================================================
+# OSRM API CONFIGURATION
+# ================================================================
+app:
+  osrm:
+    # URL pública de OSRM (para desarrollo)
+    # Para producción, usa una instancia local o una API comercial
+    url: ${OSRM_URL:http://router.project-osrm.org}
+    # Timeout en segundos para las llamadas a OSRM
+    timeout: 10
+
+# ================================================================
+# LOGGING
+# ================================================================
+logging:
+  level:
+    com.geocoding: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
