@@ -35,6 +35,12 @@ public class PackageServiceImpl implements PackageService {
     @Override
     @Transactional
     public PackageDetailDTO createPackage(PackageRequestDTO request, String ownerId) {
+
+        // Step 1: Validate ownerId
+        if (ownerId == null || ownerId.isEmpty()) {
+            throw new AppException("User ID is required to create a package", 400);
+        }
+
         log.info("Creating package with tracking number: {}", request.trackingNumber());
 
         // Step 1: Validate tracking number is unique
@@ -55,9 +61,10 @@ public class PackageServiceImpl implements PackageService {
         // Step 4: Save
         Package saved = packageRepository.save(pkg);
         log.info("Package created with id: {}", saved.getId());
+        saved.setStore(store);
 
         // Step 5: Return detail with store loaded
-        return getPackageDetail(saved.getId());
+        return packageMapper.toDetailDto(pkg);
     }
 
     // ================================================================
