@@ -1,10 +1,24 @@
 server:
   port: 8080
 
+# ================================================================
+# KEYCLOAK CONFIGURATION
+# ================================================================
+# Used for JWT validation and authentication.
+# Values can be overridden by environment variables (Docker).
+# Default values are for local development with external Keycloak.
+# ================================================================
 app:
   keycloak:
+    # Keycloak server base URL
+    # External Keycloak provided by UTN for development
     uri: ${KEYCLOAK_URI:https://labsys.frc.utn.edu.ar/aim}
+    
+    # Keycloak realm containing users and roles
     realm: ${KEYCLOAK_REALM:dds-materia}
+    
+    # JWKS URI for JWT validation - fetches public keys automatically
+    # Constructed from uri and realm with fallback
     jwks-uri: ${KEYCLOAK_JWKS_URI:${app.keycloak.uri}/realms/${app.keycloak.realm}/protocol/openid-connect/certs}
 
 spring:
@@ -15,7 +29,11 @@ spring:
     gateway:
       routes:
         # ================================================================
-        # ROUTE: FLEETS SERVICE
+        # FLEETS SERVICE (ms-fleets)
+        # ================================================================
+        # Port: 8081 (local) / fleets-service:8081 (Docker)
+        # Routes: fleet management, vehicles, categories
+        # CircuitBreaker: fleetsService with fallback
         # ================================================================
         - id: fleets-service
           uri: ${FLEETS_SERVICE_URL:http://localhost:8081}
@@ -30,7 +48,11 @@ spring:
             - AddRequestHeader=X-Service-Name, fleets-service
 
         # ================================================================
-        # ROUTE: ROUTES SERVICE
+        # ROUTES SERVICE (ms-routes)
+        # ================================================================
+        # Port: 8082 (local) / routes-service:8082 (Docker)
+        # Routes: route and leg management, shipment orchestration
+        # CircuitBreaker: routesService with fallback
         # ================================================================
         - id: routes-service
           uri: ${ROUTES_SERVICE_URL:http://localhost:8082}
@@ -45,7 +67,11 @@ spring:
             - AddRequestHeader=X-Service-Name, routes-service
 
         # ================================================================
-        # AUTH: AUTH SERVICE
+        # AUTH SERVICE (ms-auth)
+        # ================================================================
+        # Port: 8083 (local) / auth-service:8083 (Docker)
+        # Routes: authentication, registration, token refresh
+        # CircuitBreaker: authService with fallback
         # ================================================================
         - id: auth-service
           uri: ${AUTH_SERVICE_URL:http://localhost:8083}
@@ -60,22 +86,61 @@ spring:
             - AddRequestHeader=X-Service-Name, auth-service
 
         # ================================================================
-        # ROUTE: PACKAGES SERVICE (futuro)
+        # PACKAGES SERVICE (ms-packages)
         # ================================================================
-        # - id: packages-service
-        #   uri: ${PACKAGES_SERVICE_URL:http://packages-service:8083}
-        #   predicates:
-        #     - Path=/api/v1/packages/**
-        #   filters:
-        #     - StripPrefix=0
+        # Port: 8084 (local) / packages-service:8084 (Docker)
+        # Routes: package and store management
+        # CircuitBreaker: packagesService with fallback
+        # ================================================================
+        - id: packages-service
+          uri: ${PACKAGES_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/v1/packages/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: packagesService
+                fallbackUri: forward:/fallback/packages
+            - StripPrefix=0
+            - AddRequestHeader=X-Service-Name, packages-service
 
-    # CIRCUIT BREAKER CONFIG
-    # Resilience4J
+        # ================================================================
+        # GEOCODING SERVICE (ms-geocoding)
+        # ================================================================
+        # Port: 8085 (local) / geocoding-service:8085 (Docker)
+        # Routes: distance calculation via OSRM
+        # CircuitBreaker: geocodingService with fallback
+        # ================================================================
+        - id: geocoding-service
+          uri: ${GEOCODING_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/distance/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: geocodingService
+                fallbackUri: forward:/fallback/geocoding
+            - StripPrefix=0
+            - AddRequestHeader=X-Service-Name, geocoding-service
+
+    # ================================================================
+    # CIRCUIT BREAKER (Resilience4J)
+    # ================================================================
+    # Protects system from cascading failures.
+    # Enabled globally for all routes using CircuitBreaker filter.
+    # ================================================================
     circuitbreaker:
       resilience4j:
         enabled: true
 
-# ACTUATOR (para monitoreo)
+# ================================================================
+# ACTUATOR (Monitoring)
+# ================================================================
+# Exposes endpoints for health checks and Gateway status.
+# - health: Application health
+# - info: Application information
+# - gateway: Route and filter information
+# ================================================================
 management:
   endpoints:
     web:
@@ -92,6 +157,9 @@ management:
 
 # ================================================================
 # LOGGING
+# ================================================================
+# DEBUG level for Gateway to see routing and request details.
+# Useful for debugging routing issues and CircuitBreaker events.
 # ================================================================
 logging:
   level:

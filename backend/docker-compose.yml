@@ -7,11 +7,22 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # Service URLs (routing)
       - APP_FLEETS_URL=${FLEETS_SERVICE_URL}
       - APP_ROUTES_URL=${ROUTES_SERVICE_URL}
+      - APP_AUTH_URL=${AUTH_SERVICE_URL}
+      - APP_PACKAGES_URL=${PACKAGES_SERVICE_URL}
+      - APP_GEOCODING_URL=${GEOCODING_SERVICE_URL}
+      # Keycloak Configuration
+      - KEYCLOAK_URI=${KEYCLOAK_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_JWKS_URI=${KEYCLOAK_JWKS_URI}
     depends_on:
       - fleets-service
       - routes-service
+      - auth-service
+      - packages-service
+      - geocoding-service
     networks:
       - backend-network
     restart: unless-stopped
@@ -40,8 +51,51 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
       - APP_CLIENTS_FLEETS_URL=${FLEETS_SERVICE_URL}
       - APP_CLIENTS_PACKAGES_URL=${PACKAGES_SERVICE_URL}
+      - APP_CLIENTS_GEOCODING_URL=${GEOCODING_SERVICE_URL}
     depends_on:
       - fleets-service
+      - packages-service
+      - geocoding-service
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  auth-service:
+    build: ./ms-auth
+    container_name: auth-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:authdb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
+      - KEYCLOAK_URI=${KEYCLOAK_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  packages-service:
+    build: ./ms-packages
+    container_name: packages-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:packagesdb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  geocoding-service:
+    build: ./ms-geocoding
+    container_name: geocoding-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - OSRM_URL=${OSRM_URL:-http://router.project-osrm.org}
     networks:
       - backend-network
     restart: unless-stopped

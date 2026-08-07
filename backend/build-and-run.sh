@@ -12,11 +12,11 @@ echo "Building all microservices..."
 echo "========================================================="
 
 # Step 1: Build each microservice
-for service in ms-fleets ms-routes gateway; do
+# List all services that need to be built
+for service in ms-fleets ms-routes ms-auth ms-packages ms-geocoding gateway; do
   if [ -d "$service" ]; then
     echo ""
     echo "[1/3] Building $service..."
-    # create a subshell to move directoyrs and return the same pwd after that
     (cd "$service" && mvn clean package -DskipTests)
     echo "[OK] $service built successfully"
   else
@@ -46,9 +46,12 @@ echo "All services started successfully!"
 echo "========================================================="
 echo ""
 echo "Services:"
-echo "  - Gateway: http://localhost:8080"
-echo "  - Fleets:  http://localhost:8081"
-echo "  - Routes:  http://localhost:8082"
+echo "  - Gateway:    http://localhost:8080"
+echo "  - Fleets:     http://localhost:8081"
+echo "  - Routes:     http://localhost:8082"
+echo "  - Auth:       http://localhost:8083"
+echo "  - Packages:   http://localhost:8084"
+echo "  - Geocoding:  http://localhost:8085"
 echo ""
 echo "Logs: docker-compose logs -f"
 echo "Stop: docker-compose down"
