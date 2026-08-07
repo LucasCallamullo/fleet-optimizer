@@ -1,0 +1,261 @@
+### ================================================================
+### SHIPMENT ENDPOINTS - ms-routes
+### BASE URL: http://localhost:8082 (ms-routes directo)
+### O via Gateway: http://localhost:8080
+### ================================================================
+
+@baseUrl = http://localhost:8082
+@gatewayUrl = http://localhost:8080
+@shipmentBaseUrl = {{baseUrl}}/api/v1/shipments
+
+### ================================================================
+### USERS FOR TESTING (Keycloak)
+### ================================================================
+### Regular User:
+###   Email: user_regular@gmail.com
+###   Password: pass1234
+###   Role: usuario
+###
+### Admin User:
+###   Email: admin_regular@gmail.com
+###   Password: pass1234
+###   Role: admin
+### ================================================================
+
+### ================================================================
+### 1. LOGIN - Get JWT Token (via Gateway)
+### ================================================================
+# @name loginUser
+POST {{gatewayUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### ================================================================
+### 2. SAVE TOKEN
+### ================================================================
+@accessToken = {{loginUser.response.body.accessToken}}
+@refreshToken = {{loginUser.response.body.refreshToken}}
+
+### ================================================================
+### 3. CREATE SHIPMENT - Via ms-routes directo
+### ================================================================
+# @name createShipment
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "packageIds": [1, 2],
+    "vehicleId": 1,
+    "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+    }
+}
+
+### ================================================================
+### 4. CREATE SHIPMENT - Multiple packages (3 packages)
+### ================================================================
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "packageIds": [1, 2, 3],
+    "vehicleId": 2,
+    "destination": {
+        "street": "Av. San Martin",
+        "streetNumber": "100",
+        "city": "Mendoza",
+        "state": "Mendoza",
+        "country": "Argentina",
+        "postalCode": "5500",
+        "latitude": -32.8908,
+        "longitude": -68.8272
+    }
+}
+
+### ================================================================
+### 5. CREATE SHIPMENT - Single package
+### ================================================================
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "packageIds": [1],
+    "vehicleId": 1,
+    "destination": {
+        "street": "Av. Libertador",
+        "streetNumber": "1000",
+        "city": "Buenos Aires",
+        "state": "CABA",
+        "country": "Argentina",
+        "postalCode": "1000",
+        "latitude": -34.6037,
+        "longitude": -58.3816
+    }
+}
+
+### ================================================================
+### 6. CREATE SHIPMENT - With invalid vehicle (should fail 404)
+### ================================================================
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "packageIds": [1, 2],
+    "vehicleId": 999,
+    "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+    }
+}
+
+### ================================================================
+### 7. CREATE SHIPMENT - With empty packages (should fail 400)
+### ================================================================
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "packageIds": [],
+    "vehicleId": 1,
+    "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+    }
+}
+
+### ================================================================
+### 8. CREATE SHIPMENT - Without authentication (should fail 401)
+### ================================================================
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+
+{
+    "packageIds": [1, 2],
+    "vehicleId": 1,
+    "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+    }
+}
+
+### ================================================================
+### 9. CREATE SHIPMENT - With invalid token (should fail 401)
+### ================================================================
+POST {{shipmentBaseUrl}}
+Content-Type: application/json
+Authorization: Bearer invalid.token.here
+
+{
+    "packageIds": [1, 2],
+    "vehicleId": 1,
+    "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+    }
+}
+
+### ================================================================
+### 10. CREATE SHIPMENT - Via Gateway (if ms-routes directo no funciona)
+### ================================================================
+POST {{gatewayUrl}}/api/v1/shipments
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "packageIds": [1, 2],
+    "vehicleId": 1,
+    "destination": {
+        "street": "Av. Colon",
+        "streetNumber": "500",
+        "city": "Cordoba",
+        "state": "Cordoba",
+        "country": "Argentina",
+        "postalCode": "5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888
+    }
+}
+
+### ================================================================
+### EXPECTED RESPONSES
+### ================================================================
+### 
+### SUCCESS (201 Created):
+### {
+###   "routeId": 1,
+###   "routeName": "Shipment-20260101-120000",
+###   "status": "PLANNED",
+###   "vehicleId": 1,
+###   "totalDistanceKm": 1400.0,
+###   "totalDurationMinutes": 960,
+###   "legs": [
+###     {
+###       "legId": 1,
+###       "sequence": 1,
+###       "status": "PENDING",
+###       "distanceKm": 700.0,
+###       "durationMinutes": 480,
+###       "packageId": 1,
+###       "weightKg": 10.0,
+###       "volumeCbm": 0.30,
+###       "estimatedArrival": "2026-01-01T00:00:00"
+###     }
+###   ],
+###   "estimatedArrival": "2026-01-01T00:00:00",
+###   "createdAt": "2026-01-01T00:00:00"
+### }
+###
+### ERROR (404 Not Found):
+### {
+###   "status": 404,
+###   "error": "Vehicle not found: 999",
+###   "path": "/api/v1/shipments"
+### }
+###
+### ERROR (400 Bad Request):
+### {
+###   "status": 400,
+###   "error": "At least one package is required",
+###   "path": "/api/v1/shipments"
+### }
+### ================================================================
