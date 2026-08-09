@@ -1,11 +1,11 @@
 # Fleet Optimizer 2025
 
-El objetivo general del proyecto es implementar una solución backend basada en microservicios para la gestión integral de un sistema de logística de transporte de paquetes. El sistema permite administrar una flota de vehículos, gestionar paquetes y planificar rutas de entrega de forma eficiente, optimizando costos y tiempos mediante el cálculo de distancias.
+The overall objective of the project is to implement a microservices-based backend solution for the comprehensive management of a package transport logistics system. The system enables the management of a vehicle fleet, package handling, and efficient delivery route planning, optimizing costs and times through distance calculation.
 
-[![Static Badge](https://img.shields.io/badge/Documentation-EN-blue)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README.md) [![Documentation ES](https://img.shields.io/badge/Documentation-ES-green)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README-ES.md)
+[![Static Badge](https://img.shields.io/badge/Documentation-EN-blue)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README.md) [![Documentation ES](https://img.shields.io/badge/Documentation-ES-green)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README-es.md) [![Contact](https://img.shields.io/badge/Contact-FF6C37?style=for-the-badge&logo=gmail&logoColor=white)](#contact)
 
 
-## Tecnologías Stack
+## Technology Stack
 
 ### Backend
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
@@ -17,18 +17,15 @@ El objetivo general del proyecto es implementar una solución backend basada en 
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-
-### Base de Datos & ORM
+### Database & ORM
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![H2](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white)
 ![JPA](https://img.shields.io/badge/JPA-Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
 
-
-### Seguridad
+### Security
 ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)
 ![Keycloak](https://img.shields.io/badge/Keycloak-0085CA?style=for-the-badge&logo=keycloak&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
-
 
 ### Tools & DevOps
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -36,149 +33,156 @@ El objetivo general del proyecto es implementar una solución backend basada en 
 ![Git Badge](https://img.shields.io/badge/git%20-%23F05033.svg?&style=for-the-badge&logo=git&logoColor=white) 
 ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 
-
 ### Testing
 ![JUnit](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
 ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white)
 ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
 
+
 <hr>
-<h2> 👥 Información de Contacto </h2>
-<a href="#contacto-section">Ir a Contacto ↓</a>
 
-<h2>Guía de Inicio Rápido</h2>
+<h2>Quick Start Guide</h2>
+<p>Follow these steps to set up the complete development environment.</p>
 
-<p>Sigue estos pasos para levantar el entorno de desarrollo completo.</p>
-
-<h3>Prerrequisitos</h3>
+<h3>Prerequisites</h3>
 <ul>
-  <li>Docker y Docker Compose instalados.</li>
-  <li>Git para clonar el repositorio.</li>
-  <li>(Opcional) Java 17 y Maven para ejecutar los servicios sin Docker.</li>
+  <li>Docker and Docker Compose installed.</li>
+  <li>Git to clone the repository.</li>
+  <li>(Optional) Java 17 and Maven to run services without Docker.</li>
 </ul>
 
-<h3>Paso a paso</h3>
+<h3>Step by Step</h3>
 
-<h4>1. Clonar el repositorio</h4>
+<h4>1. Clone the repository</h4>
 <pre><code>git clone https://github.com/LucasCallamullo/fleet-optimizer.git
 cd fleet-optimizer</code></pre>
 
-<h4>2. Configurar variables de entorno</h4>
-<p>El proyecto incluye un archivo de ejemplo. Crea tu propio archivo <code>.env</code> a partir de él y ajusta los valores si es necesario.</p>
+<h4>2. Configure environment variables</h4>
+<p>The project includes an example file. Create your own <code>.env</code> file from it and adjust the values if needed.</p>
 <pre><code>cp .env.example .env
-# No es necesario Editar el archivo .env creado, las claves de keycloack son válidas.</code></pre>
+# No need to edit the created .env file, the Keycloak keys are valid.</code></pre>
 
-<h4>3. Construir los JARs de los microservicios</h4>
-<p>Para que Docker pueda empaquetar los servicios, necesitas generar los archivos JAR. Puedes hacerlo con el script proporcionado o manualmente:</p>
+<h4>3. Build the microservices JARs</h4>
+<p>For Docker to package the services, you need to generate the JAR files. You can do this using the provided script or manually:</p>
 
-<p><strong>Opción A: Usar el script automático</strong></p>
+<p><strong>Option A: Use the automatic script</strong></p>
 <pre><code>./build-and-run.sh</code></pre>
 
-<p><strong>Opción B: Construir manualmente cada servicio</strong></p>
+<p><strong>Option B: Build each service manually</strong></p>
 <pre><code>mvn clean package -DskipTests -f ms-fleets/pom.xml
 mvn clean package -DskipTests -f ms-routes/pom.xml
 mvn clean package -DskipTests -f ms-auth/pom.xml
 mvn clean package -DskipTests -f gateway/pom.xml</code></pre>
 
-<h4>4. Levantar todos los servicios con Docker Compose</h4>
-<p>Este comando descarga las imágenes necesarias (PostgreSQL, OSRM) y construye las de tus microservicios.</p>
+<h4>4. Start all services with Docker Compose</h4>
+<p>This command downloads the necessary images (PostgreSQL, OSRM) and builds your microservices.</p>
 <pre><code>docker-compose up -d</code></pre>
 
-<h4>5. Verificar que todo esté funcionando</h4>
+<h4>5. Verify everything is working</h4>
 <ul>
   <li><strong>Gateway:</strong> <code>http://localhost:8080</code></li>
-  <li><strong>Swagger UI (ej. Routes):</strong> <code>http://localhost:8082/swagger-ui.html</code></li>
+  <li><strong>Swagger UI (e.g. Routes):</strong> <code>http://localhost:8082/swagger-ui.html</code></li>
 </ul>
 
-<h4>6. (Opcional) Detener los servicios</h4>
+<h4>6. (Optional) Stop the services</h4>
 <pre><code>docker-compose down</code></pre>
 
+
 <hr>
 
-<h2>🐳 Despliegue con Docker</h2>
-
-<p>Todos los servicios están dockerizados y pueden levantarse mediante Docker Compose, incluyendo:</p>
-
+<h2>🐳 Docker Deployment</h2>
+<p>All services are dockerized and can be started using Docker Compose, including:</p>
 <ul>
   <li><strong>API Gateway (Gateway)</strong></li>
-  <li><strong>Microservicio de Autenticación (ms-auth)</strong></li>
-  <li><strong>Microservicio de Flotas (ms-fleets)</strong></li>
-  <li><strong>Microservicio de Rutas (ms-routes)</strong></li>
-  <li><strong>Microservicio de Paquetes (ms-packages)</strong></li>
-  <li><strong>Microservicio de Geocodificación (ms-geocoding)</strong></li>
-  <li><strong>Bases de datos (H2/PostgreSQL)</strong> por microservicio.</li>
+  <li><strong>Authentication Microservice (ms-auth)</strong></li>
+  <li><strong>Fleet Microservice (ms-fleets)</strong></li>
+  <li><strong>Routes Microservice (ms-routes)</strong></li>
+  <li><strong>Packages Microservice (ms-packages)</strong></li>
+  <li><strong>Geocoding Microservice (ms-geocoding)</strong></li>
+  <li><strong>Frontend (React)</strong> - <em>(coming soon)</em></li>
+  <li><strong>Databases (H2/PostgreSQL)</strong> per microservice.</li>
 </ul>
+<p>This provides a unified, reproducible environment ready for testing or deployment.</p>
 
-<p>Esto permite un entorno unificado, reproducible y listo para pruebas o despliegue.</p>
 
 <hr>
 
-<h2>Arquitectura General</h2>
+<h2>General Architecture</h2>
 
-<p>El sistema sigue una arquitectura moderna compuesta por múltiples microservicios independientes, cada uno responsable de un dominio específico:</p>
+<p>The system follows a modern architecture composed of multiple independent microservices, each responsible for a specific domain:</p>
 
 <h3>🔹 API Gateway</h3>
-<p>Punto de entrada único para todas las aplicaciones frontend o clientes externos. Encargado del enrutamiento y la comunicación hacia cada microservicio, además de validar los tokens JWT emitidos por Keycloak y propagar el contexto de usuario.</p>
+<p>Single entry point for all frontend applications or external clients. Responsible for routing and communication to each microservice, as well as validating JWT tokens issued by Keycloak and propagating user context.</p>
 
-<h3>🔹 Servicio de Autenticación (ms-auth)</h3>
-<p>Centraliza la gestión de usuarios y la autenticación. Se integra con Keycloak (OAuth2/OpenID Connect) para la emisión y refresco de tokens JWT, y la gestión de roles y permisos.</p>
+<h3>🔹 Authentication Service (ms-auth)</h3>
+<p>Centralizes user management and authentication. Integrates with Keycloak (OAuth2/OpenID Connect) for JWT token issuance and refresh, and role/permission management.</p>
 
-<h3>🔹 Servicio de Flotas (ms-fleets)</h3>
-<p>Gestiona el catálogo de vehículos. Administra el CRUD de vehículos y sus categorías, incluyendo sus capacidades (peso y volumen máximo), costos operativos y estado de disponibilidad.</p>
+<h3>🔹 Fleet Service (ms-fleets)</h3>
+<p>Manages the vehicle catalog. Handles CRUD operations for vehicles and their categories, including capacities (maximum weight and volume), operational costs, and availability status.</p>
 
-<h3>🔹 Servicio de Paquetes (ms-packages)</h3>
-<p>Administra el ciclo de vida de los paquetes, desde su creación (con peso, volumen y origen) hasta su estado final (CREADO, EN PROCESO, LISTO PARA RETIRAR, EN TRÁNSITO, ENTREGADO, etc.). Cada paquete está asociado a una tienda de origen.</p>
+<h3>🔹 Packages Service (ms-packages)</h3>
+<p>Manages the package lifecycle from creation (with weight, volume, and origin) to final status (CREATED, PROCESSING, READY_FOR_PICKUP, IN_TRANSIT, DELIVERED, etc.). Each package is associated with a source store.</p>
 
-<h3>🔹 Servicio de Rutas (ms-routes)</h3>
-<p>Orquesta el proceso de creación de envíos. Coordina la validación de paquetes y vehículos con otros microservicios, calcula distancias y tiempos a través del MS de Geocoding, y persiste las rutas y sus tramos (legs) de forma atómica. Cada paquete en un envío se convierte en un tramo de la ruta.</p>
+<h3>🔹 Routes Service (ms-routes)</h3>
+<p>Orchestrates the shipment creation process. Coordinates package and vehicle validation with other microservices, calculates distances and times through the Geocoding MS, and atomically persists routes and their legs. Each package in a shipment becomes a leg of the route.</p>
 
-<h3>🔹 Servicio de Geocodificación (ms-geocoding)</h3>
-<p>Microservicio dedicado exclusivamente al cálculo de rutas y distancias en base a coordenadas geográficas (latitud/longitud). Consume una instancia Docker de OSRM (Open Source Routing Machine) y soporta el cálculo de distancias y tiempos estimados para optimizar los costos y la logística del sistema. Implementa un endpoint batch para procesar múltiples ubicaciones en una sola llamada.</p>
+<h3>🔹 Frontend (React)</h3>
+<p>Client application developed with React that consumes the Gateway API. Provides a user interface for managing packages, vehicles, routes, and shipment tracking. Communicates exclusively with the API Gateway, which acts as an intermediary with the rest of the microservices.</p>
+
+<h3>🔹 Geocoding Service (ms-geocoding)</h3>
+<p>Microservice dedicated exclusively to route and distance calculation based on geographic coordinates (latitude/longitude). Consumes the <strong>OpenRouteService (ORS)</strong> API, a routing service that requires an API key for usage. Supports distance and estimated time calculation to optimize system costs and logistics. Implements a batch endpoint to process multiple locations in a single call.</p>
+
 
 <hr>
 
 <h2>C4 Model</h2>
 
-![](https://raw.githubusercontent.com/LucasCallamullo/TPI-backend-3k2/refs/heads/main/docs/img/c4_model.png)
+![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png)
 
-<h2>Flujo de Autenticación (OAuth2 + JWT)</h2>
+<h2>DER</h2>
 
-<h3>Pasos del flujo:</h3>
+![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
 
-<ol>
-  <li>
-    <strong>Inicio de Autenticación:</strong>
-    El usuario inicia sesión desde el frontend con sus credenciales.
-  </li>
-  <li>
-    <strong>Login en Gateway:</strong>
-    El frontend envía las credenciales al endpoint <code>/api/v1/auth/login</code> del API Gateway.
-  </li>
-  <li>
-    <strong>Validación en Keycloak:</strong>
-    El Gateway enruta la petición al microservicio <code>ms-auth</code>, que valida las credenciales contra Keycloak y obtiene un token JWT.
-  </li>
-  <li>
-    <strong>Token al Frontend:</strong>
-    El Gateway devuelve el token JWT al frontend.
-  </li>
-  <li>
-    <strong>Petición con Token:</strong>
-    El frontend envía el token en el header <code>Authorization: Bearer &lt;token&gt;</code> en cada petición subsiguiente.
-  </li>
-  <li>
-    <strong>Validación y Enrutamiento:</strong>
-    El Gateway valida el token JWT (firma y expiración), extrae la información del usuario (ID, roles) del <code>realm_access</code> y la inyecta como headers (<code>X-User-Id</code>, <code>X-User-Roles</code>).
-  </li>
-  <li>
-    <strong>Autorización en Microservicios:</strong>
-    El microservicio destino recibe el contexto del usuario (a través de los headers) y utiliza <code>@PreAuthorize</code> para controlar el acceso a los endpoints según los roles.
-  </li>
-</ol>
 
 <hr>
 
-<h2 id="contacto-section"> 💻 Contacto Lucas Callamullo - Back-End Developer </h2>
+<h2>Authentication Flow (OAuth2 + JWT)</h2>
+<h3>Flow steps:</h3>
+<ol>
+  <li>
+    <strong>Authentication Start:</strong>
+    The user logs in from the frontend with their credentials.
+  </li>
+  <li>
+    <strong>Login in Gateway:</strong>
+    The frontend sends the credentials to the <code>/api/v1/auth/login</code> endpoint of the API Gateway.
+  </li>
+  <li>
+    <strong>Validation in Keycloak:</strong>
+    The Gateway routes the request to the <code>ms-auth</code> microservice, which validates the credentials against Keycloak and obtains a JWT token.
+  </li>
+  <li>
+    <strong>Token to Frontend:</strong>
+    The Gateway returns the JWT token to the frontend.
+  </li>
+  <li>
+    <strong>Request with Token:</strong>
+    The frontend sends the token in the <code>Authorization: Bearer &lt;token&gt;</code> header in every subsequent request.
+  </li>
+  <li>
+    <strong>Validation and Routing:</strong>
+    The Gateway validates the JWT token (signature and expiration), extracts user information (ID, roles) from <code>realm_access</code>, and injects it as headers (<code>X-User-Id</code>, <code>X-User-Roles</code>).
+  </li>
+  <li>
+    <strong>Authorization in Microservices:</strong>
+    The destination microservice receives the user context (via headers) and uses <code>@PreAuthorize</code> to control access to endpoints based on roles.
+  </li>
+</ol>
+
+
+<hr>
+
+<h2 id="contact"> 💻 Contact Lucas Callamullo - Back-End Developer </h2>
 
 | [![GitHub](https://img.shields.io/badge/github-%23121011.svg?&style=for-the-badge&logo=github&logoColor=white)](https://github.com/LucasCallamullo) | [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucas-callamullo/) | [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:lucas.callamullo.dev@gmail.com) |
 |:-:|:-:|:-:|
