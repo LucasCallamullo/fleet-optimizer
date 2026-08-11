@@ -165,3 +165,19 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     com.fleetoptimizer.gateway: DEBUG
+
+# ================================================================
+# RESILIENCE4J CONFIGURATION (Timeouts & Circuit Breakers)
+# ================================================================
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s # Eleva el tiempo límite de 1s a 5s para llamadas externas lentas
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s

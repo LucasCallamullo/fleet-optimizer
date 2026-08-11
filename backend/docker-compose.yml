@@ -7,12 +7,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Service URLs (routing)
-      - APP_FLEETS_URL=${FLEETS_SERVICE_URL}
-      - APP_ROUTES_URL=${ROUTES_SERVICE_URL}
-      - APP_AUTH_URL=${AUTH_SERVICE_URL}
-      - APP_PACKAGES_URL=${PACKAGES_SERVICE_URL}
-      - APP_GEOCODING_URL=${GEOCODING_SERVICE_URL}
+      # Nombres de variables mapeados a los que lee tu application.yml
+      - FLEETS_SERVICE_URL=http://fleets-service:8081
+      - ROUTES_SERVICE_URL=http://routes-service:8082
+      - AUTH_SERVICE_URL=http://auth-service:8083
+      - PACKAGES_SERVICE_URL=http://packages-service:8084
+      - GEOCODING_SERVICE_URL=http://geocoding-service:8085
+
       # Keycloak Configuration
       - KEYCLOAK_URI=${KEYCLOAK_URI}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
@@ -49,9 +50,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:h2:mem:routesdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
-      - APP_CLIENTS_FLEETS_URL=${FLEETS_SERVICE_URL}
-      - APP_CLIENTS_PACKAGES_URL=${PACKAGES_SERVICE_URL}
-      - APP_CLIENTS_GEOCODING_URL=${GEOCODING_SERVICE_URL}
+      # Ajustado a los nombres reales que buscan los Feign Clients/WebClient
+      - FLEETS_SERVICE_URL=http://fleets-service:8081
+      - PACKAGES_SERVICE_URL=http://packages-service:8084
+      - GEOCODING_SERVICE_URL=http://geocoding-service:8085
     depends_on:
       - fleets-service
       - packages-service
@@ -71,6 +73,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
       - KEYCLOAK_URI=${KEYCLOAK_URI}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
     networks:
       - backend-network
     restart: unless-stopped
@@ -95,7 +99,8 @@ services:
       - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - OSRM_URL=${OSRM_URL:-http://router.project-osrm.org}
+      - ORS_URL=${ORS_URL:-https://api.openrouteservice.org}
+      - ORS_API_KEY=${ORS_API_KEY}
     networks:
       - backend-network
     restart: unless-stopped

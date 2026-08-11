@@ -176,7 +176,7 @@ services:
   # Responsibilities:
   #   - Distance calculation between two coordinates
   #   - Estimated travel time calculation
-  #   - Integration with OSRM (Open Source Routing Machine)
+  #   - Integration with OpenRouteService (ORS)
   #   - Batch processing for multiple location pairs
   # ================================================================
   geocoding-service:
@@ -188,7 +188,8 @@ services:
       - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - OSRM_URL=${OSRM_URL:-http://router.project-osrm.org}
+      - ORS_URL=${ORS_URL:-https://api.openrouteservice.org}
+      - ORS_API_KEY=${ORS_API_KEY}
       - LOGGING_LEVEL_COM_GEOCODING=DEBUG
     networks:
       - backend-network
