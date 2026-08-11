@@ -1,0 +1,145 @@
+### ================================================================
+### GEOCODING SERVICE - ms-geocoding
+### BASE URL: http://localhost:8085
+### ================================================================
+
+@baseUrl = http://localhost:8085
+@distanceBaseUrl = {{baseUrl}}/api/v1/distance
+
+### ================================================================
+### 1. CALCULAR DISTANCIA (Single)
+### ================================================================
+### Buenos Aires (-34.6037, -58.3816) → Cordoba (-31.4201, -64.1888)
+# @name calculateDistance
+POST {{distanceBaseUrl}}
+Content-Type: application/json
+
+{
+    "originLat": -34.6037,
+    "originLon": -58.3816,
+    "destLat": -31.4201,
+    "destLon": -64.1888
+}
+
+### ================================================================
+### 2. CALCULAR DISTANCIA (Buenos Aires → Mendoza)
+### ================================================================
+POST {{distanceBaseUrl}}
+Content-Type: application/json
+
+{
+    "originLat": -34.6037,
+    "originLon": -58.3816,
+    "destLat": -32.8908,
+    "destLon": -68.8272
+}
+
+### ================================================================
+### 3. CALCULAR DISTANCIA (Cordoba → Mendoza)
+### ================================================================
+POST {{distanceBaseUrl}}
+Content-Type: application/json
+
+{
+    "originLat": -31.4201,
+    "originLon": -64.1888,
+    "destLat": -32.8908,
+    "destLon": -68.8272
+}
+
+### ================================================================
+### 4. CALCULAR DISTANCIA (Buenos Aires → Rosario)
+### ================================================================
+POST {{distanceBaseUrl}}
+Content-Type: application/json
+
+{
+    "originLat": -34.6037,
+    "originLon": -58.3816,
+    "destLat": -32.9595,
+    "destLon": -60.6615
+}
+
+### ================================================================
+### 5. BATCH DISTANCES (Múltiples pares)
+### ================================================================
+POST {{distanceBaseUrl}}/batch
+Content-Type: application/json
+
+{
+    "pairs": [
+        {
+            "legId": 1,
+            "originLat": -34.6037,
+            "originLon": -58.3816,
+            "destLat": -31.4201,
+            "destLon": -64.1888
+        },
+        {
+            "legId": 2,
+            "originLat": -31.4201,
+            "originLon": -64.1888,
+            "destLat": -32.8908,
+            "destLon": -68.8272
+        },
+        {
+            "legId": 3,
+            "originLat": -34.6037,
+            "originLon": -58.3816,
+            "destLat": -32.8908,
+            "destLon": -68.8272
+        }
+    ]
+}
+
+### ================================================================
+### 6. ERROR: COORDENADAS FALTANTES (debe fallar con 400)
+### ================================================================
+POST {{distanceBaseUrl}}
+Content-Type: application/json
+
+{
+    "originLat": -34.6037,
+    "originLon": -58.3816,
+    "destLat": null,
+    "destLon": -64.1888
+}
+
+### ================================================================
+### 7. ERROR: COORDENADAS SIN FORMATO VÁLIDO
+### ================================================================
+POST {{distanceBaseUrl}}
+Content-Type: application/json
+
+{
+    "originLat": -34.6037,
+    "originLon": -58.3816,
+    "destLat": -31.4201,
+    "destLon": -64.1888
+}
+
+### ================================================================
+### EXPECTED RESPONSES
+### ================================================================
+### 
+### SUCCESS (200 OK):
+### {
+###   "distanceKm": 700.5,
+###   "durationMinutes": 480,
+###   "geometry": "{\"type\":\"LineString\",\"coordinates\":[...]}"
+### }
+###
+### ERROR (400 Bad Request):
+### {
+###   "status": 400,
+###   "error": "Destination latitude is required",
+###   "path": "/api/v1/distance"
+### }
+###
+### ERROR (500 Internal Server Error):
+### {
+###   "status": 500,
+###   "error": "Error calculating distance: ...",
+###   "path": "/api/v1/distance"
+### }
+### ================================================================
