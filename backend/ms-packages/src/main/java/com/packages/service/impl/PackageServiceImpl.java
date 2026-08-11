@@ -239,7 +239,29 @@ public class PackageServiceImpl implements PackageService {
     private void validateStatusTransition(List<Package> packages, PackageStatus newStatus) {
         for (Package pkg : packages) {
             PackageStatus current = pkg.getStatus();
+
+            // CREATED or READY_FOR_PICKUP → IN_TRANSIT
+            if (newStatus == PackageStatus.IN_TRANSIT && 
+                current != PackageStatus.READY_FOR_PICKUP && 
+                current != PackageStatus.CREATED) {
+                throw new AppException(
+                    String.format("Package %d has status '%s' but must be 'CREATED' or 'READY_FOR_PICKUP' to transition to IN_TRANSIT",
+                        pkg.getId(), current),
+                    400
+                );
+            }
             
+            // CREATED → READY_FOR_PICKUP (si tenés una transición previa explícita)
+            if (newStatus == PackageStatus.READY_FOR_PICKUP && 
+                current != PackageStatus.CREATED) {
+                throw new AppException(
+                    String.format("Package %d has status '%s' but must be 'CREATED' to transition to READY_FOR_PICKUP",
+                        pkg.getId(), current),
+                    400
+                );
+            }
+            
+            /*  
             // Only READY_FOR_PICKUP → IN_TRANSIT
             if (newStatus == PackageStatus.IN_TRANSIT && current != PackageStatus.READY_FOR_PICKUP) {
                 throw new AppException(
@@ -247,7 +269,7 @@ public class PackageServiceImpl implements PackageService {
                         pkg.getId(), current),
                     400
                 );
-            }
+            } */
             
             // Only IN_TRANSIT → DELIVERED
             if (newStatus == PackageStatus.DELIVERED && current != PackageStatus.IN_TRANSIT) {

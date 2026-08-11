@@ -27,31 +27,6 @@ public class PackageController {
 
     private final PackageExternalService packageExternalService;
 
-
-    /**
-     * Updates the status of one or more packages.
-     * 
-     * Endpoint: PATCH /api/v1/packages/status
-     * 
-     * Request body:
-     * {
-     *   "packageIds": [1, 2, 3],
-     *   "status": "IN_TRANSIT"
-     * }
-     * 
-     * @param request The status update request
-     * @throws AppException if any package not found
-     * @throws AppException if status is invalid
-     * @throws AppException if packages are not in valid state
-     */
-    @PatchMapping("/status")
-    @PreAuthorize("isAuthenticated()")
-    public void updatePackageStatus(@Valid @RequestBody PackageStatusUpdateRequest request) {
-        log.info("PATCH /api/v1/packages/status - Updating {} packages to '{}'", 
-            request.packageIds().size(), request.status());
-        packageService.updatePackageStatus(request.packageIds(), request.status());
-    }
-
     // ================================================================
     // CREATE
     // ================================================================
@@ -190,17 +165,43 @@ public class PackageController {
      * Fetches package details by their IDs.
      * Used exclusively by ms-routes for shipment creation.
      * 
-     * Endpoint: GET /api/v1/packages?ids=1,2,3
+     * Endpoint: GET /api/v1/packages/internal?ids=1,2,3
      * 
-     * This endpoint is called by ms-routes to get package details
-     * (weight, volume, origin location) for route planning.
+     * This endpoint is INTERNAL - only accessible from other services.
+     * No authentication required.
      * 
      * @param ids List of package IDs (comma-separated)
      * @return List of PackageDTO with package details
      */
-    @GetMapping(params = "ids")  // ← Only responds if there is an "ids" parameter
+    @GetMapping(value = "/internal", params = "ids")
     public List<PackageDTO> getPackagesByIds(@RequestParam("ids") List<Long> ids) {
-        log.info("GET /api/v1/packages?ids={} - Fetching packages for ms-routes", ids);
+        log.info("GET /api/v1/packages/internal?ids={} - Fetching packages for ms-routes", ids);
         return packageExternalService.getPackagesDto(ids);
+    }
+
+    /**
+     * Updates the status of one or more packages.
+     * 
+     * Endpoint: PATCH /api/v1/packages/status
+     * 
+     * Request body:
+     * {
+     *   "packageIds": [1, 2, 3],
+     *   "status": "IN_TRANSIT"
+     * }
+     * 
+     * @param request The status update request
+     * @throws AppException if any package not found
+     * @throws AppException if status is invalid
+     * @throws AppException if packages are not in valid state
+     */
+    // TODO: Consider migrating endpoint back to @PatchMapping once Feign client in ms-routes 
+    // is upgraded with feign-hc5 (Apache HttpClient 5) to support HTTP PATCH.
+    @PutMapping("/status")
+    @PreAuthorize("isAuthenticated()")
+    public void updatePackageStatus(@Valid @RequestBody PackageStatusUpdateRequest request) {
+        log.info("PATCH /api/v1/packages/status - Updating {} packages to '{}'", 
+            request.packageIds().size(), request.status());
+        packageService.updatePackageStatus(request.packageIds(), request.status());
     }
 }
