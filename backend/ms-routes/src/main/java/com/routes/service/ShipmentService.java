@@ -188,7 +188,7 @@ public class ShipmentService {
         packageClient.updatePackageStatus(
             new PackageStatusUpdateRequest(
                 request.packageIds(),
-                "IN_TRANSIT"
+                "READY_FOR_PICKUP"
             )
         );
 

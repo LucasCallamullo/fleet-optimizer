@@ -5,12 +5,13 @@ server:
 # EXTERNAL SERVICES CONFIGURATION
 # ================================================================
 app:
-  # Las URLs de los clientes se sobrescriben con variables de entorno
   clients:
     fleets:
-      url: http://localhost:8081
+      url: ${FLEETS_SERVICE_URL:http://localhost:8081}
     packages:
-      url: http://localhost:8083
+      url: ${PACKAGES_SERVICE_URL:http://localhost:8084}  
+    geocoding:
+      url: ${GEOCODING_SERVICE_URL:http://localhost:8085}
 
 spring:
   application:

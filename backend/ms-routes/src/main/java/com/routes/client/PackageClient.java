@@ -1,12 +1,13 @@
 package com.routes.client;
 
+import com.routes.config.FeignClientConfig;
 import com.routes.config.FeignConfig;
 import com.routes.dto.client.packages.PackageDTO;
 import com.routes.dto.client.packages.PackageStatusUpdateRequest;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -26,8 +27,11 @@ import java.util.List;
  */
 @FeignClient(
     name = "ms-packages",                                           // ← Service name (for service discovery)
-    url = "${app.clients.packages.url:http://localhost:8083}",       // ← Configurable URL with fallback
-    configuration = FeignConfig.class                // intercepts errors from other MS
+    url = "${app.clients.packages.url}",       // ← Configurable URL with fallback
+    configuration = {
+        FeignConfig.class,           // ← Error decoder (error handler HTTP)
+        FeignClientConfig.class      // ← Request interceptor (propagate token)
+    }
 )
 public interface PackageClient {
     
@@ -57,7 +61,7 @@ public interface PackageClient {
      * @throws org.springframework.web.client.HttpClientErrorException if any package is not found (404)
      * @throws org.springframework.web.client.HttpServerErrorException if Package MS returns an error (5xx)
      */
-    @GetMapping("/api/v1/packages")
+    @GetMapping("/api/v1/packages/internal")
     List<PackageDTO> getPackagesByIds(@RequestParam("ids") List<Long> ids);
 
     /**
@@ -76,7 +80,10 @@ public interface PackageClient {
      * 
      * @param request The status update request containing package IDs and new status
      */
-    @PatchMapping("/api/v1/packages/status")
+    // TODO: Consider migrating to PATCH by adding feign-hc5 (Apache HttpClient 5).
+    // Currently using PUT because HttpURLConnection (OpenFeign's default HTTP client)
+    // does not support HTTP PATCH requests.
+    @PutMapping("/api/v1/packages/status")
     void updatePackageStatus(@RequestBody PackageStatusUpdateRequest request);
 
     /**

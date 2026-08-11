@@ -1,5 +1,6 @@
 package com.routes.client;
 
+import com.routes.config.FeignClientConfig;
 import com.routes.config.FeignConfig;
 import com.routes.dto.client.fleets.FleetVehicleDTO;
 
@@ -21,8 +22,11 @@ import java.util.List;
  */
 @FeignClient(
     name = "ms-fleets",                                           // ← Service name (for service discovery)
-    url = "${app.clients.fleets.url:http://localhost:8081}",       // ← Configurable URL with fallback
-    configuration = FeignConfig.class                // intercepts errors from other MS
+    url = "${app.clients.fleets.url}",       // ← Configurable URL with fallback
+    configuration = {
+        FeignConfig.class,           // ← Error decoder (error handler HTTP)
+        FeignClientConfig.class      // ← Request interceptor (propagate token)
+    }
 )
 public interface FleetClient {
     

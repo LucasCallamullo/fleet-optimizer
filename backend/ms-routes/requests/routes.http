@@ -1,9 +1,31 @@
-@baseUrl = http://localhost:8082/api/v1/routes
+@baseUrl = http://localhost:8080
+
+@routesURL = {{baseUrl}}/api/v1/routes
+
+### ================================================================
+### 1. LOGIN - Get JWT Token (via Gateway)
+### ================================================================
+# @name loginUser
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### ================================================================
+### 2. SAVE TOKEN
+### ================================================================
+@accessToken = {{loginUser.response.body.accessToken}}
+@refreshToken = {{loginUser.response.body.refreshToken}}
 
 
 ### Get Route By Id - Complete Example
-GET {{baseUrl}}/1
+GET {{routesURL}}/1
+Authorization: Bearer {{accessToken}}
 
 
-### Get all Routes - Complete Example
-GET {{baseUrl}}
+### Get all Routes - Complete Example - Not Declared
+GET {{routesURL}}
+Authorization: Bearer {{accessToken}}

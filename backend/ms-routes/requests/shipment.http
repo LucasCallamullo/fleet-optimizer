@@ -1,10 +1,10 @@
 ### ================================================================
 ### SHIPMENT ENDPOINTS - ms-routes
-### BASE URL: http://localhost:8082 (ms-routes directo)
+### BASE URL: http://localhost:8080 (ms-routes directo)
 ### O via Gateway: http://localhost:8080
 ### ================================================================
 
-@baseUrl = http://localhost:8082
+@baseUrl = http://localhost:8080
 @gatewayUrl = http://localhost:8080
 @shipmentBaseUrl = {{baseUrl}}/api/v1/shipments
 

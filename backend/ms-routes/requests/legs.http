@@ -2,20 +2,57 @@
 ### LEG ENDPOINTS
 ### ================================================================
 
-@baseUrl = http://localhost:8082/api/v1/legs
+@baseUrl = http://localhost:8080
+
+@legBaseUrl = {{baseUrl}}/api/v1/legs
+
+### ================================================================
+### USERS FOR TESTING (Keycloak)
+### ================================================================
+### Regular User:
+###   Email: user_regular@gmail.com
+###   Password: pass1234
+###   Role: usuario
+###
+### Admin User:
+###   Email: admin_regular@gmail.com
+###   Password: pass1234
+###   Role: admin
+### ================================================================
+
+### ================================================================
+### 1. LOGIN - Get JWT Token (via Gateway)
+### ================================================================
+# @name loginUser
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### ================================================================
+### 2. SAVE TOKEN
+### ================================================================
+@accessToken = {{loginUser.response.body.accessToken}}
+@refreshToken = {{loginUser.response.body.refreshToken}}
 
 
 ### Get Leg by ID
-GET {{baseUrl}}/2
+GET {{legBaseUrl}}/2
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 ### Get Legs by Route ID
-GET {{baseUrl}}/route/1
+GET {{legBaseUrl}}/route/1
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 ### Update Leg
-PUT {{baseUrl}}/1
+PUT {{legBaseUrl}}/1
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "sequence": 1,
@@ -44,5 +81,5 @@ Content-Type: application/json
 }
 
 ### Delete Leg
-DELETE {{baseUrl}}/1
+DELETE {{legBaseUrl}}/1
 Content-Type: application/json

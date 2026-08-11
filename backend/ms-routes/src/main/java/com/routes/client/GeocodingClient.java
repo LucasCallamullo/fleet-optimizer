@@ -1,5 +1,6 @@
 package com.routes.client;
 
+import com.routes.config.FeignClientConfig;
 import com.routes.config.FeignConfig;
 import com.routes.dto.client.geocoding.BatchDistanceRequest;
 import com.routes.dto.client.geocoding.BatchDistanceResponse;
@@ -10,8 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
     name = "ms-geocoding",
-    url = "${app.clients.geocoding.url:http://localhost:8084}",
-    configuration = FeignConfig.class
+    url = "${app.clients.geocoding.url}",
+    configuration = {
+        FeignConfig.class,           // ← Error decoder (error handler HTTP)
+        FeignClientConfig.class      // ← Request interceptor (propagate token)
+    }
 )
 public interface GeocodingClient {
     
