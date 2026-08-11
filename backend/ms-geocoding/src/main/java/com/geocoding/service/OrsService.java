@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+// import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geocoding.dto.request.BatchDistanceRequestDTO;
 import com.geocoding.dto.request.DistanceRequestDTO;
 import com.geocoding.dto.request.LocationPairDTO;
@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 public class OrsService {
 
     private final WebClient orsWebClient;
-    private final ObjectMapper objectMapper;
+    // private final ObjectMapper objectMapper;
 
     @Value("${app.ors.api-key}")
     private String apiKey;

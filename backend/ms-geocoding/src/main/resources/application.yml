@@ -11,6 +11,7 @@ spring:
 app:
   ors:
     # URL pública de OSRM (para desarrollo)
+    # Key ORS expuesta por desarrollo
     url: ${ORS_URL:https://api.openrouteservice.org}
     api-key: ${ORS_API_KEY:eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjNhMmMzMmRhN2Q5YzQ4NzE5Y2VkODNlZjMyNWI0ZWM1IiwiaCI6Im11cm11cjY0In0=}
     # Timeout en segundos para las llamadas a OSRM
