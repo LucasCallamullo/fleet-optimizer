@@ -188,7 +188,7 @@ public class OrsService {
      * @return BatchDistanceResponseDTO with results for each pair
      */
     public Mono<BatchDistanceResponseDTO> calculateBatchDistances(BatchDistanceRequestDTO request) {
-        log.info("Calculating batch distances for {} pairs", request.pairs().size());
+        log.info("Calculating batch distances for {} location pairs", request.locations().size());
 
         // Step 1: Extract all locations (origins and destinations)
         // For Matrix API, we need all unique locations in one array
@@ -197,15 +197,15 @@ public class OrsService {
         List<Integer> destIndices = new ArrayList<>();
 
         // First, add all origins
-        for (LocationPairDTO pair : request.pairs()) {
-            double[] origin = {pair.originLon(), pair.originLat()};
+        for (LocationPairDTO pair : request.locations()) {
+            double[] origin = { pair.origin().longitude(), pair.origin().latitude() };
             allLocations.add(origin);
             originIndices.add(allLocations.size() - 1);
         }
 
         // Then, add all destinations
-        for (LocationPairDTO pair : request.pairs()) {
-            double[] dest = {pair.destLon(), pair.destLat()};
+        for (LocationPairDTO pair : request.locations()) {
+            double[] dest = { pair.destination().longitude(), pair.destination().latitude() };
             allLocations.add(dest);
             destIndices.add(allLocations.size() - 1);
         }
@@ -219,7 +219,7 @@ public class OrsService {
             "destinations", destIndices
         );
 
-        // Step 3: Make POST request to ORS Matrix API
+        // Step 4: Llamada a ORS Matrix API
         return orsWebClient.post()
             .uri("/v2/matrix/driving-car")
             .header("Authorization", apiKey)
@@ -261,8 +261,8 @@ public class OrsService {
 
             // Step 2: Iterate over each pair and get the corresponding matrix cell
             // Each origin i maps to destination i (same index)
-            for (int i = 0; i < request.pairs().size(); i++) {
-                LocationPairDTO pair = request.pairs().get(i);
+            for (int i = 0; i < request.locations().size(); i++) {
+                LocationPairDTO pair = request.locations().get(i);
                 
                 // Extract distance in meters and convert to km
                 double distanceMeters = distancesNode.path(i).path(i).asDouble();

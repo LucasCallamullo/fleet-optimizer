@@ -91,7 +91,7 @@ public class GeocodingController {
      */
     @PostMapping("/batch")
     public Mono<BatchDistanceResponseDTO> calculateBatchDistances(@Valid @RequestBody BatchDistanceRequestDTO request) {
-        log.info("POST /api/v1/distance/batch - Calculating {} distances", request.pairs().size());
+        log.info("POST /api/v1/distance/batch - Calculating {} distances", request.locations().size());
         return orsService.calculateBatchDistances(request);
     }
 }

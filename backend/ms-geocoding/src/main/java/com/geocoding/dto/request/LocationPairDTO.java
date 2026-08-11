@@ -1,5 +1,7 @@
 package com.geocoding.dto.request;
 
+import com.geocoding.dto.common.LocationDTO;
+
 /**
  * DTO representing a pair of locations for distance calculation.
  * 
@@ -18,10 +20,12 @@ package com.geocoding.dto.request;
  * @param destLat Latitude of the destination location
  * @param destLon Longitude of the destination location
  */
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 public record LocationPairDTO(
     Long legId,
-    Double originLat,
-    Double originLon,
-    Double destLat,
-    Double destLon
+    @NotNull @Valid LocationDTO origin,
+    @NotNull @Valid LocationDTO destination
 ) {}

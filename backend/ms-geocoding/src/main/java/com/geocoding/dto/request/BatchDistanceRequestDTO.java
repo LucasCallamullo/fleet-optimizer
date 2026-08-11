@@ -33,5 +33,5 @@ import java.util.List;
 public record BatchDistanceRequestDTO(
     @NotEmpty(message = "At least one location pair is required")
     @Valid
-    List<LocationPairDTO> pairs
+    List<LocationPairDTO> locations
 ) {}
