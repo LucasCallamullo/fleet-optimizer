@@ -55,6 +55,7 @@ Accept: application/json
 ### ============================================================
 ### @prompt existsName Enter category name to check:
 GET {{categoriesUrl}}/exists/Truck
+Authorization: Bearer {{userToken}}
 
 ### ============================================================
 ### 5. CREATE CATEGORY

@@ -9,19 +9,40 @@
 ### Variables
 @baseUrl = http://localhost:8080
 @vehiclesUrl = {{baseUrl}}/api/v1/vehicles
-@categoriesUrl = {{baseUrl}}/api/v1/categories
+
+### 
+@authBaseUrl = {{baseUrl}}/api/v1/auth
+
+
+### ================================================================
+### 1. LOGIN - Regular User
+### ================================================================
+# @name loginUser
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "user_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### 
+@accessToken = {{loginUser.response.body.accessToken}}
+@userRefreshToken = {{loginUser.response.body.refreshToken}}
 
 ### ============================================================
 ### 1. GET ALL VEHICLES (Basic - only category ID)
 ### ============================================================
 GET {{vehiclesUrl}}
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 2. GET ALL VEHICLES DETAILED (with full category)
 ### ============================================================
 GET {{vehiclesUrl}}/detailed
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 3. GET VEHICLE BY ID (with full category)
@@ -29,6 +50,7 @@ Accept: application/json
 ### @prompt vehicleId Enter vehicle ID:
 GET {{vehiclesUrl}}/2
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 4. GET VEHICLE BY LICENSE PLATE (with full category)
@@ -36,6 +58,7 @@ Accept: application/json
 ### @prompt licensePlate Enter license plate (e.g., ABC123):
 GET {{vehiclesUrl}}/license/ABC123
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 5. GET VEHICLES BY CATEGORY ID
@@ -43,6 +66,7 @@ Accept: application/json
 ### @prompt categoryId Enter category ID:
 GET {{vehiclesUrl}}/category/1
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 6. CREATE VEHICLE (POST)
@@ -50,6 +74,7 @@ Accept: application/json
 POST {{vehiclesUrl}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "licensePlate": "ABC123",
@@ -63,6 +88,7 @@ Accept: application/json
 POST {{vehiclesUrl}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "licensePlate": "XYZ789",
@@ -76,6 +102,7 @@ Accept: application/json
 POST {{vehiclesUrl}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "licensePlate": "DEF456",
@@ -90,6 +117,7 @@ Accept: application/json
 PUT {{vehiclesUrl}}/2
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "licensePlate": "GHI789",
@@ -103,12 +131,14 @@ Accept: application/json
 ### @prompt deleteId Enter vehicle ID to delete:
 DELETE {{vehiclesUrl}}/20
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 11. GET VEHICLE BY ID - Invalid (should return 404)
 ### ============================================================
 GET {{vehiclesUrl}}/9999
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### ============================================================
 ### 12. CREATE VEHICLE - Invalid data (validation errors)
@@ -116,6 +146,7 @@ Accept: application/json
 POST {{vehiclesUrl}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "licensePlate": "A",  
@@ -128,6 +159,7 @@ Accept: application/json
 POST {{vehiclesUrl}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "licensePlate": "ABC123", 
