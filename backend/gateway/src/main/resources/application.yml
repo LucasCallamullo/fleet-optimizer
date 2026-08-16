@@ -26,28 +26,6 @@ spring:
     name: gateway
 
   cloud:
-    globalcors:
-      cors-configurations:
-        '[/**]':
-          allowed-origins:
-            - "http://localhost:3000"  # Frontend React
-            - "http://localhost:5173"  # Frontend React
-            # - "https://dominio.com"  # for Produccion
-          allowed-methods:
-            - "GET"
-            - "POST"
-            - "PUT"
-            - "DELETE"
-            - "OPTIONS"
-          allowed-headers:
-            - "Authorization"
-            - "Content-Type"
-            - "X-Requested-With"
-            - "Accept"
-            - "Origin"
-          allow-credentials: true
-          max-age: 3600
-
     gateway:
       routes:
         # ================================================================

@@ -3,6 +3,7 @@ package com.fleetoptimizer.gateway.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
@@ -12,7 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Security configuration for the API Gateway.
@@ -42,7 +43,7 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) throws Exception {
         return http
-            // Step 1: CORS configuration
+            // Step 1: CORS configuration - ACTIVE
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
             // Step 2: Disable CSRF (stateless API)
@@ -50,9 +51,12 @@ public class SecurityConfig {
             
             // Step 3: Authorization rules
             .authorizeExchange(exchanges -> exchanges
+                // PERMITIR OPTIONS PREFLIGHT SIN AUTENTICACION
+                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                 // Public endpoints (no authentication required)
                 .pathMatchers("/actuator/health", "/actuator/info").permitAll()
-                .pathMatchers("/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
+                .pathMatchers("/api/v1/auth/**").permitAll()
                 // All other endpoints require authentication
                 .anyExchange().authenticated()
             )
@@ -87,20 +91,56 @@ public class SecurityConfig {
      * CORS configuration.
      * Allows cross-origin requests from frontend applications.
      * 
-     * In production, replace "*" with specific origins:
-     * - React: http://localhost:5173
-     * - Angular: http://localhost:4200
+     * IMPORTANT: When using withCredentials: true,
+     * allowedOrigins CANNOT be "*".
+     * Must specify exact origins.
+     * 
+     * In production, replace with specific origins:
+     * - React: http://localhost:3000, http://localhost:5173
      * - Production: https://myapp.com
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
-        // TODO: Replace "*" with specific origins for production
-        config.setAllowedOrigins(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        // Specific origins (NOT wildcard)
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",
+            "http://localhost:5173"
+        ));
+        
+        // Allow credentials (JWT in headers)
+        config.setAllowCredentials(true);
+        
+        // Allowed methods (including OPTIONS for preflight)
+        config.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+        
+        // Allowed headers
+        config.setAllowedHeaders(Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+            "X-User-Id",
+            "X-User-Email",
+            "X-User-Roles",
+            "X-Auth-Token",
+            "Cookie"
+        ));
+        
+        // Exposed headers (frontend can read these)
+        config.setExposedHeaders(Arrays.asList(
+            "X-User-Id",
+            "X-User-Email",
+            "X-User-Roles",
+            "Authorization"
+        ));
+        
+        // Max age for preflight requests (1 hour)
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

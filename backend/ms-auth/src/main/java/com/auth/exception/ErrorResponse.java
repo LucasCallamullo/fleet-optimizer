@@ -24,8 +24,9 @@ import java.time.LocalDateTime;
 public record ErrorResponse(
     LocalDateTime timestamp,
     int status,
-    String error,
-    String path
+    String message,
+    String path,
+    boolean success
 ) {
     
     /**
@@ -36,6 +37,6 @@ public record ErrorResponse(
      * @param path the request URI
      */
     public ErrorResponse(int status, String error, String path) {
-        this(LocalDateTime.now(), status, error, path);
+        this(LocalDateTime.now(), status, error, path, false);
     }
 }
