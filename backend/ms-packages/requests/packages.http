@@ -1,0 +1,41 @@
+
+### Variables
+@baseUrl = http://localhost:8080
+@packagesUrl = {{baseUrl}}/api/v1/packages
+
+### 
+@authBaseUrl = http://localhost:8080/api/v1/auth
+
+
+### ================================================================
+### 1. LOGIN - Regular User
+### ================================================================
+# @name loginUser
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin_regular@gmail.com",
+    "password": "pass1234"
+}
+
+
+### "email": "user_regular@gmail.com",
+
+### 
+@accessToken = {{loginUser.response.body.accessToken}}
+@userRefreshToken = {{loginUser.response.body.refreshToken}}
+
+### ============================================================
+### 1. GET ALL VEHICLES (Basic - only category ID)
+### ============================================================
+GET {{packagesUrl}}
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+### ============================================================
+### 2. GET ALL VEHICLES DETAILED (with full category)
+### ============================================================
+GET {{packagesUrl}}/detailed
+Accept: application/json
+Authorization: Bearer {{accessToken}}

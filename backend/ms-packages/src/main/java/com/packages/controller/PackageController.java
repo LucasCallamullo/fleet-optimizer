@@ -8,14 +8,17 @@ import com.packages.dto.response.PackageResponseDTO;
 import com.packages.exception.AppException;
 import com.packages.service.PackageExternalService;
 import com.packages.service.PackageService;
+import com.packages.utils.AuthHelper;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
 
 @Slf4j
 @RestController
@@ -24,8 +27,11 @@ import java.util.List;
 public class PackageController {
 
     private final PackageService packageService;
-
+    
     private final PackageExternalService packageExternalService;
+
+    // necesary for some utils on request propagate from gateway
+    private final AuthHelper authHelper;    
 
     // ================================================================
     // CREATE
@@ -56,32 +62,54 @@ public class PackageController {
     // READ
     // ================================================================
 
-    /**
-     * Retrieves all packages (basic view, no store details).
-     * 
-     * Endpoint: GET /api/v1/packages
-     * 
-     * @return List of basic package responses
-     */
-    @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public List<PackageResponseDTO> getAllPackages() {
-        log.info("GET /api/v1/packages - Fetching all packages (basic)");
-        return packageService.getAllPackages();
-    }
+    // ================================================================
+    // 1. GET ALL PACKAGES (Filtered by User)
+    // ================================================================
 
     /**
-     * Retrieves all packages with full store details.
+     * GET /api/v1/packages
      * 
-     * Endpoint: GET /api/v1/packages/detailed
+     * Returns packages filtered by the current user.
+     * Admin users see all packages. Regular users see only their own.
      * 
-     * @return List of detailed package responses with store information
+     * @param request - HttpServletRequest containing Gateway headers
+     * @return List<PackageResponseDTO> - Filtered list of packages
+     * @throws AppException - 401 if user is not authenticated
+     */
+    @GetMapping
+    public List<PackageResponseDTO> getPackages(HttpServletRequest request) {
+        // Extract user ID and admin status from Gateway headers
+        String userId = authHelper.getCurrentUserId(request);
+        boolean isAdmin = authHelper.isAdmin(request);
+        
+        log.info("GET /api/v1/packages - User: {}, Admin: {}", userId, isAdmin);
+        
+        return packageService.getPackagesForUser(userId, isAdmin);
+    }
+
+    // ================================================================
+    // 2. GET DETAILED PACKAGES (With Store Information)
+    // ================================================================
+
+    /**
+     * GET /api/v1/packages/detailed
+     * 
+     * Returns packages with full store details filtered by user.
+     * Admin users see all packages. Regular users see only their own.
+     * 
+     * @param request - HttpServletRequest containing Gateway headers
+     * @return List<PackageDetailDTO> - Filtered list of packages with store details
+     * @throws AppException - 401 if user is not authenticated
      */
     @GetMapping("/detailed")
-    @PreAuthorize("isAuthenticated()")
-    public List<PackageDetailDTO> getAllPackagesDetailed() {
-        log.info("GET /api/v1/packages/detailed - Fetching all packages with store details");
-        return packageService.getAllPackagesWithStore();
+    public List<PackageDetailDTO> getPackagesDetailed(HttpServletRequest request) {
+        // Extract user ID and admin status from Gateway headers
+        String userId = authHelper.getCurrentUserId();
+        boolean isAdmin = authHelper.isAdmin();
+        
+        log.info("GET /api/v1/packages/detailed - User: {}, Admin: {}", userId, isAdmin);
+        
+        return packageService.getDetailedPackagesForUser(userId, isAdmin);
     }
 
     /**
@@ -155,7 +183,6 @@ public class PackageController {
         log.info("DELETE /api/v1/packages/{} - Deleting package", id);
         packageService.deletePackage(id);
     }
-
 
     // ================================================================
     // INTER-SERVICE COMMUNICATION (para ms-routes)
