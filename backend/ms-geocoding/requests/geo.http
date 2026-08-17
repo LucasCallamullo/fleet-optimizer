@@ -67,27 +67,39 @@ POST {{distanceBaseUrl}}/batch
 Content-Type: application/json
 
 {
-    "pairs": [
+    "locations": [
         {
             "legId": 1,
-            "originLat": -34.6037,
-            "originLon": -58.3816,
-            "destLat": -31.4201,
-            "destLon": -64.1888
+            "origin": {
+                "latitude": -34.6037,
+                "longitude": -58.3816
+            },
+            "destination": {
+                "latitude": -31.4201,
+                "longitude": -64.1888
+            }
         },
         {
             "legId": 2,
-            "originLat": -31.4201,
-            "originLon": -64.1888,
-            "destLat": -32.8908,
-            "destLon": -68.8272
+            "origin": {
+                "latitude": -31.4201,
+                "longitude": -64.1888
+            },
+            "destination": {
+                "latitude": -32.8908,
+                "longitude": -68.8272
+            }
         },
         {
             "legId": 3,
-            "originLat": -34.6037,
-            "originLon": -58.3816,
-            "destLat": -32.8908,
-            "destLon": -68.8272
+            "origin": {
+                "latitude": -34.6037,
+                "longitude": -58.3816
+            },
+            "destination": {
+                "latitude": -32.8908,
+                "longitude": -68.8272
+            }
         }
     ]
 }
