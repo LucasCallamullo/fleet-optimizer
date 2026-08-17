@@ -161,4 +161,38 @@ public interface PackageService {
      * @throws AppException with status 404 if package not found
      */
     void deletePackage(Long id);
+
+    // ================================================================
+    // USER-FILTERED PACKAGES (NEW METHODS)
+    // ================================================================
+
+    /**
+     * Retrieves packages filtered by user ID.
+     * 
+     * If the user is an admin, returns all packages.
+     * If the user is a regular user, returns only packages owned by them.
+     * 
+     * This method returns basic information without store details.
+     * 
+     * @param userId - The ID of the current user (from X-User-Id header)
+     * @param isAdmin - True if the user has admin role (from X-User-Roles header)
+     * @return List<PackageResponseDTO> - Filtered list of packages
+     */
+    List<PackageResponseDTO> getPackagesForUser(String userId, boolean isAdmin);
+
+    /**
+     * Retrieves packages with store details filtered by user ID.
+     * 
+     * If the user is an admin, returns all packages with store details.
+     * If the user is a regular user, returns only packages owned by them
+     * with store details.
+     * 
+     * This method uses JOIN FETCH to load the store relationship eagerly,
+     * avoiding LazyInitializationException.
+     * 
+     * @param userId - The ID of the current user (from X-User-Id header)
+     * @param isAdmin - True if the user has admin role (from X-User-Roles header)
+     * @return List<PackageDetailDTO> - Filtered list of packages with store details
+     */
+    List<PackageDetailDTO> getDetailedPackagesForUser(String userId, boolean isAdmin);
 }

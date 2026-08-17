@@ -102,6 +102,42 @@ public class PackageServiceImpl implements PackageService {
     }
 
     // ================================================================
+    // USER-FILTERED PACKAGES (NEW METHODS)
+    // ================================================================
+
+    @Override
+    public List<PackageResponseDTO> getPackagesForUser(String userId, boolean isAdmin) {
+        log.debug("Fetching packages for user: {} (Admin: {})", userId, isAdmin);
+        
+        List<Package> packages;
+        if (isAdmin) {
+            // Admin users see all packages
+            packages = packageRepository.findAll();
+        } else {
+            // Regular users only see their own packages
+            packages = packageRepository.findByOwnerId(userId);
+        }
+        
+        return packageMapper.toResponseDtoList(packages);
+    }
+
+    @Override
+    public List<PackageDetailDTO> getDetailedPackagesForUser(String userId, boolean isAdmin) {
+        log.debug("Fetching detailed packages for user: {} (Admin: {})", userId, isAdmin);
+        
+        List<Package> packages;
+        if (isAdmin) {
+            // Admin users see all packages with store details
+            packages = packageRepository.findAllWithStore();
+        } else {
+            // Regular users only see their own packages with store details
+            packages = packageRepository.findByOwnerIdWithStore(userId);
+        }
+        
+        return packageMapper.toDetailDtoList(packages);
+    }
+
+    // ================================================================
     // UPDATE
     // ================================================================
 
