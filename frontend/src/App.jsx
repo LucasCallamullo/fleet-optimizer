@@ -6,13 +6,16 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 // CURRENT COMPONENTS
 import MainLayout from "@/shared/components/base/MainLayout";
 import Home from "@/shared/pages/Home";
-import Vehicle from "@/features/vehicles/pages/Vehicle";
 import Error404 from "@/shared/pages/Error404";
 import '@/index.css';
 
 // === NEW AUTHENTICATION COMPONENTS ===
 import LoginForm from '@/features/auth/pages/LoginForm';
 import Register from '@/features/auth/pages/RegisterPage';
+
+import Vehicle from "@/features/vehicles/pages/Vehicle";
+
+import GeocodingPage from '@/features/geocoding/pages/GeocodingPage';
 
 // ================================================================
 // 1. PROTECTED ROUTE COMPONENT (Logged-in users only)
@@ -178,6 +181,15 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+
+      <Route path="/geocoding" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <GeocodingPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
 
       {/* ============================================ */}
       {/* 404 - CATCH-ALL ROUTE */}
