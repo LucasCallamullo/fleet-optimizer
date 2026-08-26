@@ -17,6 +17,9 @@ import Vehicle from "@/features/vehicles/pages/Vehicle";
 
 import GeocodingPage from '@/features/geocoding/pages/GeocodingPage';
 
+import PackagesPage from '@/features/packages/pages/PackagesPage';
+import PackageDetailPage from '@/features/packages/pages/PackageDetailPage';
+
 // ================================================================
 // 1. PROTECTED ROUTE COMPONENT (Logged-in users only)
 // ================================================================
@@ -187,6 +190,23 @@ export default function App() {
         <ProtectedRoute>
           <MainLayout>
             <GeocodingPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      {/* El orden siempre se intenta pacakges --> packages/params */}
+      <Route path="/packages" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <PackagesPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/packages/:id" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <PackageDetailPage />
           </MainLayout>
         </ProtectedRoute>
       } />
