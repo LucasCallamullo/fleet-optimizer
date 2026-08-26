@@ -66,7 +66,9 @@ cd fleet-optimizer</code></pre>
 <p>Para que Docker pueda empaquetar los servicios, necesitas generar los archivos JAR. Puedes hacerlo con el script proporcionado o manualmente:</p>
 
 <p><strong>Opción A: Usar el script automático</strong></p>
-<pre><code>./build-and-run.sh</code></pre>
+<pre><code>cd backend
+chmod +x run.sh
+./run.sh start</code></pre>
 
 <p><strong>Opción B: Construir manualmente cada servicio</strong></p>
 <pre><code>mvn clean package -DskipTests -f ms-fleets/pom.xml
@@ -87,6 +89,15 @@ mvn clean package -DskipTests -f gateway/pom.xml</code></pre>
 <h4>6. (Opcional) Detener los servicios</h4>
 <pre><code>docker-compose down</code></pre>
 
+<h4>7. (Opcional) Iniciar Frontend en React / Tailwind</h4>
+<pre><code>cd ..
+cd frontend
+npm i
+npm run dev</code></pre>
+
+<ul>
+  <li><strong>FrontEnd:</strong> <code>http://localhost:5173</code></li>
+</ul>
 
 <hr>
 
