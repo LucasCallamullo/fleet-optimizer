@@ -77,14 +77,14 @@ logging:
   # Writes logs to a file for long-term storage and debugging.
   # Useful for production environments.
   # ============================================
-  file:
+  # file:
     # Path where log files are stored (relative to application root)
-    name: logs/ms-fleets.log
+  #  name: logs/ms-fleets.log
     
     # Maximum size per file (10MB)
     # When file reaches this size, it's rotated (renamed and a new one is created)
-    max-size: 10MB
+  #  max-size: 10MB
     
     # Number of rotated log files to keep
     # Example: ms-fleets.log, ms-fleets.1.log, ms-fleets.2.log, ... up to 7
-    max-history: 7
+  #   max-history: 7

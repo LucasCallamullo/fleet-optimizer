@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+// import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -188,6 +188,7 @@ public class VehicleController {
      * @return List of available vehicles that meet the requirements
      */
     @GetMapping("/available-for-package")
+    @PreAuthorize("isAuthenticated()")
     public List<VehicleResponseDTO> getAvailableVehiclesForPackage(
             @RequestParam Double requiredWeightKg,
             @RequestParam Double requiredVolumeCbm) {

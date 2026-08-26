@@ -40,5 +40,5 @@ logging:
   level:
     com.fleets: WARN
     org.springframework: WARN
-  file:
-    name: logs/ms-fleets-test.log
+  # file:
+  #  name: logs/ms-fleets-test.log

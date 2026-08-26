@@ -43,6 +43,6 @@ logging:
     com.fleets.filter: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
-  file:
-    name: logs/ms-fleets.log
+  #  file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
+  # file:
+  #  name: logs/ms-fleets.log
