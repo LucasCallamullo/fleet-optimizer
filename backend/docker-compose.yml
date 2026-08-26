@@ -1,20 +1,238 @@
+# ================================================================
+# DOCKER COMPOSE - Fleet Optimizer Microservices
+# ================================================================
+#
+# Architecture: API Gateway pattern with internal microservices
+# - Only the Gateway is exposed to the outside world (port 8080)
+# - All microservices and databases are internal (no public ports)
+# - Services communicate via internal Docker network
+#
+# ================================================================
+# NETWORKING PRINCIPLES
+# ================================================================
+#
+# 1. Gateway is the ONLY entry point (port 8080)
+# 2. Microservices are internal (no public ports)
+# 3. Databases are internal (no public ports)
+# 4. All services use the internal Docker DNS for service discovery
+#    (e.g., fleets-service:8081, postgres-fleets:5432)
+# ================================================================
+
 version: '3.9'
 
 services:
+
+  # ================================================================
+  # POSTGRES DATABASES
+  # Each microservice has its own dedicated database
+  # All databases are INTERNAL only (no ports exposed to host)
+  # ================================================================
+
+  # Database for Fleets Service (vehicles, categories)
+  postgres-fleets:
+    image: postgres:16-alpine
+    container_name: postgres-fleets
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: fleets_db
+    volumes:
+      - postgres_fleets_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d fleets_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Database for Routes Service (routes, legs, shipments)
+  postgres-routes:
+    image: postgres:16-alpine
+    container_name: postgres-routes
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: routes_db
+    volumes:
+      - postgres_routes_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d routes_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Database for Packages Service (packages, stores)
+  postgres-packages:
+    image: postgres:16-alpine
+    container_name: postgres-packages
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: packages_db
+    volumes:
+      - postgres_packages_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d packages_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ================================================================
+  # DATABASE FOR AUTH SERVICE (COMMENTED)
+  # ================================================================
+  # NOTE: ms-auth does NOT use a database directly.
+  # All user data is managed by Keycloak (external identity provider).
+  # If you need local user storage in the future, uncomment this block.
+  # ================================================================
+  #
+  # postgres-auth:
+  #   image: postgres:16-alpine
+  #   container_name: postgres-auth
+  #   environment:
+  #     POSTGRES_USER: ${DB_USERNAME:-postgres}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+  #     POSTGRES_DB: auth_db
+  #   volumes:
+  #     - postgres_auth_data:/var/lib/postgresql/data
+  #   networks:
+  #     - backend-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d auth_db"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+
+  # ================================================================
+  # MICROSERVICES
+  # All services are INTERNAL only (no ports exposed to host)
+  # Communication happens via internal Docker network
+  # ================================================================
+
+  # Fleets Service - Vehicle and category management
+  fleets-service:
+    build: ./ms-fleets
+    container_name: fleets-service
+    # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-fleets:5432/fleets_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=false
+    depends_on:
+      postgres-fleets:
+        condition: service_healthy
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # Routes Service - Route and shipment orchestration
+  routes-service:
+    build: ./ms-routes
+    container_name: routes-service
+    # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-routes:5432/routes_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=false
+      - FLEETS_SERVICE_URL=http://fleets-service:8081
+      - PACKAGES_SERVICE_URL=http://packages-service:8084
+      - GEOCODING_SERVICE_URL=http://geocoding-service:8085
+    depends_on:
+      postgres-routes:
+        condition: service_healthy
+      fleets-service:
+        condition: service_started
+      packages-service:
+        condition: service_started
+      geocoding-service:
+        condition: service_started
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # Auth Service - Authentication and user management
+  # NOTE: Uses Keycloak directly. No local database needed.
+  auth-service:
+    build: ./ms-auth
+    container_name: auth-service
+    # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      # No database configuration needed - uses Keycloak
+      - KEYCLOAK_URI=${KEYCLOAK_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+    # No depends_on needed - no database to wait for
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # Packages Service - Package and store management
+  packages-service:
+    build: ./ms-packages
+    container_name: packages-service
+    # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-packages:5432/packages_db
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=false
+    depends_on:
+      postgres-packages:
+        condition: service_healthy
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # Geocoding Service - Distance calculation (no database)
+  geocoding-service:
+    build: ./ms-geocoding
+    container_name: geocoding-service
+    # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - ORS_URL=${ORS_URL:-https://api.openrouteservice.org}
+      - ORS_API_KEY=${ORS_API_KEY}
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  # ================================================================
+  # API GATEWAY
+  # ================================================================
+  # This is the ONLY service exposed to the outside world
+  # All external requests must go through this gateway
+  # ================================================================
+
   gateway-service:
     build: ./gateway
     container_name: gateway-service
     ports:
-      - "8080:8080"
+      - "8080:8080"  # ONLY exposed port - entry point for all external traffic
     environment:
-      # Nombres de variables mapeados a los que lee tu application.yml
+      - SPRING_PROFILES_ACTIVE=docker
       - FLEETS_SERVICE_URL=http://fleets-service:8081
       - ROUTES_SERVICE_URL=http://routes-service:8082
       - AUTH_SERVICE_URL=http://auth-service:8083
       - PACKAGES_SERVICE_URL=http://packages-service:8084
       - GEOCODING_SERVICE_URL=http://geocoding-service:8085
-
-      # Keycloak Configuration
       - KEYCLOAK_URI=${KEYCLOAK_URI}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_JWKS_URI=${KEYCLOAK_JWKS_URI}
@@ -28,84 +246,27 @@ services:
       - backend-network
     restart: unless-stopped
 
-  fleets-service:
-    build: ./ms-fleets
-    container_name: fleets-service
-    ports:
-      - "8081:8081"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:logisticadb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
-    networks:
-      - backend-network
-    restart: unless-stopped
-
-  routes-service:
-    build: ./ms-routes
-    container_name: routes-service
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:routesdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
-      # Ajustado a los nombres reales que buscan los Feign Clients/WebClient
-      - FLEETS_SERVICE_URL=http://fleets-service:8081
-      - PACKAGES_SERVICE_URL=http://packages-service:8084
-      - GEOCODING_SERVICE_URL=http://geocoding-service:8085
-    depends_on:
-      - fleets-service
-      - packages-service
-      - geocoding-service
-    networks:
-      - backend-network
-    restart: unless-stopped
-
-  auth-service:
-    build: ./ms-auth
-    container_name: auth-service
-    ports:
-      - "8083:8083"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:authdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
-      - KEYCLOAK_URI=${KEYCLOAK_URI}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
-    networks:
-      - backend-network
-    restart: unless-stopped
-
-  packages-service:
-    build: ./ms-packages
-    container_name: packages-service
-    ports:
-      - "8084:8084"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:packagesdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-}
-    networks:
-      - backend-network
-    restart: unless-stopped
-
-  geocoding-service:
-    build: ./ms-geocoding
-    container_name: geocoding-service
-    ports:
-      - "8085:8085"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - ORS_URL=${ORS_URL:-https://api.openrouteservice.org}
-      - ORS_API_KEY=${ORS_API_KEY}
-    networks:
-      - backend-network
-    restart: unless-stopped
+# ================================================================
+# NETWORK
+# ================================================================
+# Internal network - not accessible from outside
+# Services communicate using container names as hostnames
+# ================================================================
 
 networks:
   backend-network:
     driver: bridge
     name: fleet-network
+
+# ================================================================
+# VOLUMES
+# ================================================================
+# Persistent storage for each database
+# Data persists even after containers are stopped/removed
+# ================================================================
+
+volumes:
+  postgres_fleets_data:
+  postgres_routes_data:
+  postgres_packages_data:
+  # postgres_auth_data:  # Commented out - not needed
