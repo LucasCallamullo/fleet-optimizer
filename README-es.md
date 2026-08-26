@@ -99,6 +99,18 @@ npm run dev</code></pre>
   <li><strong>FrontEnd:</strong> <code>http://localhost:5173</code></li>
 </ul>
 
+
+<hr>
+
+<h2>C4 Model</h2>
+
+![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png)
+
+<h2>DER</h2>
+
+![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
+
+
 <hr>
 
 <h2>🐳 Despliegue con Docker</h2>
@@ -147,17 +159,6 @@ npm run dev</code></pre>
 
 <hr>
 
-<h2>C4 Model</h2>
-
-![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png)
-
-<h2>DER</h2>
-
-![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
-
-
-<hr>
-
 <h2>Flujo de Autenticación (OAuth2 + JWT)</h2>
 <h3>Pasos del flujo:</h3>
 <ol>
@@ -190,6 +191,52 @@ npm run dev</code></pre>
     El microservicio destino recibe el contexto del usuario (a través de los headers) y utiliza <code>@PreAuthorize</code> para controlar el acceso a los endpoints según los roles.
   </li>
 </ol>
+
+<h2>🖥️ Capturas del Frontend</h2>
+<p>La aplicación ofrece una interfaz intuitiva para gestionar todos los aspectos del sistema logístico. A continuación, se muestran algunas de las pantallas principales.</p>
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Dashboard</strong>
+    </td>
+    <td align="center">
+      <strong>Gestión de Flota</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front1.png" alt="Dashboard" width="400"/>
+      <br>
+      <em>Dashboard con información del JWT y accesos rápidos</em>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front2.png" alt="Gestión de Flota" width="400"/>
+      <br>
+      <em>Tabla de vehículos con capacidades y estado</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Detalle de Paquete</strong>
+    </td>
+    <td align="center">
+      <strong>Selección de Vehículo</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front3.png" alt="Detalle de Paquete" width="400"/>
+      <br>
+      <em>Detalle del paquete con selector de destino</em>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front4.png" alt="Selección de Vehículo" width="400"/>
+      <br>
+      <em>Vehículos disponibles filtrados por capacidad</em>
+    </td>
+  </tr>
+</table>
 
 
 <hr>

@@ -101,6 +101,16 @@ npm run dev</code></pre>
 
 <hr>
 
+<h2>C4 Model</h2>
+
+![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png)
+
+<h2>DER</h2>
+
+![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
+
+<hr>
+
 <h2>🐳 Docker Deployment</h2>
 <p>All services are dockerized and can be started using Docker Compose, including:</p>
 <ul>
@@ -143,18 +153,6 @@ npm run dev</code></pre>
 <h3>🔹 Geocoding Service (ms-geocoding)</h3>
 <p>Microservice dedicated exclusively to route and distance calculation based on geographic coordinates (latitude/longitude). Consumes the <strong>OpenRouteService (ORS)</strong> API, a routing service that requires an API key for usage. Supports distance and estimated time calculation to optimize system costs and logistics. Implements a batch endpoint to process multiple locations in a single call.</p>
 
-
-<hr>
-
-<h2>C4 Model</h2>
-
-![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png)
-
-<h2>DER</h2>
-
-![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
-
-
 <hr>
 
 <h2>Authentication Flow (OAuth2 + JWT)</h2>
@@ -190,6 +188,51 @@ npm run dev</code></pre>
   </li>
 </ol>
 
+<h2>🖥️ Frontend Screenshots</h2>
+<p>The application provides an intuitive interface for managing all aspects of the logistics system. Below are some of the main screens.</p>
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Dashboard</strong>
+    </td>
+    <td align="center">
+      <strong>Fleet Management</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front1.png" alt="Dashboard" width="400"/>
+      <br>
+      <em>Dashboard with JWT info and quick access</em>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front2.png" alt="Fleet Management" width="400"/>
+      <br>
+      <em>Vehicles table with capacities and status</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Package Detail</strong>
+    </td>
+    <td align="center">
+      <strong>Vehicle Selection</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front3.png" alt="Package Detail" width="400"/>
+      <br>
+      <em>Package details with destination selector</em>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/front4.png" alt="Vehicle Selection" width="400"/>
+      <br>
+      <em>Available vehicles filtered by capacity</em>
+    </td>
+  </tr>
+</table>
 
 <hr>
 
