@@ -1,0 +1,48 @@
+# ================================================================
+# APPLICATION - ms-packages (Docker configuration)
+# ================================================================
+# This file overrides application.yml when the "docker" profile is active.
+# Used when running the service inside a Docker container.
+# ================================================================
+
+spring:
+  # ================================================================
+  # DATASOURCE - PostgreSQL for Docker
+  # ================================================================
+  datasource:
+    url: jdbc:postgresql://postgres-packages:5432/packages_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  # ================================================================
+  # JPA - Hibernate configuration for PostgreSQL
+  # ================================================================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # ================================================================
+  # H2 Console - Disabled in Docker
+  # ================================================================
+  h2:
+    console:
+      enabled: false
+
+# ================================================================
+# LOGGING - Less verbose in Docker
+# ================================================================
+logging:
+  level:
+    com.packages.controller: INFO
+    com.packages.filter: WARN
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
+
+  # File appender is disabled in Docker (logs go to container logs)

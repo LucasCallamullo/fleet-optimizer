@@ -39,3 +39,11 @@ Authorization: Bearer {{accessToken}}
 GET {{packagesUrl}}/detailed
 Accept: application/json
 Authorization: Bearer {{accessToken}}
+
+
+### ============================================================
+### 2. GET ALL VEHICLES DETAILED (with full category)
+### ============================================================
+GET {{packagesUrl}}/1/detailed
+Accept: application/json
+Authorization: Bearer {{accessToken}}

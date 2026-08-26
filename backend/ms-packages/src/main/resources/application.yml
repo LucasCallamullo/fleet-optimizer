@@ -1,75 +1,72 @@
+# ================================================================
+# APPLICATION - ms-packages (Base configuration)
+# ================================================================
+# This is the base configuration used for local development.
+# Values here are overridden by application-docker.yml when
+# the "docker" profile is active.
+# ================================================================
+
 server:
   port: 8084
 
 spring:
   application:
     name: ms-packages
-  
+
+  # ================================================================
+  # DATASOURCE - H2 for local development
+  # ================================================================
   datasource:
-    # url: jdbc:h2:mem:fleetdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    # driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:packagesdb
     username: sa
     password: 
-  
+    driver-class-name: org.h2.Driver
+
+  # ================================================================
+  # JPA - Hibernate configuration
+  # ================================================================
   jpa:
-    # defer-datasource-initialization: true
     hibernate:
       ddl-auto: create
-    # show-sql: true
-
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-    # database-platform: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.H2Dialect
 
-# ============================================
+  # ================================================================
+  # H2 Console - Enabled for local development
+  # ================================================================
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# ================================================================
 # LOGGING CONFIGURATION
-# ============================================
+# ================================================================
+# NOTE: File appender is configured but not used by default.
+# To enable file logging, uncomment the 'file:' section below.
+# ================================================================
+
 logging:
-  
-  # ============================================
-  # LOG LEVELS (Filters)
-  # ============================================
-  # Defines which log messages are displayed.
-  # Priority order: TRACE < DEBUG < INFO < WARN < ERROR
-  # 
-  # When set to INFO: shows INFO, WARN, ERROR (hides DEBUG and TRACE)
-  # ============================================
   level:
-    # Application packages
-    com.packages.controller: WARN                    # Controllers - only important operations
-    com.packages.filter: INFO                        # logging filter / middleware
-    
-  
-  # ============================================
-  # LOG PATTERNS (Format)
-  # ============================================
+    com.packages.controller: WARN
+    com.packages.filter: INFO
+
   pattern:
-    # Console output format (human-readable, color-friendly)
-    # %d{pattern} - timestamp (yyyy-MM-dd HH:mm:ss)
-    # %level      - log level (INFO, DEBUG, ERROR, etc.)
-    # %msg        - the actual log message
-    # %n          - new line
-    # console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %highlight(%-5level) - %msg%n"
-    
+    # Console output format - without %highlight to avoid conflict with filter colors
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
     # File output format (more detailed for debugging)
-    # %thread     - name of the thread that generated the log
-    # %logger{36} - source class name (limited to 36 chars)
     file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
-  
-  # ============================================
+
+  # ================================================================
   # FILE APPENDER (Persistent logs)
-  # ============================================
-  file:
-    # Path where log files are stored (relative to application root)
-    name: logs/ms-packages.log
-    
-    # Maximum size per file (10MB)
-    # When file reaches this size, it's rotated (renamed and a new one is created)
-    max-size: 10MB
-    
-    # Number of rotated log files to keep
-    # Example: ms-packages.log, ms-packages.1.log, ms-packages.2.log, ... up to 7
-    max-history: 7
+  # ================================================================
+  # Commented out by default - uncomment to enable file logging.
+  # Writes logs to a file for long-term storage and debugging.
+  # ================================================================
+  # file:
+  #   name: logs/ms-packages.log
+  #   max-size: 10MB
+  #   max-history: 7
