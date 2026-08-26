@@ -130,7 +130,7 @@ public interface VehicleService {
      * @param requiredVolumeCbm - Required volume capacity
      * @return List of matching vehicles
      */
-    List<VehicleResponseDTO> findAvailableVehicles(Double requiredWeightKg, Double requiredVolumeCbm);
+    List<VehicleDetailDTO> findAvailableVehicles(Double requiredWeightKg, Double requiredVolumeCbm);
     
     // ================================================================
     // CRUD OPERATIONS

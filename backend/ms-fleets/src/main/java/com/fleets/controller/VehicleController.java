@@ -189,14 +189,14 @@ public class VehicleController {
      */
     @GetMapping("/available-for-package")
     @PreAuthorize("isAuthenticated()")
-    public List<VehicleResponseDTO> getAvailableVehiclesForPackage(
+    public List<VehicleDetailDTO> getAvailableVehiclesForPackage(
             @RequestParam Double requiredWeightKg,
             @RequestParam Double requiredVolumeCbm) {
         
         log.info("GET /api/v1/vehicles/available-for-package - Weight: {}kg, Volume: {}m³", 
             requiredWeightKg, requiredVolumeCbm);
         
-        List<VehicleResponseDTO> vehicles = vehicleService.findAvailableVehicles(
+        List<VehicleDetailDTO> vehicles = vehicleService.findAvailableVehicles(
             requiredWeightKg, requiredVolumeCbm);
         
         return vehicles;

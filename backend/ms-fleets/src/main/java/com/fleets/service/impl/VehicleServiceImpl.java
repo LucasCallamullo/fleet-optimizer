@@ -145,11 +145,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<VehicleResponseDTO> findAvailableVehicles(Double requiredWeightKg, Double requiredVolumeCbm) {
+    public List<VehicleDetailDTO> findAvailableVehicles(Double requiredWeightKg, Double requiredVolumeCbm) {
         log.debug("Finding available vehicles for weight: {}kg, volume: {}m³", requiredWeightKg, requiredVolumeCbm);
         
         // Get all available vehicles
-        List<Vehicle> availableVehicles = vehicleRepository.findByStatus(VehicleStatus.AVAILABLE);
+        List<Vehicle> availableVehicles = vehicleRepository.findByStatusWithCategory(VehicleStatus.AVAILABLE);
         
         // Filter by capacity requirements
         List<Vehicle> matchingVehicles = availableVehicles.stream()
@@ -160,7 +160,7 @@ public class VehicleServiceImpl implements VehicleService {
             matchingVehicles.size(), availableVehicles.size());
         
         // Map to DTOs (only category ID)
-        return vehicleMapper.toDtoList(matchingVehicles);
+        return vehicleMapper.toDtoListWithCategory(matchingVehicles);
     }
 
     /**

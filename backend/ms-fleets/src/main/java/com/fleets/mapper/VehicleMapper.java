@@ -105,49 +105,7 @@ public interface VehicleMapper {
      * @return List<VehicleResponseDTO> - List of DTOs to send to client
      */
     List<VehicleResponseDTO> toDtoList(List<Vehicle> entities);
-    
-    /**
-     * ================================================================
-     * 6. ADVANCED MAPPING - Named Mappings (Optional)
-     * ================================================================
-     * 
-     * @description Example of using @Named for multiple mapping strategies.
-     *              Useful when you need different mappings for different use cases.
-     * 
-     * @param entity - The Vehicle entity
-     * @return VehicleResponseDTO - Mapped DTO with status
-     * 
-     * USAGE:
-     * // Define named mapping method
-     * @Named("withStatus")
-     * @Mapping(target = "status", expression = "java(mapStatus(entity))")
-     * VehicleResponseDTO toDtoWithStatus(Vehicle entity);
-     * 
-     * // Reference in another mapper
-     * @Mapping(target = "vehicle", qualifiedByName = "withStatus")
-     * ReservationDTO toDto(Reservation reservation);
-     * 
-     * NOTE: Commented out as optional - uncomment if needed
-     */
-    // @Named("withStatus")
-    // @Mapping(target = "status", expression = "java(mapStatus(entity))")
-    // VehicleResponseDTO toDtoWithStatus(Vehicle entity);
-    
-    /**
-     * ================================================================
-     * 7. HELPER METHODS - Custom Logic (Optional)
-     * ================================================================
-     * 
-     * @description Helper methods for complex mapping logic.
-     *              Can be used in @Mapping(expression = "java(...)").
-     * 
-     * @param entity - The Vehicle entity
-     * @return String - Mapped status
-     * 
-     * NOTE: Commented out as optional - uncomment if needed
-     */
-    // default String mapStatus(Vehicle entity) {
-    //     if (entity == null) return "UNKNOWN";
-    //     return entity.isActive() ? "ACTIVE" : "INACTIVE";
-    // }
+
+
+    List<VehicleDetailDTO> toDtoListWithCategory(List<Vehicle> entities);
 }

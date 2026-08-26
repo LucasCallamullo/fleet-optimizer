@@ -39,9 +39,20 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByCategoryIdWithCategory(@Param("categoryId") Long categoryId);
     
     /**
-     * Find all vehicles with a specific status.
+     * Find all vehicles with a specific status with their category eagerly loaded.
+     * Uses LEFT JOIN FETCH to load category in the same query (EAGER).
+     * Includes vehicles even if category is null.
+     * 
+     * Use this when you need to display vehicle details with category information.
+     * 
+     * @param status the vehicle status (AVAILABLE, IN_ROUTE, MAINTENANCE, INACTIVE)
+     * @return list of vehicles with the given status and their category loaded (EAGER)
+     * 
+     * @example
+     * List<Vehicle> availableVehicles = vehicleRepository.findByStatusWithCategory(VehicleStatus.AVAILABLE);
      */
-    List<Vehicle> findByStatus(VehicleStatus status);
+    @Query("SELECT v FROM Vehicle v LEFT JOIN FETCH v.category WHERE v.status = :status")
+    List<Vehicle> findByStatusWithCategory(@Param("status") VehicleStatus status);
 
     /**
      * Find available vehicles that meet weight and volume requirements.
