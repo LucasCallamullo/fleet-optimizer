@@ -25,50 +25,89 @@
 
     <dependencies>
         <!-- ================================================================
-             CORE GATEWAY (Spring Cloud Gateway)
+             SPRING CLOUD GATEWAY
              ================================================================
-             NOTA: Spring Cloud Gateway usa WebFlux (reactivo).
-             NO incluye JPA, NO incluye JDBC, NO incluye Tomcat.
+             Reactive API Gateway based on Netty.
+             Provides routing, filtering, and cross-cutting concerns.
+             
+             IMPORTANT: Uses WebFlux (reactive) NOT traditional Servlet stack.
+             Does NOT include: JPA, JDBC, or Tomcat (uses Netty instead).
+             All requests are handled asynchronously and non-blocking.
         -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
 
-        <!-- Circuit Breaker -->
+        <!-- ================================================================
+             CIRCUIT BREAKER
+             ================================================================
+             Resilience4J implementation for fault tolerance.
+             Prevents cascading failures with:
+             - Timeouts for slow services
+             - Fallbacks when services are unavailable
+             - Circuit breakers to stop calling failing services
+        -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
         </dependency>
 
-        <!-- Actuator - monitoring and debug -->
+        <!-- ================================================================
+             ACTUATOR
+             ================================================================
+             Monitoring and management endpoints.
+             Provides:
+             - /actuator/health - Service health status
+             - /actuator/info - Service information
+             - /actuator/gateway - Gateway routes and filters
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <!-- ================================================================
-             LOMBOK (reducción de código)
-             ================================================================ -->
+             LOMBOK
+             ================================================================
+             Reduces boilerplate code.
+             Annotations: @Data, @Slf4j, @RequiredArgsConstructor, @Builder.
+             Generates code at compile time.
+        -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- JWT validation -->
+        <!-- ================================================================
+             SECURITY & JWT
+             ================================================================
+             OAuth2 Resource Server: Validates JWT tokens from Keycloak.
+             Provides JWT authentication for all incoming requests.
+             Required for the gateway to validate tokens before routing.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
+
+        <!-- Spring Security: Core security framework.
+             Provides SecurityContext, authentication, and authorization.
+             Required for @PreAuthorize and method-level security.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
         <!-- ================================================================
-             TESTS
-             ================================================================ -->
+             TESTING
+             ================================================================
+             Spring Boot Test: Comprehensive testing framework.
+             Includes: JUnit 5, Mockito, and Spring TestContext.
+             Excludes JUnit 4 vintage engine for clean JUnit 5 setup.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -82,6 +121,12 @@
         </dependency>
     </dependencies>
 
+    <!-- ================================================================
+         DEPENDENCY MANAGEMENT
+         ================================================================
+         Manages Spring Cloud versions for all cloud dependencies.
+         This ensures all cloud components use compatible versions.
+    -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -96,6 +141,10 @@
 
     <build>
         <plugins>
+            <!-- Compiler Plugin: Configures annotation processing.
+                 Required for Lombok to generate code at compile time.
+                 Specifies Lombok version explicitly to avoid build issues.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -104,14 +153,16 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <!-- A veces la version de lombok sin especificar puede trabar 
-                            el clean package -->
+                            <!-- Explicit version prevents compile-time issues -->
                             <version>${lombok.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
+            <!-- Spring Boot Maven Plugin: Creates executable JAR.
+                 Excludes Lombok from the final JAR (not needed at runtime).
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
