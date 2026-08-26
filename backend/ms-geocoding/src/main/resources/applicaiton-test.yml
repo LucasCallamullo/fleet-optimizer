@@ -1,0 +1,25 @@
+# ================================================================
+# APPLICATION - ms-geocoding (Test configuration)
+# ================================================================
+# Used when running integration tests.
+# ================================================================
+
+# ================================================================
+# OSRM API CONFIGURATION - Mock values for tests
+# ================================================================
+app:
+  ors:
+    url: http://localhost:8085
+    api-key: test-api-key
+    timeout: 5
+
+# ================================================================
+# LOGGING - Minimal logging for tests
+# ================================================================
+logging:
+  level:
+    com.geocoding: WARN
+    org.springframework.web.reactive.function.client: WARN
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"

@@ -5,9 +5,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- =========================================== -->
-    <!-- PARENT: Spring Boot Starter Parent          -->
-    <!-- =========================================== -->
+    <!-- ================================================================
+         PARENT: Spring Boot Starter Parent
+         ================================================================
+         Provides base configuration and dependency management.
+         Version 3.2.12 is the latest stable from the 3.2.x branch.
+    -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -15,60 +18,101 @@
         <relativePath/>
     </parent>
 
-    <!-- =========================================== -->
-    <!-- PROJECT METADATA                            -->
-    <!-- =========================================== -->
+    <!-- ================================================================
+         PROJECT METADATA
+    -->
     <groupId>com.fleetoptimizer</groupId>
     <artifactId>ms-geocoding</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ms-geocoding</name>
     <description>Geocoding service for route calculation using OSRM</description>
 
-    <!-- =========================================== -->
-    <!-- PROPERTIES                                  -->
-    <!-- =========================================== -->
+    <!-- ================================================================
+         PROPERTIES
+         ================================================================
+         Defines Java version for the project.
+    -->
     <properties>
         <java.version>17</java.version>
     </properties>
 
-    <!-- =========================================== -->
-    <!-- DEPENDENCIES                                -->
-    <!-- =========================================== -->
+    <!-- ================================================================
+         DEPENDENCIES
+         ================================================================
+    -->
+
     <dependencies>
 
-        <!-- Spring Boot Web Starter (Tomcat) -->
+        <!-- ================================================================
+             SPRING BOOT STARTERS
+        -->
+
+        <!-- Spring Boot Web: REST APIs with Tomcat embedded.
+             Provides: @RestController, @RequestMapping, and HTTP support.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- WebClient para llamar a OSRM -->
+        <!-- WebFlux: Reactive web framework for non-blocking HTTP clients.
+             Used for WebClient to call OSRM API asynchronously.
+             Note: Uses Netty in addition to Tomcat for reactive clients.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-        <!-- Lombok -->
+        <!-- ================================================================
+             UTILITY LIBRARIES
+        -->
+
+        <!-- Lombok: Reduces boilerplate code.
+             Generates getters, setters, builders, and constructors at compile time.
+             Annotations: @Data, @Builder, @Slf4j, @RequiredArgsConstructor.
+        -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Validation -->
+        <!-- Validation: Bean validation for DTOs.
+             Provides @Valid, @NotNull, @Min, @Max annotations.
+             Uses Jakarta Bean Validation 3.0 (JSR-380).
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Swagger / OpenAPI -->
+        <!-- ================================================================
+             API DOCUMENTATION
+        -->
+
+        <!-- Swagger / OpenAPI: Auto-generates API documentation.
+             Access UI at: http://localhost:8085/swagger-ui.html
+             Generates docs from @RestController and DTOs.
+        -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.6.0</version>
         </dependency>
 
-        <!-- Tests -->
+        <!-- ================================================================
+             TESTING
+             ================================================================
+             NOTE: ms-geocoding does NOT use a database.
+             No JPA, Hibernate, PostgreSQL, or H2 dependencies needed.
+             All data comes from the OSRM API.
+        -->
+
+        <!-- Spring Boot Test: Comprehensive testing framework.
+             Includes JUnit 5, Mockito, and Spring TestContext.
+             Excludes vintage engine (JUnit 4) for clean JUnit 5 setup.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -83,15 +127,20 @@
 
     </dependencies>
 
-    <!-- =========================================== -->
-    <!-- BUILD                                       -->
-    <!-- =========================================== -->
+    <!-- ================================================================
+         BUILD CONFIGURATION
+    -->
     <build>
         <plugins>
+
+            <!-- Spring Boot Maven Plugin: Creates executable JAR.
+                 Excludes Lombok from the final JAR (not needed at runtime).
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
 

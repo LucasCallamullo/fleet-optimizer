@@ -1,3 +1,10 @@
+# ================================================================
+# APPLICATION - ms-geocoding (Base configuration)
+# ================================================================
+# This service does NOT use a database.
+# All data comes from the OSRM (Open Route Service) API.
+# ================================================================
+
 server:
   port: 8085
 
@@ -6,15 +13,15 @@ spring:
     name: ms-geocoding
 
 # ================================================================
-# ORS (OPEN ROUTE SOURCE) API CONFIGURATION
+# OSRM (OPEN ROUTE SERVICE) API CONFIGURATION
 # ================================================================
 app:
   ors:
-    # URL pública de OSRM (para desarrollo)
-    # Key ORS expuesta por desarrollo
+    # Public OSRM URL for development
+    # The API key is provided via environment variables
     url: ${ORS_URL:https://api.openrouteservice.org}
     api-key: ${ORS_API_KEY:eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjNhMmMzMmRhN2Q5YzQ4NzE5Y2VkODNlZjMyNWI0ZWM1IiwiaCI6Im11cm11cjY0In0=}
-    # Timeout en segundos para las llamadas a OSRM
+    # Timeout in seconds for OSRM API calls
     timeout: 10
 
 # ================================================================
@@ -24,3 +31,11 @@ logging:
   level:
     com.geocoding: DEBUG
     org.springframework.web.reactive.function.client: DEBUG
+
+  # ================================================================
+  # LOG PATTERNS - Formato simplificado
+  # ================================================================
+  # NOTA: No usar %highlight porque el filter ya tiene sus propios colores
+  # ================================================================
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"

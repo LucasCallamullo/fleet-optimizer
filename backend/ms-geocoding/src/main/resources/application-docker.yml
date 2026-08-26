@@ -1,0 +1,25 @@
+# ================================================================
+# APPLICATION - ms-geocoding (Docker configuration)
+# ================================================================
+# This file overrides application.yml when the "docker" profile is active.
+# ================================================================
+
+# ================================================================
+# OSRM API CONFIGURATION - Uses environment variables
+# ================================================================
+app:
+  ors:
+    url: ${ORS_URL}
+    api-key: ${ORS_API_KEY}
+    timeout: 30
+
+# ================================================================
+# LOGGING - Less verbose in Docker
+# ================================================================
+logging:
+  level:
+    com.geocoding: INFO
+    org.springframework.web.reactive.function.client: INFO
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
