@@ -1,0 +1,60 @@
+# ================================================================
+# APPLICATION - ms-routes (Docker configuration)
+# ================================================================
+# This file overrides application.yml when the "docker" profile is active.
+# Used when running the service inside a Docker container.
+# ================================================================
+
+# ================================================================
+# EXTERNAL SERVICES - Using internal Docker DNS
+# ================================================================
+app:
+  clients:
+    fleets:
+      url: http://fleets-service:8081
+    packages:
+      url: http://packages-service:8084
+    geocoding:
+      url: http://geocoding-service:8085
+
+spring:
+  # ================================================================
+  # DATASOURCE - PostgreSQL for Docker
+  # ================================================================
+  datasource:
+    url: jdbc:postgresql://postgres-routes:5432/routes_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  # ================================================================
+  # JPA - Hibernate configuration for PostgreSQL
+  # ================================================================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # ================================================================
+  # H2 Console - Disabled in Docker
+  # ================================================================
+  h2:
+    console:
+      enabled: false
+
+# ================================================================
+# LOGGING - Less verbose in Docker
+# ================================================================
+logging:
+  level:
+    com.routes.controller: INFO
+    com.routes.filter: WARN
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
+
+  # File appender disabled in Docker

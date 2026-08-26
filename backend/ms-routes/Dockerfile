@@ -1,27 +1,41 @@
 # ================================================================
-# DOCKERFILE - ms-routes
+# DOCKERFILE - ms-routes (Multi-stage build)
 # ================================================================
-# Base image: Java 17 JRE (runtime only, smaller than JDK)
-# Uses Eclipse Temurin (OpenJDK distribution)
+# 
+# STAGE 1: BUILD - Compiles the application inside the container
+# STAGE 2: RUNTIME - Runs the JAR with only JRE
 # ================================================================
 
+# ================================================================
+# STAGE 1: BUILD
+# ================================================================
+FROM maven:3.9-eclipse-temurin-17-alpine AS build
+
+WORKDIR /app
+
+# Dependency caching
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Build the application
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# ================================================================
+# STAGE 2: RUNTIME
+# ================================================================
 FROM eclipse-temurin:17-jre-alpine
 
-# Metadata
 LABEL maintainer="Lucas Callamullo"
 LABEL description="Routes microservice for Fleet Optimization System"
 
-# Application directory
 WORKDIR /app
 
-# Copy JAR file
-# ================================================================
-# The JAR is built by Maven: mvn clean package
-# It will be placed in the target/ directory
-COPY target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
-# Expose port (must match server.port in application.yml)
 EXPOSE 8082
 
-# Run the application
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#  CMD wget --no-verbose --tries=1 --spider http://localhost:8082/actuator/health || exit 1
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

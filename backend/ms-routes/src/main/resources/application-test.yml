@@ -1,0 +1,57 @@
+# ================================================================
+# APPLICATION - ms-routes (Test configuration)
+# ================================================================
+# Used when running integration tests with the "test" profile.
+# ================================================================
+
+# ================================================================
+# EXTERNAL SERVICES - Mock URLs for tests
+# ================================================================
+app:
+  clients:
+    fleets:
+      url: http://localhost:8081
+    packages:
+      url: http://localhost:8084
+    geocoding:
+      url: http://localhost:8085
+
+spring:
+  # ================================================================
+  # DATASOURCE - H2 in-memory for tests
+  # ================================================================
+  datasource:
+    url: jdbc:h2:mem:routes_test_db
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+  # ================================================================
+  # JPA - Hibernate configuration for tests
+  # ================================================================
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # ================================================================
+  # H2 Console - Disabled in tests
+  # ================================================================
+  h2:
+    console:
+      enabled: false
+
+# ================================================================
+# LOGGING - Minimal logging for tests
+# ================================================================
+logging:
+  level:
+    com.routes: WARN
+    org.springframework: WARN
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
