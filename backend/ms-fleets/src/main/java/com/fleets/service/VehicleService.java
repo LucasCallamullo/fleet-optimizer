@@ -117,6 +117,20 @@ public interface VehicleService {
      * @return list of VehicleDetailDTO in that category
      */
     List<VehicleDetailDTO> getVehiclesByCategory(Long categoryId);
+
+    /**
+     * Finds available vehicles that meet the weight and volume requirements.
+     * 
+     * Criteria:
+     * 1. Status must be AVAILABLE
+     * 2. maxWeightKg must be null OR >= requiredWeightKg
+     * 3. maxVolumeCbm must be null OR >= requiredVolumeCbm
+     * 
+     * @param requiredWeightKg - Required weight capacity
+     * @param requiredVolumeCbm - Required volume capacity
+     * @return List of matching vehicles
+     */
+    List<VehicleResponseDTO> findAvailableVehicles(Double requiredWeightKg, Double requiredVolumeCbm);
     
     // ================================================================
     // CRUD OPERATIONS

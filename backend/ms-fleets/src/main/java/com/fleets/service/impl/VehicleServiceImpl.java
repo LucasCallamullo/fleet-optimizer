@@ -6,6 +6,7 @@ import com.fleets.dto.response.VehicleDetailDTO;
 import com.fleets.exception.AppException;
 import com.fleets.model.Category;
 import com.fleets.model.Vehicle;
+import com.fleets.model.VehicleStatus;
 import com.fleets.repository.VehicleRepository;
 import com.fleets.service.CategoryService;
 import com.fleets.service.VehicleService;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * JPA-based implementation of VehicleService.
@@ -140,6 +142,45 @@ public class VehicleServiceImpl implements VehicleService {
             );
         
         return vehicleMapper.toDetailDto(vehicleWithCategory);
+    }
+
+    @Override
+    public List<VehicleResponseDTO> findAvailableVehicles(Double requiredWeightKg, Double requiredVolumeCbm) {
+        log.debug("Finding available vehicles for weight: {}kg, volume: {}m³", requiredWeightKg, requiredVolumeCbm);
+        
+        // Get all available vehicles
+        List<Vehicle> availableVehicles = vehicleRepository.findByStatus(VehicleStatus.AVAILABLE);
+        
+        // Filter by capacity requirements
+        List<Vehicle> matchingVehicles = availableVehicles.stream()
+            .filter(vehicle -> meetsRequirements(vehicle, requiredWeightKg, requiredVolumeCbm))
+            .collect(Collectors.toList());
+        
+        log.info("Found {} vehicles matching requirements out of {} available", 
+            matchingVehicles.size(), availableVehicles.size());
+        
+        // Map to DTOs (only category ID)
+        return vehicleMapper.toDtoList(matchingVehicles);
+    }
+
+    /**
+     * Checks if a vehicle meets the weight and volume requirements.
+     * 
+     * @param vehicle - The vehicle to check
+     * @param requiredWeightKg - Required weight capacity
+     * @param requiredVolumeCbm - Required volume capacity
+     * @return true if vehicle meets requirements, false otherwise
+     */
+    private boolean meetsRequirements(Vehicle vehicle, Double requiredWeightKg, Double requiredVolumeCbm) {
+        // Check weight capacity
+        boolean meetsWeight = vehicle.getMaxWeightKg() == null || 
+                              vehicle.getMaxWeightKg() >= requiredWeightKg;
+        
+        // Check volume capacity
+        boolean meetsVolume = vehicle.getMaxVolumeCbm() == null || 
+                              vehicle.getMaxVolumeCbm() >= requiredVolumeCbm;
+        
+        return meetsWeight && meetsVolume;
     }
     
     // ================================================================

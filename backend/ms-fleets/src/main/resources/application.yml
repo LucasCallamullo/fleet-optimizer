@@ -1,57 +1,55 @@
+# ================================================================
+# APPLICATION - ms-fleets (Base configuration)
+# ================================================================
+# This is the base configuration used for local development.
+# Values here are overridden by application-docker.yml when
+# the "docker" profile is active.
+# ================================================================
+
 server:
   port: 8081
 
 spring:
   application:
     name: ms-fleets
-  
+
+  # ================================================================
+  # DATASOURCE - H2 for local development
+  # ================================================================
   datasource:
-    # url: jdbc:h2:mem:fleetdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    # driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:logisticadb
     username: sa
     password: 
-  
+    driver-class-name: org.h2.Driver
+
+  # ================================================================
+  # JPA - Hibernate configuration
+  # ================================================================
   jpa:
-    # defer-datasource-initialization: true
     hibernate:
       ddl-auto: create
-    # show-sql: true
-
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-    # database-platform: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.H2Dialect
 
-# ============================================
+  # ================================================================
+  # H2 Console - Enabled for local development
+  # ================================================================
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# ================================================================
 # LOGGING CONFIGURATION
-# ============================================
-# Controls how and where application logs are written.
-# Similar to configuring winston/morgan in Express.js
-# ============================================
-
+# ================================================================
 logging:
-  
-  # ============================================
-  # LOG LEVELS (Filters)
-  # ============================================
-  # Defines which log messages are displayed.
-  # Priority order: TRACE < DEBUG < INFO < WARN < ERROR
-  # 
-  # When set to INFO: shows INFO, WARN, ERROR (hides DEBUG and TRACE)
-  # When set to DEBUG: shows DEBUG, INFO, WARN, ERROR
-  # ============================================
   level:
-    # Application packages
-    # com.fleets: DEBUG                            # Base package - shows all app logs
-    com.fleets.controller: WARN                    # Controllers - only important operations
-    com.fleets.filter: INFO                        # logging filter / middleware
-    
-    # Hibernate (ORM) logs
-    # org.hibernate.SQL: DEBUG                       # Shows SQL statements executed
-    # org.hibernate.tool.hbm2ddl: DEBUG
-    # org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Shows SQL parameter values (use only in dev)
-  
+    com.fleets.controller: WARN
+    com.fleets.filter: INFO
+
   # ============================================
   # LOG PATTERNS (Format)
   # ============================================
@@ -65,13 +63,14 @@ logging:
     # %msg        - the actual log message
     # %n          - new line
     # console: "%d{yyyy-MM-dd HH:mm:ss} - %level - %msg%n"
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %highlight(%-5level) - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %-5level - %msg%n"
     
     # File output format (more detailed for debugging)
     # %thread     - name of the thread that generated the log
     # %logger{36} - source class name (limited to 36 chars)
     file: "%d{yyyy-MM-dd HH:mm:ss} - %level - [%thread] - %logger{36} - %msg%n%n"
   
+
   # ============================================
   # FILE APPENDER (Persistent logs)
   # ============================================

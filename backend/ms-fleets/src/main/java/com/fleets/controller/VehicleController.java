@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -175,5 +176,28 @@ public class VehicleController {
         log.info("DELETE /api/v1/vehicles/{} - Deleting vehicle", id);
         vehicleService.deleteVehicle(id);
         log.info("Vehicle deleted successfully - id: {}", id);
+    }
+
+    /**
+     * GET /api/v1/vehicles/available-for-package
+     * 
+     * Returns vehicles that can carry a package with given requirements.
+     * 
+     * @param requiredWeightKg - Required weight capacity in kg
+     * @param requiredVolumeCbm - Required volume capacity in m³
+     * @return List of available vehicles that meet the requirements
+     */
+    @GetMapping("/available-for-package")
+    public List<VehicleResponseDTO> getAvailableVehiclesForPackage(
+            @RequestParam Double requiredWeightKg,
+            @RequestParam Double requiredVolumeCbm) {
+        
+        log.info("GET /api/v1/vehicles/available-for-package - Weight: {}kg, Volume: {}m³", 
+            requiredWeightKg, requiredVolumeCbm);
+        
+        List<VehicleResponseDTO> vehicles = vehicleService.findAvailableVehicles(
+            requiredWeightKg, requiredVolumeCbm);
+        
+        return vehicles;
     }
 }

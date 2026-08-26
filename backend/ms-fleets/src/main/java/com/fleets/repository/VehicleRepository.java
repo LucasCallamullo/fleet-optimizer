@@ -1,6 +1,8 @@
 package com.fleets.repository;
 
 import com.fleets.model.Vehicle;
+import com.fleets.model.VehicleStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,10 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
-    
-    // ================================================================
-    // FIND BY CATEGORY ID
-    // ================================================================
     
     /**
      * Find all vehicles belonging to a specific category.
@@ -40,6 +38,23 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     @Query("SELECT v FROM Vehicle v JOIN FETCH v.category WHERE v.category.id = :categoryId")
     List<Vehicle> findByCategoryIdWithCategory(@Param("categoryId") Long categoryId);
     
+    /**
+     * Find all vehicles with a specific status.
+     */
+    List<Vehicle> findByStatus(VehicleStatus status);
+
+    /**
+     * Find available vehicles that meet weight and volume requirements.
+     * Uses null checks to handle vehicles without capacity data.
+     */
+    @Query("SELECT v FROM Vehicle v WHERE v.status = 'AVAILABLE' AND " +
+           "(v.maxWeightKg IS NULL OR v.maxWeightKg >= :requiredWeightKg) AND " +
+           "(v.maxVolumeCbm IS NULL OR v.maxVolumeCbm >= :requiredVolumeCbm)")
+    List<Vehicle> findAvailableForRequirements(
+        @Param("requiredWeightKg") Double requiredWeightKg,
+        @Param("requiredVolumeCbm") Double requiredVolumeCbm
+    );
+
     // ================================================================
     // FIND ALL
     // ================================================================
