@@ -24,40 +24,66 @@
 
     <dependencies>
         <!-- ================================================================
-             WEBFLUX (para WebClient reactivo)
-             NOTA: Usamos WebFlux para WebClient reactivo, no Tomcat.
+             SPRING BOOT STARTERS - Core framework dependencies
+        -->
+        
+        <!-- WebFlux: Reactive web framework for non-blocking HTTP clients.
+             Used for WebClient to call Keycloak asynchronously.
+             Note: Uses Netty instead of Tomcat (reactive stack).
         -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-        <!-- SECURITY - Para @PreAuthorize y seguridad -->
+        <!-- Security: Authentication and authorization framework.
+             Provides @PreAuthorize, SecurityContext, and method-level security.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- LOMBOK (reducción de código) -->
+        <!-- ================================================================
+             UTILITY LIBRARIES
+        -->
+        
+        <!-- Lombok: Reduces boilerplate code.
+             Generates getters, setters, builders, and constructors at compile time.
+             Annotations: @Data, @Builder, @Slf4j, @RequiredArgsConstructor.
+        -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- VALIDATION (para DTOs) -->
+        <!-- Validation: Bean validation for DTOs.
+             Provides @Valid, @NotNull, @Email, @Size annotations.
+             Uses Jakarta Bean Validation 3.0 (JSR-380).
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- JACKSON - Para parsear JSON (Keycloak responses) -->
+        <!-- Jackson Databind: JSON serialization/deserialization.
+             Required for parsing Keycloak API responses.
+             Converts JSON to Java objects and vice versa.
+        -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- TESTS -->
+        <!-- ================================================================
+             TESTING DEPENDENCIES
+        -->
+        
+        <!-- Spring Boot Test: Comprehensive testing framework.
+             Includes JUnit 5, Mockito, and Spring TestContext.
+             Excludes vintage engine (JUnit 4) for clean JUnit 5 setup.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -70,14 +96,19 @@
             </exclusions>
         </dependency>
 
-        <!-- Para mockear en tests reactivos -->
+        <!-- Reactor Test: Testing utilities for reactive streams.
+             Provides StepVerifier for testing Flux/Mono sequences.
+             Essential for testing reactive WebClient calls.
+        -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Para @WithMockUser en tests reactivos -->
+        <!-- Spring Security Test: Security testing utilities.
+             Provides @WithMockUser and MockMvc security integration.
+        -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
@@ -87,6 +118,9 @@
 
     <build>
         <plugins>
+            <!-- Compiler Plugin: Configures annotation processing.
+                 Required for Lombok to generate code at compile time.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -101,6 +135,9 @@
                 </configuration>
             </plugin>
 
+            <!-- Spring Boot Maven Plugin: Creates executable JAR.
+                 Excludes Lombok from the final JAR (not needed at runtime).
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

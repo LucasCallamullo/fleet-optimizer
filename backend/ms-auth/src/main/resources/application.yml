@@ -1,3 +1,10 @@
+# ================================================================
+# APPLICATION - ms-auth (Simplified)
+# ================================================================
+# This service does NOT use a database.
+# All authentication is handled by Keycloak via WebClient.
+# ================================================================
+
 server:
   port: 8083
 
@@ -5,6 +12,9 @@ spring:
   application:
     name: ms-auth
 
+# ================================================================
+# KEYCLOAK CONFIGURATION
+# ================================================================
 app:
   keycloak:
     uri: ${KEYCLOAK_URI:https://labsys.frc.utn.edu.ar/aim}
@@ -13,7 +23,11 @@ app:
     client-secret: ${KEYCLOAK_CLIENT_SECRET:tpi-dds-client}
     admin-user: ${KEYCLOAK_ADMIN_USER:Dds-admin}
     admin-password: ${KEYCLOAK_ADMIN_PASSWORD:dds12345}
+    jwks-uri: ${KEYCLOAK_URI}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
 
+# ================================================================
+# LOGGING - Debug for development
+# ================================================================
 logging:
   level:
     com.auth: DEBUG

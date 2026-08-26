@@ -1,0 +1,26 @@
+# ================================================================
+# APPLICATION - ms-auth (Docker profile)
+# ================================================================
+# Overrides base configuration when "docker" profile is active.
+# ================================================================
+
+# ================================================================
+# KEYCLOAK CONFIGURATION - Uses environment variables
+# ================================================================
+app:
+  keycloak:
+    uri: ${KEYCLOAK_URI}
+    realm: ${KEYCLOAK_REALM}
+    client-id: ${KEYCLOAK_CLIENT_ID}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET}
+    admin-user: ${KEYCLOAK_ADMIN_USER}
+    admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
+    jwks-uri: ${KEYCLOAK_URI}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
+
+# ================================================================
+# LOGGING - Less verbose in Docker
+# ================================================================
+logging:
+  level:
+    com.auth: INFO
+    org.springframework.web.reactive.function.client: INFO
