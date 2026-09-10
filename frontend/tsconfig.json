@@ -6,17 +6,11 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* temportal on migrate */
-    "allowJs": true,
-    "checkJs": false,
-
-    /* Alias Paths */
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
+    /* Alias Paths (No baseUrl required) */
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["src/shared/*"],
-      "@features/*": ["src/features/*"]
+      "@shared/*": ["./src/shared/*"],
+      "@features/*": ["./src/features/*"]
     },
 
     /* Bundler mode */
@@ -27,11 +21,13 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting / Checks */
+    /* Strict Type-Checking */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src"]
 }
