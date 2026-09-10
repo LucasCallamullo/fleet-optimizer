@@ -21,11 +21,7 @@ export default defineConfig({
       
       // Alias para features (módulos de negocio)
       "@features": path.resolve(__dirname, "./src/features"),
-      "@auth": path.resolve(__dirname, "./src/features/auth"),
-      "@vehicles": path.resolve(__dirname, "./src/features/vehicles"),
-      "@reservations": path.resolve(__dirname, "./src/features/reservations"),
-      "@admin": path.resolve(__dirname, "./src/features/admin"),
-      
+
       // Alias para shared (recursos compartidos)
       "@shared": path.resolve(__dirname, "./src/shared"),
       
