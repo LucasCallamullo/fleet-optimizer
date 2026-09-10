@@ -4,17 +4,36 @@
 // ============================================
 
 /**
- * API Response wrapper from Spring Boot backend
+ * Generic API response wrapper from Spring Boot backend (Success Case)
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T> {
   timestamp: string;
   status: number;
-  detail?: string | null;
   message?: string | null;
+  detail?: string | null;
   path?: string | null;
   data: T;
-  success: boolean;
+  success: true;
 }
+
+/**
+ * Standard backend error payload signature (Failure Case)
+ * Handles Spring Boot Default Error Controller & Custom GlobalExceptionHandler
+ */
+export interface ApiErrorPayload {
+  timestamp?: string;
+  status?: number;
+  error?: string;
+  message?: string;
+  detail?: string;
+  errors?: string[];
+  path?: string;
+}
+
+/**
+ * Discriminated Union type for API results
+ */
+export type ApiResult<T> = ApiResponse<T> | ApiErrorPayload;
 
 /**
  * Paginated API Response
