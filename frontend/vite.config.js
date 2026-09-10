@@ -3,32 +3,45 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from "path"
 
-
-// https://vite.dev/config/
+/**
+ * Vite Configuration
+ * 
+ * Configures React fast refresh, Tailwind CSS v4, local dev server settings,
+ * and modular alias resolutions matching tsconfig paths.
+ * 
+ * @see https://vite.dev/config/
+ */
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // Tailwind v4 plugin
+    tailwindcss(), // Integrated Tailwind CSS v4 engine
   ],
   server: {
-    // port: 3000,          // cambiar el puerto (default 5173)
-    open: true, // Abre el navegador automáticamente
+    open: true, // Automatically open application in browser on dev server start
   },
   resolve: {
     alias: {
-      // Alias principal
+      /**
+       * Root Application Alias
+       */
       "@": path.resolve(__dirname, "./src"),
       
-      // Alias para features (módulos de negocio)
+      /**
+       * Domain-driven Modules (Features)
+       */
       "@features": path.resolve(__dirname, "./src/features"),
 
-      // Alias para shared (recursos compartidos)
+      /**
+       * Cross-cutting Utilities and Shared Resources
+       */
       "@shared": path.resolve(__dirname, "./src/shared"),
       
-      // Alias específicos para shadcn/ui (basados en components.json)
+      /**
+       * Specific Design System & Component Aliases (matching components.json)
+       */
       "@components": path.resolve(__dirname, "./src/shared/components"),
       "@ui": path.resolve(__dirname, "./src/shared/components/ui"),
-      "@lib": path.resolve(__dirname, "./src/shared/lib"),  // ← Usas lib, no utils
+      "@lib": path.resolve(__dirname, "./src/shared/lib"),
       "@hooks": path.resolve(__dirname, "./src/shared/hooks"),
       "@api": path.resolve(__dirname, "./src/shared/api"),
       "@types": path.resolve(__dirname, "./src/shared/types"),
