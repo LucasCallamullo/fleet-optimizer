@@ -1,5 +1,5 @@
-// src/features/vehicles/components/VehicleForm.jsx
-import { useState, useEffect } from "react";
+// src/features/vehicles/components/VehicleForm.tsx
+import { useState, useEffect, type FormEvent } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -19,20 +19,27 @@ import {
 } from "@/shared/components/ui/select";
 import { Label } from "@/shared/components/ui/label";
 import { Weight, Package, Gauge, DollarSign, Percent, Loader2 } from 'lucide-react';
+import type { VehicleDetail, VehicleDTO, VehicleStatus } from "../types/vehiclesTypes";
+import type { CategoryResponseDTO } from "../types/categoriesTypes";
 
-/**
- * VehicleForm Component
- * 
- * @component
- * @param {Object} props
- * @param {boolean} props.open - Modal visibility state
- * @param {Function} props.onOpenChange - Toggle modal function
- * @param {Object|null} props.initialData - Vehicle data for editing
- * @param {Function} props.onSave - Callback with form data
- * @param {boolean} props.isSaving - Disable form during save
- * @param {Array} props.categories - List of categories (from useCategories)
- * @param {boolean} props.categoriesLoading - Loading state for categories
- */
+// ================================================================
+// COMPONENT PROPS INTERFACE
+// ================================================================
+
+export interface VehicleFormProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialData?: VehicleDetail | null;
+  onSave: (data: VehicleDTO) => void;
+  isSaving?: boolean;
+  categories?: CategoryResponseDTO[];
+  categoriesLoading?: boolean;
+}
+
+// ================================================================
+// COMPONENT
+// ================================================================
+
 const VehicleForm = ({
   open,
   onOpenChange,
@@ -41,19 +48,19 @@ const VehicleForm = ({
   isSaving = false,
   categories = [],
   categoriesLoading = false,
-}) => {
+}: VehicleFormProps) => {
   // ================================================================
   // LOCAL STATE - Form fields
   // ================================================================
-  const [licensePlate, setLicensePlate] = useState("");
-  const [year, setYear] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [maxWeightKg, setMaxWeightKg] = useState("");
-  const [maxVolumeCbm, setMaxVolumeCbm] = useState("");
-  const [fuelConsumptionPerKm, setFuelConsumptionPerKm] = useState("");
-  const [costPerKm, setCostPerKm] = useState("");
-  const [pricePerKm, setPricePerKm] = useState("");
-  const [status, setStatus] = useState("AVAILABLE");
+  const [licensePlate, setLicensePlate] = useState<string>("");
+  const [year, setYear] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [maxWeightKg, setMaxWeightKg] = useState<string>("");
+  const [maxVolumeCbm, setMaxVolumeCbm] = useState<string>("");
+  const [fuelConsumptionPerKm, setFuelConsumptionPerKm] = useState<string>("");
+  const [costPerKm, setCostPerKm] = useState<string>("");
+  const [pricePerKm, setPricePerKm] = useState<string>("");
+  const [status, setStatus] = useState<VehicleStatus>("AVAILABLE");
 
   // ================================================================
   // EFFECT - Reset form when modal opens or data changes
@@ -87,18 +94,18 @@ const VehicleForm = ({
   // ================================================================
   // HANDLERS
   // ================================================================
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    const vehicleData = {
+
+    const vehicleData: VehicleDTO = {
       licensePlate,
-      year: parseInt(year) || 2026,
-      category: categoryId ? { id: parseInt(categoryId) } : null,
-      maxWeightKg: maxWeightKg ? parseFloat(maxWeightKg) : null,
-      maxVolumeCbm: maxVolumeCbm ? parseFloat(maxVolumeCbm) : null,
-      fuelConsumptionPerKm: fuelConsumptionPerKm ? parseFloat(fuelConsumptionPerKm) : null,
-      costPerKm: costPerKm ? parseFloat(costPerKm) : null,
-      pricePerKm: pricePerKm ? parseFloat(pricePerKm) : null,
+      year: parseInt(year, 10) || new Date().getFullYear(),
+      categoryId: parseInt(categoryId, 10) || 0,
+      maxWeightKg: maxWeightKg ? parseFloat(maxWeightKg) : 0,
+      maxVolumeCbm: maxVolumeCbm ? parseFloat(maxVolumeCbm) : 0,
+      fuelConsumptionPerKm: fuelConsumptionPerKm ? parseFloat(fuelConsumptionPerKm) : 0,
+      costPerKm: costPerKm ? parseFloat(costPerKm) : 0,
+      pricePerKm: pricePerKm ? parseFloat(pricePerKm) : 0,
       status,
     };
 
@@ -107,20 +114,14 @@ const VehicleForm = ({
 
   const isEditing = !!initialData;
 
-  // Get category name by ID for display
-  const getCategoryName = (id) => {
-    const cat = categories.find(c => c.id === parseInt(id));
-    return cat?.name || 'Unknown';
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-150 bg-card text-card-foreground border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-gray-800">
+          <DialogTitle className="text-foreground">
             {isEditing ? "Edit Vehicle" : "Register New Vehicle"}
           </DialogTitle>
-          <DialogDescription className="text-gray-500">
+          <DialogDescription className="text-muted-foreground">
             {isEditing
               ? "Update the vehicle details."
               : "Enter the vehicle information to add it to the fleet."}
@@ -129,17 +130,17 @@ const VehicleForm = ({
 
         <form onSubmit={handleSubmit} className="space-y-5 py-4">
           {/* ============================================================ */}
-          {/* BASIC INFORMATION */}
+          {/* BASIC INFORMATION                                            */}
           {/* ============================================================ */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2">
+            <h4 className="text-sm font-semibold text-foreground border-b border-border pb-2">
               Basic Information
             </h4>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* License Plate */}
               <div className="space-y-1.5">
-                <Label htmlFor="licensePlate" className="text-sm text-gray-600">
+                <Label htmlFor="licensePlate" className="text-sm text-muted-foreground">
                   License Plate *
                 </Label>
                 <Input
@@ -149,31 +150,31 @@ const VehicleForm = ({
                   onChange={(e) => setLicensePlate(e.target.value)}
                   disabled={isSaving}
                   required
-                  className="border-gray-200 focus:border-blue-400"
+                  className="bg-background border-border focus:border-ring"
                 />
               </div>
 
               {/* Year */}
               <div className="space-y-1.5">
-                <Label htmlFor="year" className="text-sm text-gray-600">
+                <Label htmlFor="year" className="text-sm text-muted-foreground">
                   Year *
                 </Label>
                 <Input
                   id="year"
                   type="number"
-                  placeholder="2023"
+                  placeholder="2026"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                   disabled={isSaving}
                   required
-                  className="border-gray-200 focus:border-blue-400"
+                  className="bg-background border-border focus:border-ring"
                 />
               </div>
             </div>
 
             {/* Category */}
-            <div className="space-y-1.5 w-100">
-              <Label htmlFor="category" className="text-sm text-gray-600">
+            <div className="space-y-1.5 w-full">
+              <Label htmlFor="category" className="text-sm text-muted-foreground">
                 Category *
               </Label>
               <Select
@@ -181,12 +182,12 @@ const VehicleForm = ({
                 onValueChange={setCategoryId}
                 disabled={isSaving || categoriesLoading}
               >
-                <SelectTrigger className="border-gray-200 focus:border-blue-400">
+                <SelectTrigger className="bg-background border-border focus:border-ring">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover text-popover-foreground border-border">
                   {categoriesLoading ? (
-                    <div className="flex items-center justify-center py-4 text-gray-500">
+                    <div className="flex items-center justify-center py-4 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Loading categories...
                     </div>
@@ -197,7 +198,7 @@ const VehicleForm = ({
                       </SelectItem>
                     ))
                   ) : (
-                    <div className="text-center py-4 text-gray-400">
+                    <div className="text-center py-4 text-muted-foreground">
                       No categories available
                     </div>
                   )}
@@ -207,17 +208,17 @@ const VehicleForm = ({
           </div>
 
           {/* ============================================================ */}
-          {/* CAPACITY & PERFORMANCE */}
+          {/* CAPACITY & PERFORMANCE                                       */}
           {/* ============================================================ */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2">
+            <h4 className="text-sm font-semibold text-foreground border-b border-border pb-2">
               Capacity & Performance
             </h4>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="maxWeight" className="text-sm text-gray-600 flex items-center gap-1.5">
-                  <Weight className="h-3.5 w-3.5 text-gray-400" />
+                <Label htmlFor="maxWeight" className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <Weight className="h-3.5 w-3.5 text-muted-foreground" />
                   Max Weight (kg)
                 </Label>
                 <Input
@@ -228,13 +229,13 @@ const VehicleForm = ({
                   value={maxWeightKg}
                   onChange={(e) => setMaxWeightKg(e.target.value)}
                   disabled={isSaving}
-                  className="border-gray-200 focus:border-blue-400"
+                  className="bg-background border-border focus:border-ring"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="maxVolume" className="text-sm text-gray-600 flex items-center gap-1.5">
-                  <Package className="h-3.5 w-3.5 text-gray-400" />
+                <Label htmlFor="maxVolume" className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <Package className="h-3.5 w-3.5 text-muted-foreground" />
                   Max Volume (m³)
                 </Label>
                 <Input
@@ -245,14 +246,14 @@ const VehicleForm = ({
                   value={maxVolumeCbm}
                   onChange={(e) => setMaxVolumeCbm(e.target.value)}
                   disabled={isSaving}
-                  className="border-gray-200 focus:border-blue-400"
+                  className="bg-background border-border focus:border-ring"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="fuelConsumption" className="text-sm text-gray-600 flex items-center gap-1.5">
-                <Gauge className="h-3.5 w-3.5 text-gray-400" />
+              <Label htmlFor="fuelConsumption" className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <Gauge className="h-3.5 w-3.5 text-muted-foreground" />
                 Fuel Consumption (L/km)
               </Label>
               <Input
@@ -263,23 +264,23 @@ const VehicleForm = ({
                 value={fuelConsumptionPerKm}
                 onChange={(e) => setFuelConsumptionPerKm(e.target.value)}
                 disabled={isSaving}
-                className="border-gray-200 focus:border-blue-400"
+                className="bg-background border-border focus:border-ring"
               />
             </div>
           </div>
 
           {/* ============================================================ */}
-          {/* FINANCIAL INFORMATION */}
+          {/* FINANCIAL INFORMATION                                        */}
           {/* ============================================================ */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2">
+            <h4 className="text-sm font-semibold text-foreground border-b border-border pb-2">
               Financial Information
             </h4>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="costPerKm" className="text-sm text-gray-600 flex items-center gap-1.5">
-                  <DollarSign className="h-3.5 w-3.5 text-gray-400" />
+                <Label htmlFor="costPerKm" className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                   Cost per km ($)
                 </Label>
                 <Input
@@ -290,13 +291,13 @@ const VehicleForm = ({
                   value={costPerKm}
                   onChange={(e) => setCostPerKm(e.target.value)}
                   disabled={isSaving}
-                  className="border-gray-200 focus:border-blue-400"
+                  className="bg-background border-border focus:border-ring"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="pricePerKm" className="text-sm text-gray-600 flex items-center gap-1.5">
-                  <Percent className="h-3.5 w-3.5 text-gray-400" />
+                <Label htmlFor="pricePerKm" className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <Percent className="h-3.5 w-3.5 text-muted-foreground" />
                   Price per km ($)
                 </Label>
                 <Input
@@ -307,66 +308,69 @@ const VehicleForm = ({
                   value={pricePerKm}
                   onChange={(e) => setPricePerKm(e.target.value)}
                   disabled={isSaving}
-                  className="border-gray-200 focus:border-blue-400"
+                  className="bg-background border-border focus:border-ring"
                 />
               </div>
             </div>
           </div>
 
           {/* ============================================================ */}
-          {/* STATUS */}
+          {/* STATUS                                                       */}
           {/* ============================================================ */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2">
+            <h4 className="text-sm font-semibold text-foreground border-b border-border pb-2">
               Status
             </h4>
-            
+
             <div className="space-y-1.5">
-              <Label htmlFor="status" className="text-sm text-gray-600">
+              <Label htmlFor="status" className="text-sm text-muted-foreground">
                 Vehicle Status
               </Label>
               <Select
                 value={status}
-                onValueChange={setStatus}
+                onValueChange={(val) => setStatus(val as VehicleStatus)}
                 disabled={isSaving}
               >
-                <SelectTrigger className="border-gray-200 focus:border-blue-400">
+                <SelectTrigger className="bg-background border-border focus:border-ring">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover text-popover-foreground border-border">
                   <SelectItem value="AVAILABLE">🟢 Available</SelectItem>
-                  <SelectItem value="IN_ROUTE">🔵 In Route</SelectItem>
+                  <SelectItem value="IN_USE">🔵 In Use</SelectItem>
                   <SelectItem value="MAINTENANCE">🟡 Maintenance</SelectItem>
-                  <SelectItem value="INACTIVE">⚪ Inactive</SelectItem>
+                  <SelectItem value="DISCONTINUED">⚪ Discontinued</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           {/* ============================================================ */}
-          {/* FOOTER */}
+          {/* FOOTER                                                       */}
           {/* ============================================================ */}
-          <DialogFooter className="pt-4 border-t border-gray-200">
+          <DialogFooter className="pt-4 border-t border-border">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
-              className="border-gray-200 text-gray-600 hover:bg-gray-50"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSaving}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {isSaving 
-                ? "Saving..." 
-                : isEditing 
-                  ? "Update Vehicle" 
-                  : "Save Vehicle"
-              }
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : isEditing ? (
+                "Update Vehicle"
+              ) : (
+                "Save Vehicle"
+              )}
             </Button>
           </DialogFooter>
         </form>
