@@ -55,29 +55,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     /**
      * Handles authentication failures and returns a structured 401 response.
      * 
-     * <p><strong>Execution Flow:</strong>
-     * <ol>
-     *   <li>Called when Spring Security detects an AuthenticationException</li>
-     *   <li>This occurs when the request has no valid authentication context</li>
-     *   <li>Sets HTTP status to 401 (Unauthorized)</li>
-     *   <li>Sets Content-Type to application/json</li>
-     *   <li>Writes a structured JSON error response</li>
-     * </ol>
-     * 
-     * <p><strong>When is this triggered?</strong>
-     * <ul>
-     *   <li>Request without X-User-Id header (GatewayHeaderAuthenticationFilter skips)</li>
-     *   <li>Request with invalid authentication (though Gateway should catch this)</li>
-     *   <li>Direct requests to this service bypassing the Gateway</li>
-     * </ul>
-     * 
-     * <p><strong>Why JSON format?</strong>
-     * <ul>
-     *   <li>Consistent with the GlobalExceptionHandler error format</li>
-     *   <li>Includes the request path for debugging</li>
-     *   <li>Allows clients to parse errors programmatically</li>
-     * </ul>
-     * 
      * @param request The HTTP request that triggered the authentication failure
      * @param response The HTTP response to write the error to
      * @param authException The exception that caused the authentication failure
@@ -113,7 +90,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.getWriter().write("""
             {
                 "status": 401,
-                "error": "Unauthorized",
+                "success": false,
+                "detail": "Unauthorized",
                 "path": "%s"
             }
             """.formatted(request.getRequestURI())

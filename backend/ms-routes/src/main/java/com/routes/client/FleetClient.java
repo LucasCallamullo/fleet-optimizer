@@ -21,7 +21,7 @@ import java.util.List;
  *   List<FleetVehicleDTO> vehicles = fleetClient.getVehiclesByIds(List.of(1L, 2L, 3L));
  */
 @FeignClient(
-    name = "ms-fleets",                                           // ← Service name (for service discovery)
+    name = "ms-fleets",                      // ← Service name (for service discovery)
     url = "${app.clients.fleets.url}",       // ← Configurable URL with fallback
     configuration = {
         FeignConfig.class,           // ← Error decoder (error handler HTTP)

@@ -147,7 +147,8 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
             ex.getStatusCode(),
             ex.getMessage(),
-            request.getRequestURI()
+            request.getRequestURI(),
+            ex.getErrors()
         );
         return new ResponseEntity<>(error, HttpStatus.valueOf(ex.getStatusCode()));
     }

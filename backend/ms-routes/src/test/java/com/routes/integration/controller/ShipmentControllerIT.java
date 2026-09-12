@@ -117,9 +117,9 @@ class ShipmentControllerIT {
 
                 // Step 3: Assert
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.routeId").exists())
-                .andExpect(jsonPath("$.vehicleId").value(1L))
-                .andExpect(jsonPath("$.legs").isArray());
+                .andExpect(jsonPath("$.data.routeId").exists())
+                .andExpect(jsonPath("$.data.vehicleId").value(1L))
+                .andExpect(jsonPath("$.data.legs").isArray());
     }
 
     // ================================================================
@@ -154,7 +154,7 @@ class ShipmentControllerIT {
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").isString());
+                .andExpect(jsonPath("$.detail").isString());
     }
 
     // ================================================================

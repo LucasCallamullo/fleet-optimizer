@@ -17,15 +17,10 @@ Content-Type: application/json
 ### ================================================================
 ### 2. SAVE TOKEN
 ### ================================================================
-@accessToken = {{loginUser.response.body.accessToken}}
-@refreshToken = {{loginUser.response.body.refreshToken}}
+@accessToken = {{loginUser.response.body.data.accessToken}}
+@refreshToken = {{loginUser.response.body.data.refreshToken}}
 
 
 ### Get Route By Id - Complete Example
 GET {{routesURL}}/1
-Authorization: Bearer {{accessToken}}
-
-
-### Get all Routes - Complete Example - Not Declared
-GET {{routesURL}}
 Authorization: Bearer {{accessToken}}

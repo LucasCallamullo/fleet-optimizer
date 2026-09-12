@@ -1,9 +1,16 @@
 package com.routes.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.routes.exception.AppException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
+
+import feign.codec.Decoder;                                    
+import org.springframework.beans.factory.ObjectFactory;        // spring-beans
+
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +24,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Slf4j
 public class FeignConfig {
+
+        /**
+     * Replaces the default Feign decoder with one that unwraps ApiResponse
+     * envelopes returned by downstream microservices.
+     */
+    @Bean
+    public Decoder feignDecoder(ObjectFactory<HttpMessageConverters> messageConverters,
+                                ObjectMapper objectMapper) {
+        Decoder springDecoder = new SpringDecoder(messageConverters);
+        return new ApiResponseUnwrapDecoder(springDecoder, objectMapper);
+    }
 
     /**
      * Creates a custom ErrorDecoder that wraps Feign exceptions into AppException.
