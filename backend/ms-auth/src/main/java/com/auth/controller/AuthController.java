@@ -9,6 +9,8 @@ import com.auth.service.KeycloakService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -56,6 +58,7 @@ public class AuthController {
      * @return AuthResponseDTO with tokens and user info
      */
     @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         // Step 1: Log the registration attempt
         log.info("Registering new user: {}", request.email());
@@ -131,6 +134,7 @@ public class AuthController {
      * @return Mono<Void> indicating completion
      */
     @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> logout(@RequestBody(required = false) RefreshTokenRequestDTO request) {
         // Step 1: Log the logout attempt
         log.info("Logging out user");

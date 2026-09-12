@@ -13,6 +13,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,12 +52,20 @@ public class TestAuthController {
     @GetMapping("/public")
     public Mono<Map<String, Object>> publicEndpoint() {
         log.info("Public endpoint accessed");
-        
-        return Mono.just(Map.of(
+
+        // Use HashMap to allow null entries safely during Jackson serialization
+        Map<String, Object> response = new HashMap<>();    
+        response.put("success", true);
+        response.put("message", "Hello public! This endpoint is accessible to everyone without authentication");
+        response.put("timestamp", LocalDateTime.now().toString());
+
+        return Mono.just(response);
+
+        /* return Mono.just(Map.of(
             "success", true,
             "message", "Hello public! This endpoint is accessible to everyone without authentication",
             "timestamp", LocalDateTime.now().toString()
-        ));
+        )); */
     }
 
     /**
