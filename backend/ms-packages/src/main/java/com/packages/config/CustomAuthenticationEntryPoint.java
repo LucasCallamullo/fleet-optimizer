@@ -60,16 +60,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
      * 4. Sets Content-Type to application/json
      * 5. Writes a structured JSON error response
      * 
-     * When is this triggered?
-     * - Request without X-User-Id header (GatewayHeaderAuthenticationFilter skips)
-     * - Request with invalid authentication (though Gateway should catch this)
-     * - Direct requests to this service bypassing the Gateway
-     * 
-     * Why JSON format?
-     * - Consistent with the GlobalExceptionHandler error format
-     * - Includes the request path for debugging
-     * - Allows clients to parse errors programmatically
-     * 
      * @param request The HTTP request that triggered the authentication failure
      * @param response The HTTP response to write the error to
      * @param authException The exception that caused the authentication failure
@@ -91,14 +81,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         
         // Step 3: Write JSON error response
         // Structured format consistent with GlobalExceptionHandler
-        // Includes:
-        //   - status: HTTP status code (401)
-        //   - error: Human-readable error message
-        //   - path: Request URI that caused the error
         response.getWriter().write("""
             {
                 "status": 401,
-                "error": "Unauthorized",
+                "success": false,
+                "detail": "Unauthorized",
                 "path": "%s"
             }
             """.formatted(request.getRequestURI())
