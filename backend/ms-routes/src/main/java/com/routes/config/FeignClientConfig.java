@@ -57,13 +57,6 @@ public class FeignClientConfig {
      * Creates a RequestInterceptor that propagates authentication and user context
      * from the current request to outgoing Feign requests.
      * 
-     * Step-by-step:
-     * 1. Get the current HTTP request from RequestContextHolder
-     * 2. Extract the Authorization header (Bearer token) if present
-     * 3. Extract Gateway headers (X-User-Id, X-User-Roles, X-User-Email) if present
-     * 4. Add all extracted headers to the outgoing Feign request
-     * 5. Also adds a custom header X-Propagated to indicate headers were propagated
-     * 
      * This ensures that the target microservice receives the same authentication
      * context as if the request came directly from the Gateway.
      * 
