@@ -22,13 +22,13 @@ POST {{authBaseUrl}}/login
 Content-Type: application/json
 
 {
-    "email": "user_regular@gmail.com",
+    "email": "admin_regular@gmail.com",
     "password": "pass1234"
 }
 
 ### 
-@userToken = {{loginUser.response.body.accessToken}}
-@userRefreshToken = {{loginUser.response.body.refreshToken}}
+@userToken = {{loginUser.response.body.data.accessToken}}
+@userRefreshToken = {{loginUser.response.body.data.refreshToken}}
 
 ### ============================================================
 ### 1. GET ALL CATEGORIES
@@ -49,6 +49,7 @@ Authorization: Bearer {{userToken}}
 ### @prompt categoryName Enter category name:
 GET {{categoriesUrl}}/name/Truck
 Accept: application/json
+Authorization: Bearer {{userToken}}
 
 ### ============================================================
 ### 4. CHECK IF CATEGORY EXISTS BY NAME
@@ -62,42 +63,10 @@ Authorization: Bearer {{userToken}}
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
   "name": "Sedan",
-  "isActive": true
-}
-
-### ============================================================
-### 6. CREATE CATEGORY - Another one
-### ============================================================
-POST {{categoriesUrl}}
-Content-Type: application/json
-
-{
-  "name": "SUV",
-  "isActive": true
-}
-
-### ============================================================
-### 7. CREATE CATEGORY - Truck
-### ============================================================
-POST {{categoriesUrl}}
-Content-Type: application/json
-
-{
-  "name": "Truck",
-  "isActive": true
-}
-
-### ============================================================
-### 8. CREATE CATEGORY - Van
-### ============================================================
-POST {{categoriesUrl}}
-Content-Type: application/json
-
-{
-  "name": "Furgón",
   "isActive": true
 }
 
@@ -107,9 +76,10 @@ Content-Type: application/json
 ### @prompt updateCatId Enter category ID to update:
 PUT {{categoriesUrl}}/5
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
-  "name": "SUV - Actualizado",
+  "name": "SUV Actualizado",
   "isActive": true
 }
 
@@ -125,11 +95,13 @@ Authorization: Bearer {{userToken}}
 ### ============================================================
 POST {{categoriesUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
-  "name": "Sedán",
+  "name": "Truck",
   "isActive": true
 }
+
 
 ### ============================================================
 ### 12. CREATE CATEGORY - Invalid name (too short)
@@ -137,6 +109,7 @@ Content-Type: application/json
 POST {{categoriesUrl}}
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{userToken}}
 
 {
   "name": "A",
