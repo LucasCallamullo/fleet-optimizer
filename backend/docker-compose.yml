@@ -18,7 +18,8 @@
 #    (e.g., fleets-service:8081, postgres-fleets:5432)
 # ================================================================
 
-version: '3.9'
+# version: '3.9'
+name: fleet-backend-dev
 
 services:
 
@@ -227,7 +228,8 @@ services:
     ports:
       - "8080:8080"  # ONLY exposed port - entry point for all external traffic
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - CORS_ALLOWED_ORIGINS=${CORS_URLS}
       - FLEETS_SERVICE_URL=http://fleets-service:8081
       - ROUTES_SERVICE_URL=http://routes-service:8082
       - AUTH_SERVICE_URL=http://auth-service:8083

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -107,6 +108,7 @@ public class AuthController {
      * @return AuthResponseDTO with new access token
      */
     @PostMapping("/refresh")
+    @PreAuthorize("isAuthenticated()")
     public Mono<AuthResponseDTO> refresh(@Valid @RequestBody RefreshTokenRequestDTO request) {
         // Step 1: Log the refresh attempt
         log.info("Refreshing token");
@@ -134,6 +136,7 @@ public class AuthController {
      * @return Mono<Void> indicating completion
      */
     @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> logout(@RequestBody(required = false) RefreshTokenRequestDTO request) {
         // Step 1: Log the logout attempt
@@ -163,6 +166,7 @@ public class AuthController {
      * @return UserInfoDTO with user profile information
      */
     @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
     public Mono<UserInfoDTO> getProfile(@RequestHeader("Authorization") String authHeader) {
         // Step 1: Log the profile request
         log.info("Fetching user profile");
