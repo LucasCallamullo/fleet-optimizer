@@ -45,6 +45,7 @@ class AuthControllerIT {
     @Test
     @DisplayName("POST /api/v1/auth/login - Should return 200 with tokens")
     void shouldLoginSuccessfully() {
+        // Arrange
         LoginRequestDTO request = new LoginRequestDTO("user@example.com", "password123");
 
         UserInfoDTO userInfo = new UserInfoDTO(
@@ -68,6 +69,7 @@ class AuthControllerIT {
         when(keycloakService.login(anyString(), anyString()))
             .thenReturn(Mono.just(mockResponse));
 
+        // Act + Assert
         webTestClient.post()
                 .uri("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -75,12 +77,11 @@ class AuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.accessToken").value(msg -> 
-                    org.assertj.core.api.Assertions.assertThat((String) msg).isEqualTo("access.token.here"))
-                .jsonPath("$.refreshToken").value(msg -> 
-                    org.assertj.core.api.Assertions.assertThat((String) msg).isEqualTo("refresh.token.here"))
-                .jsonPath("$.user.id").value(msg -> 
-                    org.assertj.core.api.Assertions.assertThat((String) msg).isEqualTo("user-123"));
+                .jsonPath("$.status").isEqualTo(200)
+                .jsonPath("$.data.accessToken").isEqualTo(mockResponse.accessToken())
+                .jsonPath("$.data.refreshToken").isEqualTo(mockResponse.refreshToken())
+                .jsonPath("$.data.user.id").isEqualTo(mockResponse.user().id())
+                .jsonPath("$.data.user.email").isEqualTo(mockResponse.user().email());
     }
 
     // ================================================================
@@ -104,7 +105,7 @@ class AuthControllerIT {
                 .expectBody()
                 .jsonPath("$.status").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((Integer) msg).isEqualTo(401))
-                .jsonPath("$.error").value(msg -> 
+                .jsonPath("$.detail").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("Invalid credentials"));
     }
 
@@ -185,7 +186,7 @@ class AuthControllerIT {
                 .expectBody()
                 .jsonPath("$.status").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((Integer) msg).isEqualTo(409))
-                .jsonPath("$.error").value(msg -> 
+                .jsonPath("$.detail").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("Email already registered"));
     }
 
@@ -205,16 +206,15 @@ class AuthControllerIT {
 
     @Test
     @WithMockUser
-    @DisplayName("POST /api/v1/auth/logout - Should return 200 on logout")
+    @DisplayName("POST /api/v1/auth/logout - Should return 204 on logout")
     void shouldLogout() {
         when(keycloakService.logout(anyString())).thenReturn(Mono.empty());
 
         webTestClient.post()
                 .uri("/api/v1/auth/logout")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"refreshToken\":\"token\"}")
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
     }
 
     // ================================================================

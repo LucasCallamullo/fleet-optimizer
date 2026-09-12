@@ -40,7 +40,8 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.message").value(msg -> 
+                .jsonPath("$.status").isEqualTo(200)
+                .jsonPath("$.data.message").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("public"));
     }
 
@@ -52,7 +53,8 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.base_url").value(msg -> 
+                .jsonPath("$.success").isEqualTo(true)
+                .jsonPath("$.data.base_url").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("/api/v1/auth/test"));
     }
 
@@ -73,7 +75,7 @@ class TestAuthControllerIT {
     @WithMockUser
     @DisplayName("GET /api/v1/auth/test/authenticated - Should return 200 when authenticated")
     void shouldReturn200WhenAuthenticated() {
-        // ✅ No necesita mock porque el controller no llama a KeycloakService
+        // No necesita mock porque el controller no llama a KeycloakService
         // Solo usa los headers X-User-Id y X-User-Roles
         webTestClient.get()
                 .uri("/api/v1/auth/test/authenticated")
@@ -83,7 +85,7 @@ class TestAuthControllerIT {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.success").isBoolean()
-                .jsonPath("$.message").value(msg -> 
+                .jsonPath("$.data.message").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("authenticated"));
     }
 
@@ -104,7 +106,7 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.message").value(msg -> 
+                .jsonPath("$.data.message").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("users (and admins too)"));
     }
 
@@ -137,7 +139,7 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.message").value(msg -> 
+                .jsonPath("$.data.message").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("Administrator"));
     }
 
@@ -170,7 +172,7 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.message").value(msg -> 
+                .jsonPath("$.data.message").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).contains("users and administrators"));
     }
 
@@ -187,7 +189,7 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.allowedRoles").isArray();
+                .jsonPath("$.data.allowedRoles").isArray();
     }
 
     @Test
@@ -219,7 +221,7 @@ class TestAuthControllerIT {
     @WithMockUser
     @DisplayName("GET /api/v1/auth/test/profile - Should return 200 with user info")
     void shouldReturnProfileWhenAuthenticated() {
-        // ✅ Mock de KeycloakService para este test
+        // Mock de KeycloakService para este test
         UserInfoDTO mockUserInfo = new UserInfoDTO(
             "user-123",
             "user_regular",
@@ -240,9 +242,9 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.id").value(msg -> 
+                .jsonPath("$.data.id").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).isEqualTo("user-123"))
-                .jsonPath("$.email").value(msg -> 
+                .jsonPath("$.data.email").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).isEqualTo("user@example.com"));
     }
 
@@ -262,7 +264,7 @@ class TestAuthControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.user.id").value(msg -> 
+                .jsonPath("$.data.user.id").value(msg -> 
                     org.assertj.core.api.Assertions.assertThat((String) msg).isEqualTo("N/A"));
     }
 

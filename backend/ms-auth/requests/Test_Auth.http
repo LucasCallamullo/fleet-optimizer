@@ -1,0 +1,134 @@
+
+# ? ===================================================
+# ?     BASE CONFIG .HTTP
+# ? ===================================================
+
+@baseUrl = http://localhost:8080
+@authBaseUrl = {{baseUrl}}/api/v1/auth
+
+
+### ================================================================
+### + 1. LOGIN (ADMIN) || Regular User --> user_regular@gmail.com
+### ================================================================
+# @name loginUser
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin_regular@gmail.com", 
+    "password": "pass1234"
+}
+
+### ================================================================
+### + SAVE TOKENS FROM LOGIN RESPONSES
+### ================================================================
+@userToken = {{loginUser.response.body.data.accessToken}}
+@userRefreshToken = {{loginUser.response.body.data.refreshToken}}
+
+
+### ================================================================
+### ================================================================
+### TEST ENDPOINTS (different authorization levels)
+### ================================================================
+### ================================================================
+
+### ================================================================
+### 12. PUBLIC - No authentication required
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/public
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 13. INFO - No authentication required
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/info
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 14. AUTHENTICATED - Regular user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+Authorization: Bearer {{userToken}}
+
+
+### ================================================================
+### 2. LOGIN - Admin User
+### ================================================================
+# @name loginAdmin
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### 
+@adminToken = {{loginAdmin.response.body.data.accessToken}}
+@adminRefreshToken = {{loginAdmin.response.body.data.refreshToken}}
+
+
+### ================================================================
+### 15. AUTHENTICATED - Admin user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 16. USER ROLE - Regular user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/user
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 17. USER ROLE - Admin user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/user
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 18. ADMIN ROLE - Regular user (should FAIL 403)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/admin
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 19. ADMIN ROLE - Admin user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/admin
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 20. MULTI-ROLE - Regular user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/multi-role
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 21. MULTI-ROLE - Admin user (should pass)
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/multi-role
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 22. PROFILE - Regular user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/profile
+Authorization: Bearer {{userToken}}
+
+### ================================================================
+### 23. PROFILE - Admin user
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/profile
+Authorization: Bearer {{adminToken}}
+
+### ================================================================
+### 24. WITHOUT TOKEN - Should return 401
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+
+### ================================================================
+### 25. INVALID TOKEN - Should return 401
+### ================================================================
+GET {{baseUrl}}/api/v1/auth/test/authenticated
+Authorization: Bearer invalid.token.here
