@@ -8,12 +8,12 @@ import type { Location } from '@/features/packages/types/packageTypes';
 /**
  * Represents the status of a route (`RouteStatus.java`)
  */
-export type RouteStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type RouteStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'IN_TRANSIT';
 
 /**
  * Represents the status of an individual route leg (`LegStatus.java`)
  */
-export type LegStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'SKIPPED';
+export type LegStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'SKIPPED' | 'IN_TRANSIT';
 
 // ================================================================
 // REQUEST DTOS

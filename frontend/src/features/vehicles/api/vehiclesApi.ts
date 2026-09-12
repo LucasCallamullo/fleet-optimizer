@@ -13,7 +13,8 @@ import type {
 // ================================================================
 
 export interface VehicleAvailableFilters {
-  minCapacity?: number;
+  requiredWeightKg: number;
+  requiredVolumeCbm: number;
 }
 
 // ================================================================
@@ -77,21 +78,30 @@ const vehiclesApi = {
   },
 
   /**
-   * getAvailable() - GET AVAILABLE VEHICLES WITH FILTERS
+   * available-for-package() - GET AVAILABLE VEHICLES WITH FILTERS
    */
   getAvailable: async (
-    filters: VehicleAvailableFilters = {}
+    filters: VehicleAvailableFilters
   ): Promise<VehicleListResponse> => {
-    const params = new URLSearchParams();
-    if (filters.minCapacity !== undefined) {
-      params.append('minCapacity', filters.minCapacity.toString());
+
+    if (
+      typeof filters.requiredWeightKg !== 'number' || Number.isNaN(filters.requiredWeightKg) ||
+      typeof filters.requiredVolumeCbm !== 'number' || Number.isNaN(filters.requiredVolumeCbm)
+    ) {
+      throw new Error('minWeight and minVolume are required and must be numbers');
     }
+
+    const params = new URLSearchParams();
+
+    params.append('requiredWeightKg', filters.requiredWeightKg.toString());
+    params.append('requiredVolumeCbm', filters.requiredVolumeCbm.toString());
+
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
     
     // Step-by-step explanation: Issue HTTP GET to retrieve filtered available vehicles
     const response = await api.get<VehicleListResponse>(
-      `${BASE_URL}/available${queryString}`
+      `${BASE_URL}/available-for-package${queryString}`
     );
     return response.data;
   },

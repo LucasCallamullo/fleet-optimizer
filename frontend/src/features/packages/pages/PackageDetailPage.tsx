@@ -101,7 +101,8 @@ export default function PackageDetailPage() {
     try {
       // Step-by-step explanation: Issue request using vehicles API with minimum weight filter
       const response = await vehiclesApi.getAvailable({
-        minCapacity: pkg.totalWeightKg,
+        requiredWeightKg: pkg.totalWeightKg,
+        requiredVolumeCbm: pkg.totalVolumeCbm,
       });
       // Cast list to VehicleDetail array for category field access
       setVehicles((response.data as unknown as VehicleDetail[]) || []);

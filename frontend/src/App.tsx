@@ -18,6 +18,7 @@ import Vehicle from '@/features/vehicles/pages/VehiclePage'
 import GeocodingPage from '@features/geocoding/pages/GeocodingPage'
 import PackagesPage from '@features/packages/pages/PackagesPage'
 import PackageDetailPage from '@features/packages/pages/PackageDetailPage'
+import RouteDetailPage from '@features/routes/pages/RouteDetailPage'
 
 
 // ================================================================
@@ -63,6 +64,18 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route 
+        path="/routes/:id" 
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <RouteDetailPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+
 
       <Route
         path="/packages"
