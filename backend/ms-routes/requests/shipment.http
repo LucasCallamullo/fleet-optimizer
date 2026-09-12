@@ -37,8 +37,8 @@ Content-Type: application/json
 ### ================================================================
 ### 2. SAVE TOKEN
 ### ================================================================
-@accessToken = {{loginUser.response.body.accessToken}}
-@refreshToken = {{loginUser.response.body.refreshToken}}
+@accessToken = {{loginUser.response.body.data.accessToken}}
+@refreshToken = {{loginUser.response.body.data.refreshToken}}
 
 ### ================================================================
 ### 3. CREATE SHIPMENT - Via ms-routes directo
@@ -49,7 +49,7 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-    "packageIds": [1, 2],
+    "packageIds": [4],
     "vehicleId": 1,
     "destination": {
         "street": "Av. Colon",
@@ -178,28 +178,6 @@ Content-Type: application/json
 POST {{shipmentBaseUrl}}
 Content-Type: application/json
 Authorization: Bearer invalid.token.here
-
-{
-    "packageIds": [1, 2],
-    "vehicleId": 1,
-    "destination": {
-        "street": "Av. Colon",
-        "streetNumber": "500",
-        "city": "Cordoba",
-        "state": "Cordoba",
-        "country": "Argentina",
-        "postalCode": "5000",
-        "latitude": -31.4201,
-        "longitude": -64.1888
-    }
-}
-
-### ================================================================
-### 10. CREATE SHIPMENT - Via Gateway (if ms-routes directo no funciona)
-### ================================================================
-POST {{gatewayUrl}}/api/v1/shipments
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
 
 {
     "packageIds": [1, 2],
