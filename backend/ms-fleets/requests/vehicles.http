@@ -22,13 +22,13 @@ POST {{authBaseUrl}}/login
 Content-Type: application/json
 
 {
-    "email": "user_regular@gmail.com",
+    "email": "admin_regular@gmail.com",
     "password": "pass1234"
 }
 
 ### 
-@accessToken = {{loginUser.response.body.accessToken}}
-@userRefreshToken = {{loginUser.response.body.refreshToken}}
+@accessToken = {{loginUser.response.body.data.accessToken}}
+@userRefreshToken = {{loginUser.response.body.data.refreshToken}}
 
 ### ============================================================
 ### 1. GET ALL VEHICLES (Basic - only category ID)

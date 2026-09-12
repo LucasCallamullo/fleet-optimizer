@@ -109,17 +109,21 @@ class VehicleControllerIT {
     
     @Test
     @DisplayName("GET /api/v1/vehicles - Should return all vehicles")
-    @WithMockUser(roles = "USER")  // ← Simula usuario autenticado con rol USER
+    @WithMockUser(roles = "USER")  // ← Simulates an authenticated user with the USER role
     void shouldReturnAllVehicles() throws Exception {
+        // vehicle[0] = { "ABC123", 2023, sedanCategory }
+        // this.seedVehicles[0]
+        var vehicle = this.seedVehicles.get(0);
+
         mockMvc.perform(get("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$[0].licensePlate").value("ABC123"))
-                .andExpect(jsonPath("$[0].year").value(2023))
-                .andExpect(jsonPath("$[0].categoryId").value(sedanCategory.getId()))
-                .andExpect(jsonPath("$[0].id").isNumber());
+                .andExpect(jsonPath("$.data", hasSize(5)))
+                .andExpect(jsonPath("$.data[0].licensePlate").value(vehicle.getLicensePlate()))
+                .andExpect(jsonPath("$.data[0].year").value(vehicle.getYear()))
+                .andExpect(jsonPath("$.data[0].categoryId").value(vehicle.getCategory().getId()))
+                .andExpect(jsonPath("$.data[0].id").isNumber());
     }
 
     // ================================================================
@@ -129,7 +133,7 @@ class VehicleControllerIT {
     @Test
     @DisplayName("GET /api/v1/vehicles - Should return 401 when not authenticated")
     void shouldReturn401WhenNotAuthenticated() throws Exception {
-        // SIN @WithMockUser - debería fallar con 401
+        // WITHOUT @WithMockUser - should fail with 401
         mockMvc.perform(get("/api/v1/vehicles")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
@@ -143,16 +147,20 @@ class VehicleControllerIT {
     @DisplayName("GET /api/v1/vehicles/detailed - Should return all vehicles with categories")
     @WithMockUser(roles = "USER")
     void shouldReturnAllVehiclesWithCategory() throws Exception {
+        // vehicle[0] = { "ABC123", 2023, sedanCategory }
+        // this.seedVehicles[0]
+        var vehicle = this.seedVehicles.get(0);
+        var vehicleFour = this.seedVehicles.get(4);
+
         mockMvc.perform(get("/api/v1/vehicles/detailed")
                 .contentType(MediaType.APPLICATION_JSON))
-                
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$[0].licensePlate").value("ABC123"))
-                .andExpect(jsonPath("$[0].category.id").value(sedanCategory.getId()))
-                .andExpect(jsonPath("$[0].category.name").value("Sedan"))
-                .andExpect(jsonPath("$[4].licensePlate").value("JKL012"))
-                .andExpect(jsonPath("$[4].category").doesNotExist());
+                .andExpect(jsonPath("$.data", hasSize(5)))
+                .andExpect(jsonPath("$.data[0].licensePlate").value(vehicle.getLicensePlate()))
+                .andExpect(jsonPath("$.data[0].category.id").value(vehicle.getCategory().getId()))
+                .andExpect(jsonPath("$.data[0].category.name").value(vehicle.getCategory().getName()))
+                .andExpect(jsonPath("$.data[4].licensePlate").value(vehicleFour.getLicensePlate()))
+                .andExpect(jsonPath("$.data[4].category").doesNotExist());
     }
 
     // ================================================================
@@ -163,17 +171,18 @@ class VehicleControllerIT {
     @DisplayName("GET /api/v1/vehicles/{id} - Should return vehicle by ID with Category")
     @WithMockUser(roles = "USER")
     void shouldReturnVehicleById() throws Exception {
-        Long vehicleId = seedVehicles.get(1).getId();
-        Category category = seedVehicles.get(1).getCategory();
+        var vehicle = seedVehicles.get(1);
+        Long vehicleId = vehicle.getId();
+        Category category = vehicle.getCategory();
 
         mockMvc.perform(get("/api/v1/vehicles/{id}", vehicleId)
                 .contentType(MediaType.APPLICATION_JSON))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.licensePlate").value("XYZ789"))
-                .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.category.id").value(category.getId()))
-                .andExpect(jsonPath("$.category.name").value(category.getName()));
+                .andExpect(jsonPath("$.data.licensePlate").value(vehicle.getLicensePlate()))
+                .andExpect(jsonPath("$.data.year").value(vehicle.getYear()))
+                .andExpect(jsonPath("$.data.category.id").value(category.getId()))
+                .andExpect(jsonPath("$.data.category.name").value(category.getName()));
     }
 
     // ================================================================
@@ -184,15 +193,16 @@ class VehicleControllerIT {
     @DisplayName("GET /api/v1/vehicles/{id} - Should return vehicle by ID without Category")
     @WithMockUser(roles = "USER")
     void shouldReturnVehicleByIdAndCategoryNull() throws Exception {
-        Long vehicleId = seedVehicles.get(4).getId();
+        var vehicle = this.seedVehicles.get(4);
+        Long vehicleId = vehicle.getId();
 
         mockMvc.perform(get("/api/v1/vehicles/{id}", vehicleId)
                 .contentType(MediaType.APPLICATION_JSON))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.licensePlate").value("JKL012"))
-                .andExpect(jsonPath("$.year").value(2023))
-                .andExpect(jsonPath("$.category").doesNotExist());
+                .andExpect(jsonPath("$.data.licensePlate").value(vehicle.getLicensePlate()))
+                .andExpect(jsonPath("$.data.year").value(vehicle.getYear()))
+                .andExpect(jsonPath("$.data.category").doesNotExist());
     }
 
     // ================================================================
@@ -212,7 +222,7 @@ class VehicleControllerIT {
             .andExpect(jsonPath("$.status").value(404))
             .andExpect(jsonPath("$.path").value("/api/v1/vehicles/999"))
             .andExpect(jsonPath("$.timestamp").exists())
-            .andExpect(jsonPath("$.error").isString());
+            .andExpect(jsonPath("$.detail").isString());
     }
 
     // ================================================================
@@ -234,11 +244,11 @@ class VehicleControllerIT {
                 .content(objectMapper.writeValueAsString(request)))
                 
                 .andExpect(status().isCreated())    // 404 ?
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.licensePlate").value("FCD333"))
-                .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.category.id").value(sedanCategory.getId()))
-                .andExpect(jsonPath("$.category.name").value("Sedan")); 
+                .andExpect(jsonPath("$.data.id").exists())
+                .andExpect(jsonPath("$.data.licensePlate").value("FCD333"))
+                .andExpect(jsonPath("$.data.year").value(2024))
+                .andExpect(jsonPath("$.data.category.id").value(sedanCategory.getId()))
+                .andExpect(jsonPath("$.data.category.name").value(sedanCategory.getName())); 
     }
 
     // ================================================================
@@ -278,10 +288,10 @@ class VehicleControllerIT {
                 .content(objectMapper.writeValueAsString(request)))
                 
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.licensePlate").value("FCD333"))
-                .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.category").doesNotExist());
+                .andExpect(jsonPath("$.data.id").exists())
+                .andExpect(jsonPath("$.data.licensePlate").value("FCD333"))
+                .andExpect(jsonPath("$.data.year").value(2024))
+                .andExpect(jsonPath("$.data.category").doesNotExist());
     }
 
     // ================================================================
@@ -304,7 +314,7 @@ class VehicleControllerIT {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.path").value("/api/v1/vehicles"))
-                .andExpect(jsonPath("$.error").isString());
+                .andExpect(jsonPath("$.detail").isString());
     }
 
     // ================================================================
@@ -328,10 +338,10 @@ class VehicleControllerIT {
                 .content(objectMapper.writeValueAsString(request)))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(vehicleId))
-                .andExpect(jsonPath("$.licensePlate").value("ASD666"))
-                .andExpect(jsonPath("$.year").value(2025))
-                .andExpect(jsonPath("$.category.id").value(category.getId()));
+                .andExpect(jsonPath("$.data.id").value(vehicleId))
+                .andExpect(jsonPath("$.data.licensePlate").value("ASD666"))
+                .andExpect(jsonPath("$.data.year").value(2025))
+                .andExpect(jsonPath("$.data.category.id").value(category.getId()));
     }
 
     // ================================================================
@@ -377,10 +387,10 @@ class VehicleControllerIT {
                 .content(objectMapper.writeValueAsString(request)))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(vehicleId))
-                .andExpect(jsonPath("$.licensePlate").value("ASD666"))
-                .andExpect(jsonPath("$.year").value(2025))
-                .andExpect(jsonPath("$.category").doesNotExist());
+                .andExpect(jsonPath("$.data.id").value(vehicleId))
+                .andExpect(jsonPath("$.data.licensePlate").value("ASD666"))
+                .andExpect(jsonPath("$.data.year").value(2025))
+                .andExpect(jsonPath("$.data.category").doesNotExist());
     }
 
     // ================================================================
@@ -428,8 +438,8 @@ class VehicleControllerIT {
                 .contentType(MediaType.APPLICATION_JSON))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(vehicleId))
-                .andExpect(jsonPath("$.licensePlate").value(licensePlate));
+                .andExpect(jsonPath("$.data.id").value(vehicleId))
+                .andExpect(jsonPath("$.data.licensePlate").value(licensePlate));
     }
 
     // ================================================================
@@ -447,9 +457,9 @@ class VehicleControllerIT {
                 .contentType(MediaType.APPLICATION_JSON))
                 
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id").value(vehicleId))
-                .andExpect(jsonPath("$[0].category.id").value(categoryId))
-                .andExpect(jsonPath("$[1].category.id").value(categoryId));
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].id").value(vehicleId))
+                .andExpect(jsonPath("$.data[0].category.id").value(categoryId))
+                .andExpect(jsonPath("$.data[1].category.id").value(categoryId));
     }
 }

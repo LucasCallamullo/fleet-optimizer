@@ -40,11 +40,11 @@ public class DataSeeder {
     public void seedData() {
         // Check if data already exists
         if (categoryRepository.count() > 0 && vehicleRepository.count() > 0) {
-            System.out.println("📦 Data already exists - skipping seed");
+            System.out.println("Data already exists - skipping seed");
             return;
         }
 
-        System.out.println("🌱 Seeding initial data...");
+        System.out.println("Seeding initial data...");
 
         try {
             // Step 1: Create categories
@@ -54,11 +54,11 @@ public class DataSeeder {
             createVehicles(categories);
 
             // Step 3: Summary
-            System.out.println("✅ Seeded " + categoryRepository.count() + " categories");
-            System.out.println("✅ Seeded " + vehicleRepository.count() + " vehicles");
-            System.out.println("📊 Seed completed successfully!");
+            System.out.println("Seeded " + categoryRepository.count() + " categories");
+            System.out.println("Seeded " + vehicleRepository.count() + " vehicles");
+            System.out.println("Seed completed successfully!");
         } catch (Exception e) {
-            System.err.println("❌ Error seeding data: " + e.getMessage());
+            System.err.println("Error seeding data: " + e.getMessage());
             throw e; // Re-throw to trigger rollback
         }
     }

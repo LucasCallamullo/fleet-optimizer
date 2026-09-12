@@ -70,9 +70,10 @@
 		     DATABASE DRIVERS
 		-->
 		
-		<!-- PostgreSQL Driver: Production database connectivity.
-		     Commented out by default - uncomment for production.
-		     Scope: runtime means not needed for compilation.
+		<!--
+			PostgreSQL Driver: used by the 'docker' profiles to connect
+			to the real database. Scope 'runtime' means it is not needed at
+			compile time;
 		-->
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -80,14 +81,15 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- H2 Database: In-memory database for development.
-		     Great for local testing without installing PostgreSQL.
-		     Scope: runtime (used only when the app runs).
+		<!--
+			H2 Database: used by the 'test' profile as an in-memory database so
+			integration tests can run without a real PostgreSQL instance.
+			Scope 'runtime' keeps it on the classpath at execution time;
 		-->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- ================================================================
