@@ -77,6 +77,7 @@ public class PackageController {
      * @throws AppException - 401 if user is not authenticated
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")    // proofs this on internal comunication
     public List<PackageResponseDTO> getPackages(HttpServletRequest request) {
         // Extract user ID and admin status from Gateway headers
         String userId = authHelper.getCurrentUserId(request);
@@ -102,6 +103,7 @@ public class PackageController {
      * @throws AppException - 401 if user is not authenticated
      */
     @GetMapping("/detailed")
+    @PreAuthorize("isAuthenticated()")    // proofs this on internal comunication
     public List<PackageDetailDTO> getPackagesDetailed(HttpServletRequest request) {
         // Extract user ID and admin status from Gateway headers
         String userId = authHelper.getCurrentUserId();
@@ -201,6 +203,7 @@ public class PackageController {
      * @return List of PackageDTO with package details
      */
     @GetMapping(value = "/internal", params = "ids")
+    @PreAuthorize("isAuthenticated()")        // proofs this on internal comunication
     public List<PackageDTO> getPackagesByIds(@RequestParam("ids") List<Long> ids) {
         log.info("GET /api/v1/packages/internal?ids={} - Fetching packages for ms-routes", ids);
         return packageExternalService.getPackagesDto(ids);
@@ -229,6 +232,7 @@ public class PackageController {
     public void updatePackageStatus(@Valid @RequestBody PackageStatusUpdateRequest request) {
         log.info("PATCH /api/v1/packages/status - Updating {} packages to '{}'", 
             request.packageIds().size(), request.status());
+
         packageService.updatePackageStatus(request.packageIds(), request.status());
     }
 }
