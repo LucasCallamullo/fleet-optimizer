@@ -77,6 +77,20 @@
         </dependency>
 
         <!-- ================================================================
+             API DOCUMENTATION
+        -->
+
+        <!-- Swagger / OpenAPI: Auto-generates API documentation.
+             Access UI at: http://localhost:8085/swagger-ui.html
+             Generates docs from @RestController and DTOs.
+        -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
+        <!-- ================================================================
              TESTING DEPENDENCIES
         -->
         
@@ -114,6 +128,7 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
 
     <build>

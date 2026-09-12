@@ -14,6 +14,7 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Security configuration for the API Gateway.
@@ -87,6 +88,9 @@ public class SecurityConfig {
         return NimbusReactiveJwtDecoder.withJwkSetUri(keycloakJwksUri).build();
     }
 
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
     /**
      * CORS configuration.
      * Allows cross-origin requests from frontend applications.
@@ -95,19 +99,14 @@ public class SecurityConfig {
      * allowedOrigins CANNOT be "*".
      * Must specify exact origins.
      * 
-     * In production, replace with specific origins:
-     * - React: http://localhost:3000, http://localhost:5173
-     * - Production: https://myapp.com
+     * In production, replace with specific origins on application.yml or compose
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
-        // Specific origins (NOT wildcard)
-        config.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:5173"
-        ));
+        // Assigns the list coming from environment variables / properties
+        config.setAllowedOrigins(allowedOrigins);
         
         // Allow credentials (JWT in headers)
         config.setAllowCredentials(true);
