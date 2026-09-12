@@ -3,8 +3,30 @@
 ### BASE URL: http://localhost:8085
 ### ================================================================
 
-@baseUrl = http://localhost:8085
+### Variables
+@baseUrl = http://localhost:8080
 @distanceBaseUrl = {{baseUrl}}/api/v1/distance
+
+### 
+@authBaseUrl = {{baseUrl}}/api/v1/auth
+
+
+### ================================================================
+### 1. LOGIN - Regular User
+### ================================================================
+# @name loginUser
+POST {{authBaseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin_regular@gmail.com",
+    "password": "pass1234"
+}
+
+### 
+@userToken = {{loginUser.response.body.data.accessToken}}
+@userRefreshToken = {{loginUser.response.body.data.refreshToken}}
+
 
 ### ================================================================
 ### 1. CALCULAR DISTANCIA (Single)
@@ -13,6 +35,8 @@
 # @name calculateDistance
 POST {{distanceBaseUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
 
 {
     "originLat": -34.6037,
@@ -26,6 +50,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{distanceBaseUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "originLat": -34.6037,
@@ -39,6 +64,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{distanceBaseUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "originLat": -31.4201,
@@ -52,6 +78,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{distanceBaseUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "originLat": -34.6037,
@@ -65,6 +92,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{distanceBaseUrl}}/batch
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "locations": [
@@ -109,6 +137,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{distanceBaseUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "originLat": -34.6037,
@@ -122,6 +151,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{distanceBaseUrl}}
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "originLat": -34.6037,
