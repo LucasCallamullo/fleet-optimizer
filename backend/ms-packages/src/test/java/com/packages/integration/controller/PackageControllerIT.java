@@ -97,12 +97,17 @@ class PackageControllerIT {
     @WithMockUser
     @DisplayName("GET /api/v1/packages - Should return all packages when authenticated")
     void shouldReturnAllPackages() throws Exception {
+        var userId = this.testPackage.getOwnerId();
+
         mockMvc.perform(get("/api/v1/packages")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                // header agregado por parametros necesarios del controller
+                // que vienen desde el gateway como lo son los headers
+                .header("X-User-Id", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].trackingNumber").value("PKG-001"))
-                .andExpect(jsonPath("$[0].status").value("CREATED"));
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].trackingNumber").value("PKG-001"))
+                .andExpect(jsonPath("$.data[0].status").value("CREATED"));
     }
 
     // ================================================================
@@ -116,9 +121,9 @@ class PackageControllerIT {
         mockMvc.perform(get("/api/v1/packages/{id}", testPackage.getId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testPackage.getId()))
-                .andExpect(jsonPath("$.trackingNumber").value("PKG-001"))
-                .andExpect(jsonPath("$.status").value("CREATED"));
+                .andExpect(jsonPath("$.data.id").value(testPackage.getId()))
+                .andExpect(jsonPath("$.data.trackingNumber").value("PKG-001"))
+                .andExpect(jsonPath("$.data.status").value("CREATED"));
     }
 
     @Test
@@ -147,13 +152,14 @@ class PackageControllerIT {
 
         mockMvc.perform(post("/api/v1/packages")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request))
-            // header agregado por parametros necesarios del controller que vienen desde el gateway como lo son los headers
+            .content(objectMapper.writeValueAsString(request))    // propagate JWT
+            // header agregado por parametros necesarios del controller
+            // que vienen desde el gateway como lo son los headers
             .header("X-User-Id", "user-id-123"))  
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.trackingNumber").value("PKG-002"))
-            .andExpect(jsonPath("$.totalWeightKg").value(20.0))
-            .andExpect(jsonPath("$.status").value("CREATED"));
+            .andExpect(jsonPath("$.data.trackingNumber").value("PKG-002"))
+            .andExpect(jsonPath("$.data.totalWeightKg").value(20.0))
+            .andExpect(jsonPath("$.data.status").value("CREATED"));
     }
 
     @Test
@@ -178,38 +184,40 @@ class PackageControllerIT {
 
     @Test
     @WithMockUser
-    @DisplayName("PATCH /api/v1/packages/status - Should update package status")
+    @DisplayName("PUT /api/v1/packages/status - Should update package status")
     void shouldUpdatePackageStatus() throws Exception {
+        // testPackage init on PackageStatus.CREATED
+
         // First update to READY_FOR_PICKUP
-        Package pkg = packageRepository.findById(testPackage.getId()).get();
-        pkg.setStatus(PackageStatus.READY_FOR_PICKUP);
-        packageRepository.save(pkg);
+        // Package pkg = packageRepository.findById(testPackage.getId()).get();
+        // pkg.setStatus(PackageStatus.);
+        // packageRepository.save(pkg);
 
         PackageStatusUpdateRequest request = new PackageStatusUpdateRequest(
             List.of(testPackage.getId()),
-            "IN_TRANSIT"
+            PackageStatus.READY_FOR_PICKUP.toString()
         );
 
-        mockMvc.perform(patch("/api/v1/packages/status")
+        mockMvc.perform(put("/api/v1/packages/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         // Verify status was updated
         Package updated = packageRepository.findById(testPackage.getId()).get();
-        assertThat(updated.getStatus()).isEqualTo(PackageStatus.IN_TRANSIT);
+        assertThat(updated.getStatus()).isEqualTo(PackageStatus.READY_FOR_PICKUP);
     }
 
     @Test
     @WithMockUser
-    @DisplayName("PATCH /api/v1/packages/status - Should return 400 when invalid status")
+    @DisplayName("PUT /api/v1/packages/status - Should return 400 when invalid status")
     void shouldReturn400WhenInvalidStatus() throws Exception {
         PackageStatusUpdateRequest request = new PackageStatusUpdateRequest(
             List.of(testPackage.getId()),
             "INVALID_STATUS"
         );
 
-        mockMvc.perform(patch("/api/v1/packages/status")
+        mockMvc.perform(put("/api/v1/packages/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -217,15 +225,19 @@ class PackageControllerIT {
 
     @Test
     @WithMockUser
-    @DisplayName("PATCH /api/v1/packages/status - Should return 400 when package not ready for IN_TRANSIT")
+    @DisplayName("PUT /api/v1/packages/status - Should return 400 when package not ready for IN_TRANSIT")
     void shouldReturn400WhenPackageNotReady() throws Exception {
+        Package pkg = packageRepository.findById(testPackage.getId()).get();
+        pkg.setStatus(PackageStatus.CANCELLED);
+        packageRepository.save(pkg);
+
         // Package is CREATED, not READY_FOR_PICKUP
         PackageStatusUpdateRequest request = new PackageStatusUpdateRequest(
-            List.of(testPackage.getId()),
-            "IN_TRANSIT"
+            List.of(pkg.getId()),
+            PackageStatus.IN_TRANSIT.toString()
         );
 
-        mockMvc.perform(patch("/api/v1/packages/status")
+        mockMvc.perform(put("/api/v1/packages/status")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -251,28 +263,33 @@ class PackageControllerIT {
 
     @Test
     @WithMockUser
-    @DisplayName("GET /api/v1/packages?ids=1,2 - Should return packages for ms-routes")
+    @DisplayName("GET /api/v1/packages/internal?ids=1,2 - Should return packages for ms-routes")
     void shouldReturnPackagesByIds() throws Exception {
-        mockMvc.perform(get("/api/v1/packages")
+        var userId = this.testPackage.getOwnerId();
+
+        mockMvc.perform(get("/api/v1/packages/internal")
                 .param("ids", testPackage.getId().toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                // header agregado por parametros necesarios del controller
+                // que vienen desde el gateway como lo son los headers
+                .header("X-User-Id", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(testPackage.getId()))
-                .andExpect(jsonPath("$[0].totalWeightKg").value(10.0))
-                .andExpect(jsonPath("$[0].totalVolumeCbm").value(0.30))
-                .andExpect(jsonPath("$[0].origin").exists());
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(testPackage.getId()))
+                .andExpect(jsonPath("$.data[0].totalWeightKg").value(10.0))
+                .andExpect(jsonPath("$.data[0].totalVolumeCbm").value(0.30))
+                .andExpect(jsonPath("$.data[0].origin").exists());
     }
 
     @Test
     @WithMockUser
-    @DisplayName("GET /api/v1/packages?ids=999 - Should return empty list when no packages found")
+    @DisplayName("GET /api/v1/packages/internal?ids=999 - Should return empty list when no packages found")
     void shouldReturnEmptyListWhenNoPackagesFound() throws Exception {
-        mockMvc.perform(get("/api/v1/packages")
+        mockMvc.perform(get("/api/v1/packages/internal")
                 .param("ids", "999")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.data", hasSize(0)));
     }
 
     // ================================================================

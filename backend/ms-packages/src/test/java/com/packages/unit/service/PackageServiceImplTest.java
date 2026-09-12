@@ -159,8 +159,6 @@ class PackageServiceImplTest {
             .thenReturn(Optional.of(store));
         when(packageMapper.toEntity(request)).thenReturn(pkg);
         when(packageRepository.save(any(Package.class))).thenReturn(savedPkg);
-        when(packageRepository.findByIdWithStore(savedPkg.getId()))
-            .thenReturn(Optional.of(savedPkg));
         when(packageMapper.toDetailDto(any(Package.class))).thenReturn(detailDTO);
 
         // Step 2: Act
@@ -176,7 +174,6 @@ class PackageServiceImplTest {
         verify(packageRepository).findByTrackingNumber(request.trackingNumber());
         verify(storeRepository).findById(request.storeId());
         verify(packageRepository).save(any(Package.class));
-        verify(packageRepository).findByIdWithStore(savedPkg.getId());
         verify(packageMapper).toDetailDto(any(Package.class));
     }
 
@@ -600,77 +597,196 @@ class PackageServiceImplTest {
     }
 
     // ================================================================
-    // TEST: UPDATE PACKAGE STATUS - INVALID TRANSITION
+    // TEST: UPDATE PACKAGE STATUS - HAPPY PATH
     // ================================================================
 
     @Test
-    @DisplayName("Should throw exception when package is not READY_FOR_PICKUP for IN_TRANSIT")
-    void shouldThrowExceptionWhenPackageNotReadyForPickup() {
-        // Step 1: Arrange - Package with CREATED status (not READY_FOR_PICKUP)
-        Package createdPackage = new Package();
-        createdPackage.setId(1L);
-        createdPackage.setTrackingNumber("PKG-001");
-        createdPackage.setStatus(PackageStatus.CREATED);
+    @DisplayName("Should update packages to IN_TRANSIT when all are READY_FOR_PICKUP")
+    void shouldUpdatePackagesToInTransitWhenReadyForPickup() {
+        // Step 1: Arrange - Build two packages in a valid source state for IN_TRANSIT.
+        // READY_FOR_PICKUP is one of the two allowed source states (the other is CREATED).
+        Package pkg1 = packageWithId(1L, PackageStatus.READY_FOR_PICKUP);
+        Package pkg2 = packageWithId(2L, PackageStatus.READY_FOR_PICKUP);
 
-        when(packageRepository.findAllById(List.of(1L)))
-            .thenReturn(List.of(createdPackage));
+        // Step 2: Mock the repository to return both packages when queried by ID.
+        // The service calls findAllById(packageIds) inside validatePackagesExist.
+        when(packageRepository.findAllById(List.of(1L, 2L)))
+            .thenReturn(List.of(pkg1, pkg2));
 
-        // Step 2: Act & Assert
-        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "IN_TRANSIT"))
+        // Step 3: Act - Invoke the method under test with a valid status string.
+        packageService.updatePackageStatus(List.of(1L, 2L), "IN_TRANSIT");
+
+        // Step 4: Assert - Both entities must have been mutated to the new status.
+        assertThat(pkg1.getStatus()).isEqualTo(PackageStatus.IN_TRANSIT);
+        assertThat(pkg2.getStatus()).isEqualTo(PackageStatus.IN_TRANSIT);
+
+        // Step 5: Verify - The service must persist the updated entities exactly once.
+        verify(packageRepository).saveAll(List.of(pkg1, pkg2));
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID STATUS STRING
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw 400 when status string is invalid")
+    void shouldThrowWhenStatusInvalid() {
+        // Step 1: Act & Assert - Passing a string that does not match any enum value
+        // must fail during validateAndParseStatus with a 400 AppException.
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "NOT_A_STATUS"))
             .isInstanceOf(AppException.class)
-            .hasMessageContaining("must be 'READY_FOR_PICKUP' to transition to IN_TRANSIT")
+            .hasMessageContaining("Invalid status")
             .hasFieldOrPropertyWithValue("statusCode", 400);
 
-        // Step 3: Verify
+        // Step 2: Verify - The failure happens before touching the repository,
+        // so no query and no save should have been issued.
+        verify(packageRepository, never()).findAllById(any());
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - MISSING PACKAGES
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw 404 when some packages are not found")
+    void shouldThrowWhenPackagesNotFound() {
+        // Step 1: Arrange - Request two IDs but mock the repository to return only one.
+        // This simulates a missing package in the database.
+        when(packageRepository.findAllById(List.of(1L, 2L)))
+            .thenReturn(List.of(packageWithId(1L, PackageStatus.CREATED)));
+
+        // Step 2: Act & Assert - validatePackagesExist compares the requested size
+        // with the returned size and throws a 404 with the missing IDs.
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L, 2L), "IN_TRANSIT"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("Packages not found: [2]")
+            .hasFieldOrPropertyWithValue("statusCode", 404);
+
+        // Step 3: Verify - The update must not proceed when validation fails.
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID TRANSITION TO READY_FOR_PICKUP
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw 400 when package is not CREATED for READY_FOR_PICKUP")
+    void shouldThrowWhenPackageNotCreatedForReadyForPickup() {
+        // Step 1: Arrange - A package already IN_TRANSIT cannot go back to READY_FOR_PICKUP.
+        // The rule only allows CREATED -> READY_FOR_PICKUP.
+        Package pkg = packageWithId(1L, PackageStatus.IN_TRANSIT);
+
+        when(packageRepository.findAllById(List.of(1L)))
+            .thenReturn(List.of(pkg));
+
+        // Step 2: Act & Assert - validateStatusTransition must reject the transition
+        // with a 400 and a message naming the required source status.
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "READY_FOR_PICKUP"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("must be 'CREATED' to transition to READY_FOR_PICKUP")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify - No persistence should happen on a rejected transition.
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID TRANSITION TO DELIVERED
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw 400 when package is not IN_TRANSIT for DELIVERED")
+    void shouldThrowWhenPackageNotInTransitForDelivered() {
+        // Step 1: Arrange - Only IN_TRANSIT packages can be marked DELIVERED.
+        // A CREATED package must be rejected.
+        Package pkg = packageWithId(1L, PackageStatus.CREATED);
+
+        when(packageRepository.findAllById(List.of(1L)))
+            .thenReturn(List.of(pkg));
+
+        // Step 2: Act & Assert - The rule must fail with a 400 and a clear message.
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "DELIVERED"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("must be 'IN_TRANSIT' to transition to DELIVERED")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify - Nothing is persisted when the transition is invalid.
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID TRANSITION TO CANCELLED
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw 400 when package is not CREATED/PROCESSING for CANCELLED")
+    void shouldThrowWhenPackageNotCancellable() {
+        // Step 1: Arrange - Only CREATED or PROCESSING packages can be cancelled.
+        // A DELIVERED package is a terminal state and must be rejected.
+        Package pkg = packageWithId(1L, PackageStatus.DELIVERED);
+
+        when(packageRepository.findAllById(List.of(1L)))
+            .thenReturn(List.of(pkg));
+
+        // Step 2: Act & Assert - The rule must fail with a 400 and the expected message.
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "CANCELLED"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("must be 'CREATED' or 'PROCESSING' to transition to CANCELLED")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify - The update must not reach the repository.
+        verify(packageRepository, never()).saveAll(any());
+    }
+
+    // ================================================================
+    // TEST: UPDATE PACKAGE STATUS - INVALID TRANSITION TO IN_TRANSIT
+    // ================================================================
+
+    @Test
+    @DisplayName("Should throw 400 when package is DELIVERED and tries to transition to IN_TRANSIT")
+    void shouldThrowWhenPackageNotReadyForInTransit() {
+        // Step 1: Arrange - Build the package inline instead of using the helper.
+        // This version keeps trackingNumber to make the entity look realistic,
+        // though only id and status are actually read by the validation logic.
+        Package deliveredPackage = new Package();
+        deliveredPackage.setId(1L);
+        deliveredPackage.setTrackingNumber("PKG-001");
+        deliveredPackage.setStatus(PackageStatus.DELIVERED);
+
+        when(packageRepository.findAllById(List.of(1L)))
+            .thenReturn(List.of(deliveredPackage));
+
+        // Step 2: Act & Assert - DELIVERED is neither CREATED nor READY_FOR_PICKUP,
+        // so the transition to IN_TRANSIT must be rejected with a 400.
+        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), "IN_TRANSIT"))
+            .isInstanceOf(AppException.class)
+            .hasMessageContaining("must be 'CREATED' or 'READY_FOR_PICKUP' to transition to IN_TRANSIT")
+            .hasFieldOrPropertyWithValue("statusCode", 400);
+
+        // Step 3: Verify - The repository was queried, but nothing was persisted.
         verify(packageRepository).findAllById(List.of(1L));
         verify(packageRepository, never()).saveAll(any());
     }
 
     // ================================================================
-    // TEST: UPDATE PACKAGE STATUS - MIXED PACKAGES (one invalid)
+    // HELPER
     // ================================================================
 
-    @Test
-    @DisplayName("Should throw exception when one package is not READY_FOR_PICKUP")
-    void shouldThrowExceptionWhenOnePackageNotReady() {
-        // Step 1: Arrange - One READY_FOR_PICKUP, one CREATED
-        Package readyPackage = new Package();
-        readyPackage.setId(1L);
-        readyPackage.setStatus(PackageStatus.READY_FOR_PICKUP);
-
-        Package createdPackage = new Package();
-        createdPackage.setId(2L);
-        createdPackage.setStatus(PackageStatus.CREATED);
-
-        when(packageRepository.findAllById(List.of(1L, 2L)))
-            .thenReturn(List.of(readyPackage, createdPackage));
-
-        // Step 2: Act & Assert
-        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L, 2L), "IN_TRANSIT"))
-            .isInstanceOf(AppException.class)
-            .hasMessageContaining("must be 'READY_FOR_PICKUP'")
-            .hasFieldOrPropertyWithValue("statusCode", 400);
-
-        // Step 3: Verify
-        verify(packageRepository).findAllById(List.of(1L, 2L));
-        verify(packageRepository, never()).saveAll(any());
-    }
-
-    // ================================================================
-    // TEST: UPDATE PACKAGE STATUS - NULL STATUS
-    // ================================================================
-
-    @Test
-    @DisplayName("Should throw exception when status is null")
-    void shouldThrowExceptionWhenStatusIsNull() {
-        // Step 1: Act & Assert - validation fails before repository
-        assertThatThrownBy(() -> packageService.updatePackageStatus(List.of(1L), null))
-            .isInstanceOf(AppException.class)
-            .hasMessageContaining("Invalid status: null")
-            .hasFieldOrPropertyWithValue("statusCode", 400);
-
-        // Step 2: Verify - Repository never called 
-        verify(packageRepository, never()).findAllById(any());
-        verify(packageRepository, never()).saveAll(any());
+    /**
+     * Builds a minimal Package with only the fields needed by the status
+     * transition logic: id, trackingNumber, and status.
+     *
+     * Use this helper in tests where the service only reads id and status.
+     * For tests that need a fully populated entity (store, owner, weights,
+     * timestamps), use the objects built in setUp instead.
+     */
+    private Package packageWithId(Long id, PackageStatus status) {
+        Package pkg = new Package();
+        pkg.setId(id);
+        pkg.setTrackingNumber("PKG-" + id);
+        pkg.setStatus(status);
+        return pkg;
     }
 }
