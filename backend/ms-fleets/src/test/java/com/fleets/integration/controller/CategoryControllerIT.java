@@ -42,8 +42,8 @@ class CategoryControllerIT {
 
     @BeforeEach
     void setUp() {
-        categoryRepository.deleteAll();
-        vehicleRepository.deleteAll();
+        vehicleRepository.deleteAll();    // first childs
+        categoryRepository.deleteAll();   // then categories
 
         category = TestDataFactory.createDefaultCategory();
         category = categoryRepository.save(category);
@@ -57,11 +57,13 @@ class CategoryControllerIT {
     @DisplayName("GET /api/v1/categories - Should return all categories")
     @WithMockUser(roles = "USER")  // ← Simula usuario autenticado
     void shouldReturnAllCategories() throws Exception {
+        // this.category = { id: 1,  name: "Sedan" }
+
         mockMvc.perform(get("/api/v1/categories"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("Sedan"));
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data.[0].name").value(this.category.getName()));
     }
 
     // ================================================================
@@ -83,6 +85,7 @@ class CategoryControllerIT {
     @DisplayName("POST /api/v1/categories - Should create category as ADMIN")
     @WithMockUser(roles = "ADMIN")  // ← Simula ADMIN
     void shouldCreateCategoryAsAdmin() throws Exception {
+
         CategoryRequestDTO request = new CategoryRequestDTO(
             "SUV",
             "Sport Utility Vehicle",
@@ -93,7 +96,7 @@ class CategoryControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("SUV"));
+                .andExpect(jsonPath("$.data.name").value(request.name()));
     }
 
     // ================================================================
@@ -124,11 +127,13 @@ class CategoryControllerIT {
     @DisplayName("DELETE /api/v1/categories/{id} - Should delete as ADMIN")
     @WithMockUser(roles = "ADMIN")
     void shouldDeleteCategoryAsAdmin() throws Exception {
-        mockMvc.perform(delete("/api/v1/categories/{id}", category.getId()))
+        // this.category = { id: 1,  name: "Sedan" }
+
+        mockMvc.perform(delete("/api/v1/categories/{id}", this.category.getId()))
                 .andExpect(status().isNoContent());
 
         // Verify deleted
-        mockMvc.perform(get("/api/v1/categories/{id}", category.getId()))
+        mockMvc.perform(get("/api/v1/categories/{id}", this.category.getId()))
                 .andExpect(status().isNotFound());
     }
 
@@ -140,6 +145,8 @@ class CategoryControllerIT {
     @DisplayName("DELETE /api/v1/categories/{id} - Should return 403 when USER tries to delete")
     @WithMockUser(roles = "USER")
     void shouldReturn403WhenUserTriesToDelete() throws Exception {
+        // this.category = { id: 1,  name: "Sedan" }
+
         mockMvc.perform(delete("/api/v1/categories/{id}", category.getId()))
                 .andExpect(status().isForbidden());
     }
