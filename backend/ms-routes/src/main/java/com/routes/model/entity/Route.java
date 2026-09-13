@@ -90,6 +90,14 @@ public class Route {
     // ================================================================
     // RELATIONSHIPS
     // ================================================================
+
+    /**
+     * Owner of the route (user ID from Keycloak).
+     * Set at creation time from the authenticated user context.
+     * Used to enforce ownership-based authorization.
+     */
+    @Column(name = "owner_id", nullable = false)
+    private String ownerId;
     
     /**
      * List of legs that belong to this route.
