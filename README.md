@@ -9,12 +9,12 @@ The overall objective of the project is to implement a microservices-based backe
 
 |  | Tech Stack |
 | :--- | :--- |
-| **Backend** | ![Java 17](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
-| **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) |
-| **Persistence & Data** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![H2 Database](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white) ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Backend** | ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) |
+| **Persistence & Data** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![H2 Database](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white) |
 | **Security & Auth** | ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white) ![Keycloak](https://img.shields.io/badge/Keycloak-0085CA?style=for-the-badge&logo=keycloak&logoColor=white) ![OAuth 2.0 / OIDC](https://img.shields.io/badge/OAuth_2.0-EB5424?style=for-the-badge&logo=openid&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white) |
 | **DevOps & Infra** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05033?style=for-the-badge&logo=git&logoColor=white) ![Swagger / OpenAPI](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black) |
-| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white) |
+| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white) |
 
 
 <hr>
@@ -27,6 +27,7 @@ The overall objective of the project is to implement a microservices-based backe
   <li>Docker and Docker Compose installed.</li>
   <li>Git to clone the repository.</li>
   <li>(Optional) Java 17 and Maven to run services without Docker.</li>
+  <li>(Optional) Node 20 and npm to run the frontend without Docker.</li>
 </ul>
 
 <h3>Step by Step</h3>
@@ -40,42 +41,39 @@ cd fleet-optimizer</code></pre>
 <pre><code>cp .env.example .env
 # No need to edit the created .env file, the Keycloak keys are valid.</code></pre>
 
-<h4>3. Build the microservices JARs</h4>
-<p>For Docker to package the services, you need to generate the JAR files. You can do this using the provided script or manually:</p>
+<h4>3. 🐳 Start all services with Docker Compose</h4>
+<p>From the repository root, run:</p>
+<pre><code>docker compose up -d --build</code></pre>
+<p><strong>This downloads the base images (PostgreSQL, nginx, node, Maven)</strong>  and builds every backend service and the frontend. No manual JAR build is required; each service has a multi-stage Dockerfile that compiles the code inside the image.</p>
 
-<p><strong>Option A: Use the automatic script</strong></p>
-<pre><code>cd backend
-chmod +x run.sh
-./run.sh start</code></pre>
-
-<p><strong>Option B: Build each service manually</strong></p>
-<pre><code>mvn clean package -DskipTests -f ms-fleets/pom.xml
-mvn clean package -DskipTests -f ms-routes/pom.xml
-mvn clean package -DskipTests -f ms-auth/pom.xml
-mvn clean package -DskipTests -f gateway/pom.xml</code></pre>
-
-<h4>4. Start all services with Docker Compose</h4>
-<p>This command downloads the necessary images (PostgreSQL, OSRM) and builds your microservices.</p>
-<pre><code>docker-compose up -d</code></pre>
-
-<h4>5. Verify everything is working</h4>
+<h4>4. Verify everything is working</h4>
 <ul>
+  <li><strong>Frontend:</strong> <code>http://localhost</code></li>
   <li><strong>Gateway:</strong> <code>http://localhost:8080</code></li>
-  <li><strong>Swagger UI (e.g. Routes):</strong> <code>http://localhost:8082/swagger-ui.html</code></li>
 </ul>
+<p>The frontend is served by nginx on port 80 and proxies <code>/api</code> requests to the Gateway. The Gateway is the only backend entry point; microservices and databases are internal and not exposed to the host.</p>
 
-<h4>6. (Optional) Stop the services</h4>
-<pre><code>docker-compose down</code></pre>
+<h4>5. (Optional) Stop the services</h4>
+<pre><code>docker compose down</code></pre>
+<p>To also remove the database volumes (this deletes all data):</p>
+<pre><code>docker compose down -v</code></pre>
 
-<h4>7. (Optional) Init Frontend - React / Tailwind</h4>
-<pre><code>cd ..
-cd frontend
-npm i
+<h4>6. (Optional) Run the backend or frontend without Docker</h4>
+
+<p>Build the JARs manually (only if you want to run a service outside Docker)</p>
+<pre><code>cd backend
+mvn clean package -DskipTests -f gateway/pom.xml
+mvn clean package -DskipTests -f ms-auth/pom.xml
+mvn clean package -DskipTests -f ms-fleets/pom.xml
+mvn clean package -DskipTests -f ms-packages/pom.xml
+mvn clean package -DskipTests -f ms-geocoding/pom.xml
+mvn clean package -DskipTests -f ms-routes/pom.xml
+</code></pre>
+
+<p>If you want hot reload while developing the frontend:</p><strong>Frontend (dev server):</strong> <code>http://localhost:5173</code>
+<pre><code>cd frontend
+npm install
 npm run dev</code></pre>
-
-<ul>
-  <li><strong>FrontEnd:</strong> <code>http://localhost:5173</code></li>
-</ul>
 
 
 <hr>
@@ -141,28 +139,17 @@ flowchart TD
     MS_Fleets <-->|Reads / Writes| DB_Fleets
 ```
 
-<h2>DER</h2>
+<h2>Database Schema (DER)</h2>
+<p>Each microservice owns its own PostgreSQL database. The diagram below shows the tables and relationships for ms-fleets, ms-routes and ms-packages.</p>
 
 ![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
 
-<hr>
-
-<h2>🐳 Docker Deployment</h2>
-<p>All services are dockerized and can be started using Docker Compose, including:</p>
-<ul>
-  <li><strong>API Gateway (Gateway)</strong></li>
-  <li><strong>Authentication Microservice (ms-auth)</strong></li>
-  <li><strong>Fleet Microservice (ms-fleets)</strong></li>
-  <li><strong>Routes Microservice (ms-routes)</strong></li>
-  <li><strong>Packages Microservice (ms-packages)</strong></li>
-  <li><strong>Geocoding Microservice (ms-geocoding)</strong></li>
-  <li><strong>Frontend (React)</strong> - <em>(coming soon)</em></li>
-  <li><strong>Databases (H2/PostgreSQL)</strong> per microservice.</li>
-</ul>
-<p>This provides a unified, reproducible environment ready for testing or deployment.</p>
-
 
 <hr>
+
+
+<details>
+  <summary>Service responsibilities</summary>
 
 <h2>General Architecture</h2>
 
@@ -188,6 +175,8 @@ flowchart TD
 
 <h3>🔹 Geocoding Service (ms-geocoding)</h3>
 <p>Microservice dedicated exclusively to route and distance calculation based on geographic coordinates (latitude/longitude). Consumes the <strong>OpenRouteService (ORS)</strong> API, a routing service that requires an API key for usage. Supports distance and estimated time calculation to optimize system costs and logistics. Implements a batch endpoint to process multiple locations in a single call.</p>
+
+</details>
 
 <hr>
 
@@ -223,6 +212,27 @@ flowchart TD
     The destination microservice receives the user context (via headers) and uses <code>@PreAuthorize</code> to control access to endpoints based on roles.
   </li>
 </ol>
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant G as Gateway
+    participant A as ms-auth
+    participant K as Keycloak
+
+    U->>F: Enter credentials
+    F->>G: POST /api/v1/auth/login
+    G->>A: Forward request
+    A->>K: Validate credentials
+    K-->>A: JWT
+    A-->>G: JWT
+    G-->>F: JWT
+    F->>G: Request with Authorization: Bearer <token>
+    G->>G: Validate JWT, extract roles
+    G->>G: Inject X-User-Id, X-User-Roles
+    G->>A: Forward with headers
+```
 
 <h2>🖥️ Frontend Screenshots</h2>
 <p>The application provides an intuitive interface for managing all aspects of the logistics system. Below are some of the main screens.</p>
@@ -272,7 +282,7 @@ flowchart TD
 
   <tr>
     <td align="center">
-      <strong>C4 Model</strong>
+      <strong>graph services</strong>
     </td>
 
 
@@ -282,7 +292,7 @@ flowchart TD
     <td align="center">
       <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png" alt="C4 Model" width="400"/>
       <br>
-      <em>C4 with Draw.io Informal</em>
+      <em>graph services with Draw.io</em>
     </td>
 
 
@@ -293,7 +303,8 @@ flowchart TD
 
 <hr>
 
-<h2 id="contact"> 💻 Contact Lucas Callamullo - Back-End Developer </h2>
+<h2 id="contact">Contact</h2>
+<h3>Lucas Callamullo - Backend Developer</h3>
 
 | [![GitHub](https://img.shields.io/badge/github-%23121011.svg?&style=for-the-badge&logo=github&logoColor=white)](https://github.com/LucasCallamullo) | [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucas-callamullo/) | [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:lucas.callamullo.dev@gmail.com) |
 |:-:|:-:|:-:|

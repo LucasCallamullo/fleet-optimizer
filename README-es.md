@@ -9,24 +9,25 @@ El objetivo general del proyecto es implementar una solución backend basada en 
 
 |  | Tech Stack |
 | :--- | :--- |
-| **Backend** | ![Java 17](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
-| **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) |
-| **Persistence & Data** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![H2 Database](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white) ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Backend** | ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) |
+| **Persistence & Data** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![H2 Database](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white) |
 | **Security & Auth** | ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white) ![Keycloak](https://img.shields.io/badge/Keycloak-0085CA?style=for-the-badge&logo=keycloak&logoColor=white) ![OAuth 2.0 / OIDC](https://img.shields.io/badge/OAuth_2.0-EB5424?style=for-the-badge&logo=openid&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white) |
 | **DevOps & Infra** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05033?style=for-the-badge&logo=git&logoColor=white) ![Swagger / OpenAPI](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black) |
-| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white) |
+| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white) |
 
 
 <hr>
 
-<h2>Guía de Inicio Rápido</h2>
-<p>Sigue estos pasos para levantar el entorno de desarrollo completo.</p>
+<h2>Guía de inicio rápido</h2>
+<p>Seguí estos pasos para levantar el entorno de desarrollo completo.</p>
 
-<h3>Prerrequisitos</h3>
+<h3>Requisitos previos</h3>
 <ul>
   <li>Docker y Docker Compose instalados.</li>
   <li>Git para clonar el repositorio.</li>
-  <li>(Opcional) Java 17 y Maven para ejecutar los servicios sin Docker.</li>
+  <li>(Opcional) Java 17 y Maven para correr los servicios sin Docker.</li>
+  <li>(Opcional) Node 20 y npm para correr el frontend sin Docker.</li>
 </ul>
 
 <h3>Paso a paso</h3>
@@ -35,47 +36,45 @@ El objetivo general del proyecto es implementar una solución backend basada en 
 <pre><code>git clone https://github.com/LucasCallamullo/fleet-optimizer.git
 cd fleet-optimizer</code></pre>
 
-<h4>2. Configurar variables de entorno</h4>
-<p>El proyecto incluye un archivo de ejemplo. Crea tu propio archivo <code>.env</code> a partir de él y ajusta los valores si es necesario.</p>
+<h4>2. Configurar las variables de entorno</h4>
+<p>El proyecto incluye un archivo de ejemplo. Creá tu propio archivo <code>.env</code> a partir de él y ajustá los valores si hace falta.</p>
 <pre><code>cp .env.example .env
-# No es necesario Editar el archivo .env creado, las claves de keycloack son válidas.</code></pre>
+# No hace falta editar el archivo .env creado, las claves de Keycloak son válidas.</code></pre>
 
-<h4>3. Construir los JARs de los microservicios</h4>
-<p>Para que Docker pueda empaquetar los servicios, necesitas generar los archivos JAR. Puedes hacerlo con el script proporcionado o manualmente:</p>
+<h4>3. 🐳 Levantar todos los servicios con Docker Compose</h4>
+<p>Desde la raíz del repositorio, ejecutá:</p>
+<pre><code>docker compose up -d --build</code></pre>
+<p><strong>Esto descarga las imágenes base (PostgreSQL, nginx, node, Maven)</strong> y construye cada servicio del backend y el frontend. No hace falta compilar los JAR a mano: cada servicio tiene un Dockerfile multi-stage que compila el código dentro de la imagen.</p>
 
-<p><strong>Opción A: Usar el script automático</strong></p>
-<pre><code>cd backend
-chmod +x run.sh
-./run.sh start</code></pre>
-
-<p><strong>Opción B: Construir manualmente cada servicio</strong></p>
-<pre><code>mvn clean package -DskipTests -f ms-fleets/pom.xml
-mvn clean package -DskipTests -f ms-routes/pom.xml
-mvn clean package -DskipTests -f ms-auth/pom.xml
-mvn clean package -DskipTests -f gateway/pom.xml</code></pre>
-
-<h4>4. Levantar todos los servicios con Docker Compose</h4>
-<p>Este comando descarga las imágenes necesarias (PostgreSQL, OSRM) y construye las de tus microservicios.</p>
-<pre><code>docker-compose up -d</code></pre>
-
-<h4>5. Verificar que todo esté funcionando</h4>
+<h4>4. Verificar que todo funcione</h4>
 <ul>
+  <li><strong>Frontend:</strong> <code>http://localhost</code></li>
   <li><strong>Gateway:</strong> <code>http://localhost:8080</code></li>
-  <li><strong>Swagger UI (ej. Routes):</strong> <code>http://localhost:8082/swagger-ui.html</code></li>
 </ul>
+<p>El frontend lo sirve nginx en el puerto 80 y redirige las peticiones <code>/api</code> al Gateway. El Gateway es el único punto de entrada al backend; los microservicios y las bases de datos son internos y no están expuestos al host.</p>
 
-<h4>6. (Opcional) Detener los servicios</h4>
-<pre><code>docker-compose down</code></pre>
+<h4>5. (Opcional) Detener los servicios</h4>
+<pre><code>docker compose down</code></pre>
+<p>Para eliminar también los volúmenes de las bases de datos (esto borra todos los datos):</p>
+<pre><code>docker compose down -v</code></pre>
 
-<h4>7. (Opcional) Iniciar Frontend en React / Tailwind</h4>
-<pre><code>cd ..
-cd frontend
-npm i
+<h4>6. (Opcional) Correr el backend o el frontend sin Docker</h4>
+
+<p>Compilar los JAR a mano (solo si querés correr un servicio fuera de Docker)</p>
+<pre><code>cd backend
+mvn clean package -DskipTests -f gateway/pom.xml
+mvn clean package -DskipTests -f ms-auth/pom.xml
+mvn clean package -DskipTests -f ms-fleets/pom.xml
+mvn clean package -DskipTests -f ms-packages/pom.xml
+mvn clean package -DskipTests -f ms-geocoding/pom.xml
+mvn clean package -DskipTests -f ms-routes/pom.xml
+</code></pre>
+
+<p>Si querés hot reload mientras desarrollás el frontend:</p>
+<strong>Frontend (dev server):</strong> <code>http://localhost:5173</code>
+<pre><code>cd frontend
+npm install
 npm run dev</code></pre>
-
-<ul>
-  <li><strong>FrontEnd:</strong> <code>http://localhost:5173</code></li>
-</ul>
 
 
 <hr>
@@ -143,30 +142,16 @@ flowchart TD
 ```
 
 
-<h2>DER</h2>
+<h2>Database Schema (DER)</h2>
+<p>Cada microservicio posee su propia base de datos PostgreSQL. El siguiente diagrama muestra las tablas y las relaciones de ms-fleets, ms-routes y ms-packages.</p>
 
 ![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_DER.png)
 
 
 <hr>
 
-<h2>🐳 Despliegue con Docker</h2>
-<p>Todos los servicios están dockerizados y pueden levantarse mediante Docker Compose, incluyendo:</p>
-
-<ul>
-  <li><strong>API Gateway (Gateway)</strong></li>
-  <li><strong>Microservicio de Autenticación (ms-auth)</strong></li>
-  <li><strong>Microservicio de Flotas (ms-fleets)</strong></li>
-  <li><strong>Microservicio de Rutas (ms-routes)</strong></li>
-  <li><strong>Microservicio de Paquetes (ms-packages)</strong></li>
-  <li><strong>Microservicio de Geocodificación (ms-geocoding)</strong></li>
-  <li><strong>Frontend (React)</strong> - <em>(coming soon)</em></li>
-  <li><strong>Bases de datos (H2/PostgreSQL)</strong> por microservicio.</li>
-</ul>
-<p>Esto permite un entorno unificado, reproducible y listo para pruebas o despliegue.</p>
-
-
-<hr>
+<details>
+  <summary>Service responsibilities</summary>
 
 <h2>Arquitectura General</h2>
 
@@ -193,8 +178,11 @@ flowchart TD
 <h3>🔹 Servicio de Geocodificación (ms-geocoding)</h3>
 <p>Microservicio dedicado al cálculo de rutas y distancias en base a coordenadas geográficas (latitud/longitud). Consume la API de <strong>OpenRouteService (ORS)</strong>, un servicio de enrutamiento que requiere una clave de API para su uso. Soporta el cálculo de distancias y tiempos estimados para optimizar los costos y la logística del sistema. Implementa un endpoint batch para procesar múltiples ubicaciones en una sola llamada.</p>
 
+</details>
+
 
 <hr>
+
 
 <h2>Flujo de Autenticación (OAuth2 + JWT)</h2>
 <h3>Pasos del flujo:</h3>
@@ -228,6 +216,30 @@ flowchart TD
     El microservicio destino recibe el contexto del usuario (a través de los headers) y utiliza <code>@PreAuthorize</code> para controlar el acceso a los endpoints según los roles.
   </li>
 </ol>
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant G as Gateway
+    participant A as ms-auth
+    participant K as Keycloak
+
+    U->>F: Enter credentials
+    F->>G: POST /api/v1/auth/login
+    G->>A: Forward request
+    A->>K: Validate credentials
+    K-->>A: JWT
+    A-->>G: JWT
+    G-->>F: JWT
+    F->>G: Request with Authorization: Bearer <token>
+    G->>G: Validate JWT, extract roles
+    G->>G: Inject X-User-Id, X-User-Roles
+    G->>A: Forward with headers
+```
+
+
+
 
 <h2>🖥️ Capturas del Frontend</h2>
 <p>La aplicación ofrece una interfaz intuitiva para gestionar todos los aspectos del sistema logístico. A continuación, se muestran algunas de las pantallas principales.</p>
