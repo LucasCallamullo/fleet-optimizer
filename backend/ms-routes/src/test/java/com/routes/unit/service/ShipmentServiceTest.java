@@ -9,6 +9,7 @@ import com.routes.dto.client.geocoding.BatchDistanceRequest;
 import com.routes.dto.client.geocoding.BatchDistanceResponse;
 import com.routes.dto.client.geocoding.DistanceResult;
 import com.routes.dto.client.packages.PackageDTO;
+import com.routes.dto.client.packages.PackageStatusUpdateRequest;
 import com.routes.dto.request.LocationRequestDTO;
 import com.routes.dto.request.ShipmentRequestDTO;
 import com.routes.dto.response.ShipmentResponseDTO;
@@ -32,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -131,6 +133,7 @@ class ShipmentServiceTest {
         savedRoute = new Route();
         savedRoute.setId(1L);
         savedRoute.setName("Shipment-20260101-120000");
+        savedRoute.setOwnerId("admin-owner-id");
         savedRoute.setStatus(RouteStatus.PLANNED);
         savedRoute.setCreatedAt(LocalDateTime.now());
 
@@ -208,10 +211,11 @@ class ShipmentServiceTest {
         when(legService.saveAllLegs(anyList(), any(Route.class)))
             .thenReturn(legs);
 
-        doNothing().when(packageClient).updatePackageStatus(any());    // void method uses doNothing
+        when(packageClient.updatePackageStatus(any(PackageStatusUpdateRequest.class)))
+            .thenReturn(Map.of("updated", 1, "status", "IN_TRANSIT"));
 
         // Step 2: Execute
-        ShipmentResponseDTO result = shipmentService.createShipment(request);
+        ShipmentResponseDTO result = shipmentService.createShipment(request, "some-user-id", true);
 
         // Step 3: Assert
         assertThat(result).isNotNull();
@@ -242,7 +246,7 @@ class ShipmentServiceTest {
             .thenReturn(List.of());
 
         // Step 2: Execute and assert
-        assertThatThrownBy(() -> shipmentService.createShipment(request))
+        assertThatThrownBy(() -> shipmentService.createShipment(request, savedRoute.getOwnerId(), true))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("No packages found")
             .hasFieldOrPropertyWithValue("statusCode", 404);
@@ -272,7 +276,7 @@ class ShipmentServiceTest {
             .thenReturn(lowCapacityVehicle);
 
         // Step 3: Execute and assert
-        assertThatThrownBy(() -> shipmentService.createShipment(request))
+        assertThatThrownBy(() -> shipmentService.createShipment(request, "some-user-id", false))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("Total weight")
             .hasMessageContaining("exceeds vehicle capacity")
@@ -302,7 +306,7 @@ class ShipmentServiceTest {
             .thenReturn(lowCapacityVehicle);
 
         // Step 3: Execute and assert
-        assertThatThrownBy(() -> shipmentService.createShipment(request))
+        assertThatThrownBy(() -> shipmentService.createShipment(request, "some-user-id", true))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("Total volume")
             .hasMessageContaining("exceeds vehicle capacity")
@@ -327,7 +331,7 @@ class ShipmentServiceTest {
             .thenThrow(new AppException("Vehicle not found: 10", 404));
 
         // Step 2: Execute and assert
-        assertThatThrownBy(() -> shipmentService.createShipment(request))
+        assertThatThrownBy(() -> shipmentService.createShipment(request, "some-user-id", true))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("Vehicle not found")
             .hasFieldOrPropertyWithValue("statusCode", 404);
@@ -393,10 +397,11 @@ class ShipmentServiceTest {
         when(legService.saveAllLegs(anyList(), any(Route.class)))
             .thenReturn(legs);
 
-        doNothing().when(packageClient).updatePackageStatus(any());
+        when(packageClient.updatePackageStatus(any(PackageStatusUpdateRequest.class)))
+            .thenReturn(Map.of("updated", 1, "status", "IN_TRANSIT"));
 
         // Step 4: Execute - should not throw capacity exceptions
-        ShipmentResponseDTO result = shipmentService.createShipment(request);
+        ShipmentResponseDTO result = shipmentService.createShipment(request, "some-user-id", true);
 
         // Step 5: Assert
         assertThat(result).isNotNull();

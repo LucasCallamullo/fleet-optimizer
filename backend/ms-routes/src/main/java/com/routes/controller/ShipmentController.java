@@ -4,6 +4,9 @@ import com.routes.dto.request.ShipmentRequestDTO;
 import com.routes.dto.response.ShipmentResponseDTO;
 import com.routes.exception.AppException;
 import com.routes.service.ShipmentService;
+import com.routes.utils.AuthHelper;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,9 @@ import org.springframework.web.bind.annotation.*;
 public class ShipmentController {
 
     private final ShipmentService shipmentService;
+
+    // necesary for some utils on request propagate from gateway
+    private final AuthHelper authHelper;
 
     // ================================================================
     // CREATE SHIPMENT
@@ -54,9 +60,16 @@ public class ShipmentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public ShipmentResponseDTO createShipment(@Valid @RequestBody ShipmentRequestDTO request) {
+    public ShipmentResponseDTO createShipment(
+        HttpServletRequest req,
+        @Valid @RequestBody ShipmentRequestDTO request) {
+
         log.info("POST /api/v1/shipments - Creating shipment with {} packages", request.packageIds().size());
-        ShipmentResponseDTO response = shipmentService.createShipment(request);
+        // Extract user ID and admin status from Gateway headers
+        String userId = authHelper.getCurrentUserId(req);
+        boolean isAdmin = authHelper.isAdmin(req);
+        ShipmentResponseDTO response = shipmentService.createShipment(request, userId, isAdmin);
+
         log.info("Shipment created successfully - routeId: {}, {} legs", 
             response.routeId(), response.legs().size());
         return response;
