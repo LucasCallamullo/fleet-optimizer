@@ -24,3 +24,8 @@ Content-Type: application/json
 ### Get Route By Id - Complete Example
 GET {{routesURL}}/1
 Authorization: Bearer {{accessToken}}
+
+
+### Get Route By Id - Complete Example
+GET {{routesURL}}
+Authorization: Bearer {{accessToken}}

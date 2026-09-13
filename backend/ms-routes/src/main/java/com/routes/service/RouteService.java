@@ -1,5 +1,7 @@
 package com.routes.service;
 
+import java.util.List;
+
 import com.routes.dto.request.RouteRequestDTO;
 import com.routes.dto.response.RouteDetailDTO;
 import com.routes.exception.AppException;
@@ -48,7 +50,16 @@ public interface RouteService {
      * @return The complete route with all legs
      * @throws com.routes.exception.AppException if route is not found (404)
      */
-    RouteDetailDTO getRouteById(Long id);
+    List<RouteDetailDTO> getAllRoutes(String userId, boolean isAdmin);
+
+    /**
+     * Retrieves a route by its ID with all associated legs.
+     *
+     * @param id The ID of the route to retrieve
+     * @return The complete route with all legs
+     * @throws com.routes.exception.AppException if route is not found (404)
+     */
+    RouteDetailDTO getRouteById(Long id, String userId, boolean isAdmin);
     
     /**
      * Updates an existing route.
@@ -64,7 +75,7 @@ public interface RouteService {
      * @return The updated route with all legs
      * @throws com.routes.exception.AppException if route is not found (404)
      */
-    RouteDetailDTO updateRoute(Long id, RouteRequestDTO request);
+    RouteDetailDTO updateRoute(Long id, RouteRequestDTO request, String userId, boolean isAdmin);
     
     /**
      * Deletes a route by its ID.
@@ -76,7 +87,7 @@ public interface RouteService {
      * @param id The ID of the route to delete
      * @throws com.routes.exception.AppException if route is not found (404)
      */
-    void deleteRoute(Long id);
+    void deleteRoute(Long id, String userId, boolean isAdmin);
 
 
     /**
@@ -87,5 +98,5 @@ public interface RouteService {
      * @return The complete route with all legs
      * @throws com.routes.exception.AppException if route is not found (404)
      */
-    Route getRouteByIdWithLegs(Long id);
+    Route getRouteByIdWithLegs(Long id, String userId, boolean isAdmin);
 }

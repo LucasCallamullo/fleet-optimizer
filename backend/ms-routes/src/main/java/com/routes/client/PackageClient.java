@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Feign client for communicating with the Package Microservice (ms-packages).
@@ -84,19 +85,5 @@ public interface PackageClient {
     // Currently using PUT because HttpURLConnection (OpenFeign's default HTTP client)
     // does not support HTTP PATCH requests.
     @PutMapping("/api/v1/packages/status")
-    void updatePackageStatus(@RequestBody PackageStatusUpdateRequest request);
-
-    /**
-     * Hardcoded packages for testing purposes.
-     * TODO: Remove this method when ms-packages is available.
-     *
-    private List<PackageDTO> getHardcodedPackages() {
-        return List.of(
-            new PackageDTO(1L, "PKG-001", 10.0, 10.0),
-            new PackageDTO(2L, "PKG-002", 20.0, 20.0),
-            new PackageDTO(3L, "PKG-003", 30.0, 30.0),
-            new PackageDTO(4L, "PKG-004", 15.0, 15.0),
-            new PackageDTO(5L, "PKG-005", 25.0, 25.0)
-        );
-    } */
+    Map<String, Object> updatePackageStatus(@RequestBody PackageStatusUpdateRequest request);
 }

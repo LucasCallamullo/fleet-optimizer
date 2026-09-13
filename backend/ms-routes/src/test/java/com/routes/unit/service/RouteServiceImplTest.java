@@ -89,6 +89,7 @@ class RouteServiceImplTest {
         savedRoute = new Route();
         savedRoute.setId(1L);
         savedRoute.setName("Test Route");
+        savedRoute.setOwnerId("test-owner-id");
         savedRoute.setStatus(RouteStatus.PLANNED);
 
         // Step 6: Create legs (in memory)
@@ -124,13 +125,14 @@ class RouteServiceImplTest {
         Route route = new Route();
         route.setId(routeId);
         route.setName("Test Route");
+        route.setOwnerId("some-owner");
 
         when(routeRepository.findByIdWithLegs(routeId))
             .thenReturn(Optional.of(route));
         when(routeMapper.toDetailDto(route)).thenReturn(response);
 
         // STEP 2: Act
-        RouteDetailDTO result = routeService.getRouteById(routeId);
+        RouteDetailDTO result = routeService.getRouteById(routeId, route.getOwnerId(), true);
 
         // STEP 3: Assert
         assertThat(result).isNotNull();
@@ -154,7 +156,7 @@ class RouteServiceImplTest {
             .thenReturn(Optional.empty());
 
         // STEP 2: Act & Assert
-        assertThatThrownBy(() -> routeService.getRouteById(nonExistentId))
+        assertThatThrownBy(() -> routeService.getRouteById(nonExistentId, "no-matters", true))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("Route not found with id: 999")
             .hasFieldOrPropertyWithValue("statusCode", 404);
@@ -174,6 +176,7 @@ class RouteServiceImplTest {
         Long routeId = 1L;
         Route existingRoute = new Route();
         existingRoute.setId(routeId);
+        existingRoute.setOwnerId("some-owner-id");
         existingRoute.setName("Old Name");
         existingRoute.setDescription("Old Description");
 
@@ -193,11 +196,12 @@ class RouteServiceImplTest {
         when(routeMapper.toDetailDto(updatedRoute)).thenReturn(response);
 
         // STEP 2: Act
-        RouteDetailDTO result = routeService.updateRoute(routeId, request);
+        RouteDetailDTO result = routeService.updateRoute(routeId, request, existingRoute.getOwnerId(), true);
 
         // STEP 3: Assert
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(routeId);
+        assertThat(result.name()).isEqualTo(request.name());
 
         // STEP 4: Verify
         verify(routeRepository).findByIdWithLegs(routeId);
@@ -222,7 +226,7 @@ class RouteServiceImplTest {
             .thenReturn(Optional.empty());
 
         // STEP 2: Act & Assert
-        assertThatThrownBy(() -> routeService.updateRoute(nonExistentId, request))
+        assertThatThrownBy(() -> routeService.updateRoute(nonExistentId, request, "some-owner-id", true))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("Route not found with id: 999")
             .hasFieldOrPropertyWithValue("statusCode", 404);
@@ -237,11 +241,11 @@ class RouteServiceImplTest {
     void shouldDeleteRoute() {
         // STEP 1: Arrange
         Long routeId = 1L;
-        when(routeRepository.findById(routeId))
+        when(routeRepository.findByIdWithLegs(routeId))
             .thenReturn(Optional.of(savedRoute));
 
         // STEP 2: Act
-        routeService.deleteRoute(routeId);
+        routeService.deleteRoute(routeId, savedRoute.getOwnerId(), true);
 
         // STEP 3: Verify
         verify(routeRepository).delete(savedRoute);
@@ -256,11 +260,11 @@ class RouteServiceImplTest {
     void shouldThrowExceptionWhenDeletingNonExistentRoute() {
         // STEP 1: Arrange
         Long nonExistentId = 999L;
-        when(routeRepository.findById(nonExistentId))
+        when(routeRepository.findByIdWithLegs(nonExistentId))
             .thenReturn(Optional.empty());
 
         // STEP 2: Act & Assert
-        assertThatThrownBy(() -> routeService.deleteRoute(nonExistentId))
+        assertThatThrownBy(() -> routeService.deleteRoute(nonExistentId, "nomattersOwnerId", true))
             .isInstanceOf(AppException.class)
             .hasMessageContaining("Route not found with id: 999")
             .hasFieldOrPropertyWithValue("statusCode", 404);

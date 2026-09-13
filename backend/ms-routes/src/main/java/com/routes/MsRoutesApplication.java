@@ -46,6 +46,7 @@ public class MsRoutesApplication {
             Route route = new Route();
             route.setName("Buenos Aires - Cordoba - Mendoza");
             route.setDescription("Sample route for testing");
+            route.setOwnerId("811bbc42-afd8-4e58-ab51-5cb97c9ec347");
             route.setStatus(RouteStatus.PLANNED);
             route.setEstimatedDistanceKm(1350.0);
             route.setEstimatedDurationMinutes(900);
@@ -125,25 +126,4 @@ public class MsRoutesApplication {
             log.info("Seed data completed successfully!");
         };
     }
-
-    /**
-     * Configura CORS para permitir peticiones desde React (puerto 3000)
-     * 
-     * API Gatewaty se encarga de habilitar el cors externo
-     
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/v1/**")        // ← Solo endpoints /api/*
-                        .allowedOrigins("*")              // ← React "http://localhost:5173"
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        // .allowCredentials(true);             //
-                        .allowCredentials(false);
-            }
-        };
-    }
-        */
-} 
+}
