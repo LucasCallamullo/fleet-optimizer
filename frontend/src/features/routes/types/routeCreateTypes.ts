@@ -44,3 +44,4 @@ export interface RouteDetail {
 
 
 export type ApiRouteDetail = ApiResponse<RouteDetail>;
+export type ApiRouteList = ApiResponse<RouteDetail[]>; 
