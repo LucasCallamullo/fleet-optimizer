@@ -6,8 +6,6 @@ import com.geocoding.dto.common.LocationDTO;
 import com.geocoding.dto.request.BatchDistanceRequestDTO;
 import com.geocoding.dto.request.DistanceRequestDTO;
 import com.geocoding.dto.request.LocationPairDTO;
-import com.geocoding.dto.response.BatchDistanceResponseDTO;
-import com.geocoding.dto.response.DistanceResponseDTO;
 import com.geocoding.exception.AppException;
 import com.geocoding.service.OrsService;
 import org.junit.jupiter.api.BeforeEach;

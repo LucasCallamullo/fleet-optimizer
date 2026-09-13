@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -229,10 +230,22 @@ public class PackageController {
     // is upgraded with feign-hc5 (Apache HttpClient 5) to support HTTP PATCH.
     @PutMapping("/status")
     @PreAuthorize("isAuthenticated()")
-    public void updatePackageStatus(@Valid @RequestBody PackageStatusUpdateRequest request) {
-        log.info("PATCH /api/v1/packages/status - Updating {} packages to '{}'", 
-            request.packageIds().size(), request.status());
+    public Map<String, Object> updatePackageStatus(@Valid @RequestBody PackageStatusUpdateRequest request) {
+
+        String msg = String.format(
+            "PATCH /api/v1/packages/status - Updating %d packages to '%s'",
+            request.packageIds().size(),
+            request.status()
+        );
+
+        log.info(msg);
 
         packageService.updatePackageStatus(request.packageIds(), request.status());
+        Map<String, Object> detail = Map.of(
+            "detail", msg,
+            "count", request.packageIds().size(),
+            "package_status", request.status()
+        );
+        return detail;
     }
 }

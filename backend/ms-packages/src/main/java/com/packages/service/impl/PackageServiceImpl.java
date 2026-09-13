@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -260,6 +262,10 @@ public class PackageServiceImpl implements PackageService {
         return packages;
     }
 
+    private static final Set<PackageStatus> ALLOWED_FOR_IN_TRANSIT = EnumSet.of(
+        PackageStatus.CREATED, PackageStatus.READY_FOR_PICKUP
+    );
+
     /**
      * Validates business rules for status transitions.
      * 
@@ -277,9 +283,7 @@ public class PackageServiceImpl implements PackageService {
             PackageStatus current = pkg.getStatus();
 
             // CREATED or READY_FOR_PICKUP → IN_TRANSIT
-            if (newStatus == PackageStatus.IN_TRANSIT && 
-                current != PackageStatus.READY_FOR_PICKUP && 
-                current != PackageStatus.CREATED) {
+            if (newStatus == PackageStatus.IN_TRANSIT && !ALLOWED_FOR_IN_TRANSIT.contains(current)) {
                 throw new AppException(
                     String.format("Package %d has status '%s' but must be 'CREATED' or 'READY_FOR_PICKUP' to transition to IN_TRANSIT",
                         pkg.getId(), current),
@@ -287,7 +291,7 @@ public class PackageServiceImpl implements PackageService {
                 );
             }
             
-            // CREATED → READY_FOR_PICKUP (si tenés una transición previa explícita)
+            /* / CREATED → READY_FOR_PICKUP (si tenés una transición previa explícita)
             if (newStatus == PackageStatus.READY_FOR_PICKUP && 
                 current != PackageStatus.CREATED) {
                 throw new AppException(
@@ -295,7 +299,7 @@ public class PackageServiceImpl implements PackageService {
                         pkg.getId(), current),
                     400
                 );
-            }
+            } */
             
             /*  
             // Only READY_FOR_PICKUP → IN_TRANSIT

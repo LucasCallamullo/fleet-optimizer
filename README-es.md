@@ -2,41 +2,19 @@
 
 El objetivo general del proyecto es implementar una solución backend basada en microservicios para la gestión integral de un sistema de logística de transporte de paquetes. El sistema permite administrar una flota de vehículos, gestionar paquetes y planificar rutas de entrega de forma eficiente, optimizando costos y tiempos mediante el cálculo de distancias.
 
-[![Static Badge](https://img.shields.io/badge/Documentation-EN-blue)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README.md) [![Documentation ES](https://img.shields.io/badge/Documentation-ES-green)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README-es.md) [![Contact](https://img.shields.io/badge/Contact-FF6C37?style=for-the-badge&logo=gmail&logoColor=white)](#contact)
+[![Static Badge](https://img.shields.io/badge/Documentation-EN-blue)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README.md) [![Documentation ES](https://img.shields.io/badge/Documentation-ES-green)](https://github.com/LucasCallamullo/fleet-optimizer/blob/main/README-es.md) [![Contact](https://img.shields.io/badge/Contact-FF6C37?style=flat&logo=gmail&logoColor=white)](#contact)
 
 
 ## Tecnologías Stack
 
-### Backend
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
-![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-
-### Frontend
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
-### Base de Datos & ORM
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![H2](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white)
-![JPA](https://img.shields.io/badge/JPA-Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
-
-### Seguridad
-![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)
-![Keycloak](https://img.shields.io/badge/Keycloak-0085CA?style=for-the-badge&logo=keycloak&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
-
-### Tools & DevOps
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Git Badge](https://img.shields.io/badge/git%20-%23F05033.svg?&style=for-the-badge&logo=git&logoColor=white) 
-![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
-
-### Testing
-![JUnit](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
-![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white)
-![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
+|  | Tech Stack |
+| :--- | :--- |
+| **Backend** | ![Java 17](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) |
+| **Persistence & Data** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) ![H2 Database](https://img.shields.io/badge/H2_Database-0040CA?style=for-the-badge&logo=h2&logoColor=white) ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Security & Auth** | ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white) ![Keycloak](https://img.shields.io/badge/Keycloak-0085CA?style=for-the-badge&logo=keycloak&logoColor=white) ![OAuth 2.0 / OIDC](https://img.shields.io/badge/OAuth_2.0-EB5424?style=for-the-badge&logo=openid&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white) |
+| **DevOps & Infra** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white) ![Git](https://img.shields.io/badge/Git-F05033?style=for-the-badge&logo=git&logoColor=white) ![Swagger / OpenAPI](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black) |
+| **Testing** | ![JUnit 5](https://img.shields.io/badge/JUnit5-25A162?style=for-the-badge&logo=junit5&logoColor=white) ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge&logo=mockito&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white) |
 
 
 <hr>
@@ -102,9 +80,68 @@ npm run dev</code></pre>
 
 <hr>
 
+
 <h2>C4 Model</h2>
 
-![](https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png)
+```mermaid
+flowchart TD
+    %% Users
+    subgraph Users ["Users & Roles"]
+        Client["Client"]
+        Admin["Admin"]
+        Shipper["Shipper"]
+    end
+
+    %% Frontend & Gateway
+    subgraph Entry ["Entry Point"]
+        Frontend["Client Interface FrontEnd<br/><i>(React / TypeScript)</i>"]
+        Gateway["API Gateway<br/><i>(Java / Spring Cloud)</i><br/>Validate JWT + propagate headers"]
+    end
+
+    %% Core System
+    subgraph System ["Logistics & Fleet Management System"]
+        MS_Auth["MS Auth<br/><i>(Java / Spring Boot)</i><br/>Login / Refresh JWT"]
+        MS_Routes["MS Routes<br/><i>(Java / Spring Boot)</i><br/>Manages shipments, routes & legs"]
+        MS_Geo["MS GeoCoding<br/><i>(Java / Spring Boot)</i><br/>Calculates distances"]
+        MS_Packages["MS Packages<br/><i>(Java / Spring Boot)</i><br/>Package inventory & origin"]
+        MS_Fleets["MS Fleets<br/><i>(Java / Spring Boot)</i><br/>Vehicle fleet management"]
+    end
+
+    %% External Services
+    subgraph External ["External Services"]
+        Keycloak["Keycloak<br/><i>(OAuth 2.0 / OIDC)</i>"]
+        OSRM["OSRM API<br/><i>(External Map Service)</i>"]
+    end
+
+    %% Databases
+    subgraph Databases ["Persistence Layer"]
+        DB_Routes[("Routes DB<br/><i>PostgreSQL</i>")]
+        DB_Packages[("Packages DB<br/><i>PostgreSQL</i>")]
+        DB_Fleets[("Fleets DB<br/><i>PostgreSQL</i>")]
+    end
+
+    %% Flow Relationships
+    Client & Admin & Shipper -->|Uses HTTPS| Frontend
+    Frontend -->|API Requests| Gateway
+
+    Gateway -->|Auth Requests| MS_Auth
+    Gateway -->|Shipment Requests| MS_Routes
+    Gateway -->|Package Requests| MS_Packages
+    Gateway -->|Fleet Requests| MS_Fleets
+
+    MS_Auth <-->|OAuth 2.0 / Token Validations| Keycloak
+
+    MS_Routes -->|Distance Queries| MS_Geo
+    MS_Routes <-->|Package Validation| MS_Packages
+    MS_Routes <-->|Vehicle Availability| MS_Fleets
+
+    MS_Geo -->|Distance Matrix| OSRM
+
+    MS_Routes <-->|Reads / Writes| DB_Routes
+    MS_Packages <-->|Reads / Writes| DB_Packages
+    MS_Fleets <-->|Reads / Writes| DB_Fleets
+```
+
 
 <h2>DER</h2>
 
@@ -216,6 +253,8 @@ npm run dev</code></pre>
       <em>Tabla de vehículos con capacidades y estado</em>
     </td>
   </tr>
+
+
   <tr>
     <td align="center">
       <strong>Detalle de Paquete</strong>
@@ -236,6 +275,28 @@ npm run dev</code></pre>
       <em>Vehículos disponibles filtrados por capacidad</em>
     </td>
   </tr>
+
+
+  <tr>
+    <td align="center">
+      <strong>C4 Model</strong>
+    </td>
+
+
+
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/LucasCallamullo/fleet-optimizer/refs/heads/main/docs/img/fleet_optimizer_c4.png" alt="C4 Model" width="400"/>
+      <br>
+      <em>C4 con Draw.io Informal</em>
+    </td>
+
+
+
+
+  </tr>
+
 </table>
 
 
