@@ -64,13 +64,13 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     @Transactional
-    public RouteDetailDTO updateRoute(Long id, RouteRequestDTO request) {
+    public RouteDetailDTO updateRoute(Long id, RouteRequestDTO request, String userId, boolean isAdmin) {
         log.info("Updating route with id: {}", id);
         // Step 1: Validate request
         this.validateRouteRequest(request);
 
         // Step 2: Find existing Route
-        Route existingRoute = this.getRouteByIdWithLegs(id);
+        Route existingRoute = this.getRouteByIdWithLegs(id, userId, isAdmin);
 
         // Step 3: Update basic fields
         existingRoute.setName(request.name());
@@ -165,11 +165,10 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     @Transactional
-    public void deleteRoute(Long id) {
+    public void deleteRoute(Long id, String userId, boolean isAdmin) {
         log.info("Deleting route with id: {}", id);
 
-        Route route = routeRepository.findById(id)
-            .orElseThrow(() -> new AppException("Route not found with id: " + id, 404));
+        Route route = this.getRouteByIdWithLegs(id, userId, isAdmin);
 
         routeRepository.delete(route);
         log.info("Route deleted successfully with id: {}", id);
@@ -180,9 +179,22 @@ public class RouteServiceImpl implements RouteService {
     // ================================================================
 
     @Override
-    public RouteDetailDTO getRouteById(Long id) {
-        Route route = this.getRouteByIdWithLegs(id);
+    public RouteDetailDTO getRouteById(Long id, String userId, boolean isAdmin) {
+        Route route = this.getRouteByIdWithLegs(id, userId, isAdmin);
         return routeMapper.toDetailDto(route);
+    }
+
+    @Override
+    public List<RouteDetailDTO> getAllRoutes(String userId, boolean isAdmin) {
+        
+        List<Route> routes;
+        if (isAdmin) {
+            routes = routeRepository.findAllWithLegs();
+        } else {
+            routes = routeRepository.findAllByOwnerIdWithLegs(userId);
+        }
+
+        return routeMapper.toListDetailDto(routes);
     }
 
     // ================================================================
@@ -190,12 +202,18 @@ public class RouteServiceImpl implements RouteService {
     // ================================================================
 
     @Override
-    public Route getRouteByIdWithLegs(Long id) {
+    public Route getRouteByIdWithLegs(Long id, String userId, boolean isAdmin) {
         log.debug("Fetching route by id with legs: {}", id);
 
         // Trae la Route con todos sus Legs en una sola query (JOIN FETCH)
-        Route route = routeRepository.findByIdWithLegs(id)
-            .orElseThrow(() -> new AppException("Route not found with id: " + id, 404));
+        Route route;
+        if (isAdmin) {
+            route = routeRepository.findByIdWithLegs(id)
+                .orElseThrow(() -> new AppException("Route not found with id: " + id, 404));
+        } else {
+            route = routeRepository.findByIdWithLegsAndOwner(id, userId)
+                .orElseThrow(() -> new AppException("Route not found with id: " + id, 404));
+        }
 
         log.debug("Route found: {} with {} legs", route.getName(), route.getLegs().size());
         return route;

@@ -88,7 +88,7 @@ public class ShipmentService {
      * @throws AppException if validation fails (404, 400, 409)
      */
     @Transactional
-    public ShipmentResponseDTO createShipment(ShipmentRequestDTO request) {
+    public ShipmentResponseDTO createShipment(ShipmentRequestDTO request, String userId, boolean isAdmin) {
         log.info("Creating shipment with {} packages", request.packageIds().size());
 
         // ================================================================
@@ -110,6 +110,7 @@ public class ShipmentService {
         route.setName("Shipment-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")));
         route.setDescription("Shipment for " + packages.size() + " packages");
         route.setStatus(RouteStatus.PLANNED);
+        route.setOwnerId(userId);
 
         // ================================================================
         // STEP 4: Create one Leg per package and prepare batch request

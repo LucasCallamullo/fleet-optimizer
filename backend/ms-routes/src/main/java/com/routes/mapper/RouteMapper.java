@@ -25,6 +25,8 @@ public interface RouteMapper {
     // ================================================================
     // ENTITY → DTO
     // ================================================================
+
+    List<RouteDetailDTO> toListDetailDto(List<Route> routes);
     
     /**
      * Converts Route entity to RouteDetailDTO.
