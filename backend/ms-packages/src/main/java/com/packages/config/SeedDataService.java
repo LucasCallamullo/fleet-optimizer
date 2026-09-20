@@ -24,8 +24,8 @@ public class SeedDataService {
     // ================================================================
     // USER IDs
     // ================================================================
-    private static final String ADMIN_ID = "461f1c90-d3d9-4135-aa72-efc5911826ed";
-    private static final String USER_ID = "811bbc42-afd8-4e58-ab51-5cb97c9ec347";
+    private static final String ADMIN_ID = "auth0|6aaf44438c76f921189e4a85";
+    private static final String USER_ID = "auth0|6aaf437b3de387c0d8f1e01e";
 
     /**
      * Seeds initial data for testing purposes.

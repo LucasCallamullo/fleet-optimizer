@@ -7,6 +7,7 @@ proofs/
 docker-compose.override.yml
 .env
 *.env
+docs/speaks/
 
 # mvn stuff
 .mvn/

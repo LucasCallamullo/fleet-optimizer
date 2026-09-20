@@ -3,7 +3,10 @@ import type { ApiResponse } from '@shared/types/commonTypes';
 
 // Use Vite environment variable with local fallback for deployment portability
 // const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-const BASE_URL = 'http://localhost:8080/api';
+
+// this changes is because Nginx is use it like reverse proxy to redirect to gateway by private networks on docker
+// const BASE_URL = 'http://localhost/api';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Custom Axios instance configured with base URL, timeout, and standard headers
