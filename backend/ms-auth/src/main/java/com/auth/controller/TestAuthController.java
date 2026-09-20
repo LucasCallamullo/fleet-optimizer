@@ -1,7 +1,8 @@
 package com.auth.controller;
 
 import com.auth.dto.response.UserInfoDTO;
-import com.auth.service.KeycloakService;
+import com.auth.service.impl.KeycloakService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * 
  * This class binds properties from application.yml under the prefix "app.keycloak".
  * 
- * <p><strong>Property Mapping:</strong>
+ * Property Mapping:
  * <pre>
  * application.yml:
  *   app:
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
  *   clientSecret← maps to app.keycloak.client-secret
  * </pre>
  * 
- * <p><strong>Naming Convention:</strong>
  * Spring Boot automatically converts kebab-case (client-id) to camelCase (clientId).
  * This is standard behavior for @ConfigurationProperties.
  * 
