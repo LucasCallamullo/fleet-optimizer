@@ -69,7 +69,9 @@ public class SecurityConfig {
             // Step 2 & 3: Define authorization rules
             .authorizeExchange(exchanges -> exchanges
                 // Public endpoints - no authentication required
-                .pathMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
+                .pathMatchers("/api/v1/auth/login").permitAll()
+                .pathMatchers("/api/v1/auth/register").permitAll()
+                .pathMatchers("/api/v1/auth/refresh").permitAll()
                 .pathMatchers("/api/v1/auth/test/public", "/api/v1/auth/test/info").permitAll()
                 // All other endpoints require authentication
                 .anyExchange().authenticated()

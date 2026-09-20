@@ -13,12 +13,14 @@
 ### Regular User:
 ###   Email: user_regular@gmail.com
 ###   Password: pass1234
-###   Role: usuario
+###   Id: auth0|6aaf437b3de387c0d8f1e01e
+###   Role: User
 ###
 ### Admin User:
 ###   Email: admin_regular@gmail.com
 ###   Password: pass1234
-###   Role: admin
+###   ID: auth0|6aaf44438c76f921189e4a85
+###   Role: Admin
 ### ================================================================
 
 ### ================================================================
@@ -52,11 +54,10 @@ POST {{authBaseUrl}}/register
 Content-Type: application/json
 
 {
-    "email": "newuser@example.com",
+    "email": "user_regular@gmail.com",
     "password": "pass1234",
-    "firstName": "New",
-    "lastName": "User",
-    "rol": "usuario"
+    "firstName": "User",
+    "lastName": "Test Regular"
 }
 
 ### ================================================================
@@ -66,11 +67,10 @@ POST {{authBaseUrl}}/register
 Content-Type: application/json
 
 {
-    "email": "newadmin@example.com",
+    "email": "admin_regular@gmail.com",
     "password": "pass1234",
-    "firstName": "New",
-    "lastName": "Admin",
-    "rol": "admin"
+    "firstName": "Super",
+    "lastName": "Test Admin"
 }
 
 ### ================================================================
@@ -107,6 +107,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{authBaseUrl}}/refresh
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
     "refreshToken": "{{userRefreshToken}}"
@@ -117,6 +118,7 @@ Content-Type: application/json
 ### ================================================================
 POST {{authBaseUrl}}/refresh
 Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
     "refreshToken": "{{adminRefreshToken}}"

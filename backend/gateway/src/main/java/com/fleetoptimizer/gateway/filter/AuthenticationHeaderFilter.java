@@ -11,7 +11,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Authentication Header Filter.
@@ -34,12 +33,13 @@ import java.util.Map;
 @Component
 public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
 
+    private static String urlCustomClaimOAuth = "https://fo.dev";
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         
         // ================================================================
         // STEP 1: Get the Security Context (reactively)
-        // ================================================================
         // ReactiveSecurityContextHolder provides access to the authenticated user.
         // This is populated by Spring Security after JWT validation.
         // ================================================================
@@ -47,7 +47,6 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
         
             // ================================================================
             // STEP 2: Extract the Authentication object
-            // ================================================================
             // Authentication contains the user's principal and authorities.
             // After JWT validation, the principal is a Jwt object.
             // ================================================================
@@ -55,7 +54,6 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
             
             // ================================================================
             // STEP 3: Check if the principal is a Jwt
-            // ================================================================
             // If authenticated, the principal is a Jwt object.
             // If not authenticated (anonymous), it's something else.
             // ================================================================
@@ -63,7 +61,6 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
                 if (authentication != null && authentication.getPrincipal() instanceof Jwt) {
                     // ============================================================
                     // STEP 4: Cast to Jwt and extract claims
-                    // ============================================================
                     // Jwt contains all claims from the token:
                     // - sub: user ID (unique identifier)
                     // - email: user's email
@@ -75,7 +72,6 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
                     
                     // ============================================================
                     // STEP 5: Add user data as HTTP headers
-                    // ============================================================
                     // These headers are forwarded to the downstream microservice:
                     // - X-User-Id: user's unique identifier
                     // - X-User-Email: user's email
@@ -90,7 +86,6 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
             
             // ================================================================
             // STEP 6: Handle case where authentication is missing
-            // ================================================================
             // If the Security Context is empty (no authentication),
             // return the original exchange without modifications.
             // ================================================================
@@ -98,7 +93,6 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
             
             // ================================================================
             // STEP 7: Continue the filter chain
-            // ================================================================
             // After adding headers (or not), proceed to the next filter
             // and eventually to the route (target microservice).
             // ================================================================
@@ -112,24 +106,28 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
      * @param jwt The validated Jwt object
      * @return Modified ServerWebExchange with added headers
      */
-    @SuppressWarnings("unchecked")
     private ServerWebExchange addHeaders(ServerWebExchange exchange, Jwt jwt) {
         // Step 1: Extract claims from Jwt
         String userId = jwt.getClaimAsString("sub");
-        String email = jwt.getClaimAsString("email");
+        String emailId = jwt.getClaimAsString("email");
         
-        // Step 2: Extract roles from "realm_access.roles"
+        // Step 2: Extract roles from Auth0 custom namespace claim
+        // Matches the Action created in Auth0 Dashboard: https://fo.dev/roles
+        List<String> roles = jwt.getClaimAsStringList(urlCustomClaimOAuth + "/roles");
+
+        // Step 2: Extract roles from "realm_access.roles" (THIS IS ONLY FOR KEYCLOACK)
         // The roles are nested inside realm_access, not at the root level
-        List<String> roles = null;
+        /* List<String> roles = null;
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
         if (realmAccess != null && realmAccess.containsKey("roles")) {
             roles = (List<String>) realmAccess.get("roles");
-        }
+        } */
         
         // Step 3: Handle null values safely
         String userIdHeader = userId != null ? userId : "";
-        String emailHeader = email != null ? email : "";
-        String rolesHeader = roles != null ? String.join(",", roles) : "";
+        String emailIdHeader = emailId != null ? emailId : "";
+        // String rolesHeader = roles != null ? String.join(",", roles) : "";
+        String rolesHeader = (roles != null && !roles.isEmpty()) ? String.join(",", roles) : "User";
         
         // Step 4: Build and return the modified exchange
         // Headers added:
@@ -140,7 +138,7 @@ public class AuthenticationHeaderFilter implements GlobalFilter, Ordered {
         return exchange.mutate()
             .request(r -> r
                 .header("X-User-Id", userIdHeader)
-                .header("X-User-Email", emailHeader)
+                .header("X-User-Email", emailIdHeader)
                 .header("X-User-Roles", rolesHeader)
                 .header("X-Auth-Token", jwt.getTokenValue())
             )

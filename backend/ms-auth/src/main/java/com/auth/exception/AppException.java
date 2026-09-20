@@ -1,5 +1,7 @@
 package com.auth.exception;
 
+import java.util.List;
+
 import lombok.Getter;
 
 /**
@@ -21,7 +23,20 @@ public class AppException extends RuntimeException {
      * HTTP status code to be returned to the client.
      */
     private final int statusCode;
+    private final List<String> errors;
     
+    /**
+     * Constructs a new AppException with the specified message and status code.
+     *
+     * @param message the detail message (returned to client)
+     * @param statusCode the HTTP status code (e.g., 400, 404, 409)
+     */
+    public AppException(String message, int statusCode, List<String> errors) {
+        super(message);
+        this.statusCode = statusCode;
+        this.errors = errors;
+    }
+
     /**
      * Constructs a new AppException with the specified message and status code.
      *
@@ -31,6 +46,7 @@ public class AppException extends RuntimeException {
     public AppException(String message, int statusCode) {
         super(message);
         this.statusCode = statusCode;
+        this.errors = null;
     }
     
     /**
@@ -40,6 +56,6 @@ public class AppException extends RuntimeException {
      * @param message the detail message (returned to client)
      */
     public AppException(String message) {
-        this(message, 400);
+        this(message, 400, null);
     }
 }

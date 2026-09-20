@@ -13,9 +13,21 @@ spring:
     name: ms-auth
 
 # ================================================================
-# KEYCLOAK CONFIGURATION
+# -- OAuth - KEYCLOAK CONFIGURATION
 # ================================================================
 app:
+  # this use credentials .env
+  auth0:
+    domain: ${AUTH0_DOMAIN:https://dev-ejieic4zageec10c.us.auth0.com}
+    client-id: ${AUTH0_CLIENT_ID:qhfvXaQwA0DLwAXodQnXQLJ8QEXgjy3j}
+    client-secret: ${AUTH0_CLIENT_SECRET:PACL4PFfDIXS5bLzNg00-BtIuz4fN3Wad8GyMDsoipNpsWm3v3vfe44SuDj4sTXU}
+    # Audience for Management API (M2M)
+    audience: ${AUTH0_AUDIENCE:https://dev-ejieic4zageec10c.us.auth0.com/api/v2/}
+    # Audience for user login (business API)
+    login-audience: ${AUTH0_LOGIN_AUDIENCE:https://fleetoptimizer.com/api}
+    jwks-uri: ${AUTH0_JWKS_URI:https://dev-ejieic4zageec10c.us.auth0.com/.well-known/jwks.json}
+
+  # this use credentials .env
   keycloak:
     uri: ${KEYCLOAK_URI:https://labsys.frc.utn.edu.ar/aim}
     realm: ${KEYCLOAK_REALM:dds-materia}
