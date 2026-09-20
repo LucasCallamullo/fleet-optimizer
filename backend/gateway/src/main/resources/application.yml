@@ -10,16 +10,13 @@ server:
 # ================================================================
 app:
   keycloak:
-    # Keycloak server base URL
-    # External Keycloak provided by UTN for development
-    uri: ${KEYCLOAK_URI:https://labsys.frc.utn.edu.ar/aim}
-    
-    # Keycloak realm containing users and roles
-    realm: ${KEYCLOAK_REALM:dds-materia}
-    
     # JWKS URI for JWT validation - fetches public keys automatically
     # Constructed from uri and realm with fallback
-    jwks-uri: ${KEYCLOAK_JWKS_URI:${app.keycloak.uri}/realms/${app.keycloak.realm}/protocol/openid-connect/certs}
+    jwks-uri: ${KEYCLOAK_JWKS_URI:https://labsys.frc.utn.edu.ar/aim/realms/dds-materia/protocol/openid-connect/certs}
+
+  # this use credentials .env
+  auth0:
+    jwks-uri: ${AUTH0_JWKS_URI:https://dev-ejieic4zageec10c.us.auth0.com/.well-known/jwks.json}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:80,http://localhost:3000,http://localhost:5173}

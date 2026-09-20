@@ -30,13 +30,6 @@ import java.util.List;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    // ================================================================
-    // INJECT PROPERTIES FROM application.yml
-    // ================================================================
-
-    @Value("${app.keycloak.jwks-uri}")
-    private String keycloakJwksUri;
-
     /**
      * Main security filter chain.
      * Configures CORS, CSRF, public routes, and JWT validation.
@@ -69,11 +62,21 @@ public class SecurityConfig {
             .build();
     }
 
+    // ================================================================
+    // -- OAuth Config
+    // ================================================================
+
+    @Value("${app.keycloak.jwks-uri}")
+    private String keycloakJwksUri;
+
+    @Value("${app.auth0.jwks-uri}")
+    private String auth0JwksUri;
+
     /**
-     * JWT Decoder using Keycloak's public key.
+     * JWT Decoder using Auth0's public JSON Web Key Set (JWKS).
      * 
-     * The JWK (JSON Web Key) set is fetched from Keycloak's endpoint.
-     * The keys are cached by NimbusJwtDecoder automatically.
+     * The JWK set is fetched from Auth0's endpoint:
+     * https://dev-ejieic4zageec10c.us.auth0.com/.well-known/jwks.json
      * 
      * Caching behavior:
      * - First request: fetches keys from Keycloak (~1ms overhead)
@@ -85,8 +88,14 @@ public class SecurityConfig {
      */
     @Bean
     public ReactiveJwtDecoder jwtDecoder() {
-        return NimbusReactiveJwtDecoder.withJwkSetUri(keycloakJwksUri).build();
+        return NimbusReactiveJwtDecoder.withJwkSetUri(auth0JwksUri).build();
+        // this is legacy from another oauth service
+        // return NimbusReactiveJwtDecoder.withJwkSetUri(keycloakJwksUri).build();
     }
+
+    // ================================================================
+    // -- CORS Config
+    // ================================================================
 
     @Value("${cors.allowed-origins}")
     private List<String> allowedOrigins;
