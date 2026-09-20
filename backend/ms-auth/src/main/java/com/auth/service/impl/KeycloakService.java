@@ -1,9 +1,12 @@
-package com.auth.service;
+package com.auth.service.impl;
 
+import com.auth.dto.request.LoginRequestDTO;
+import com.auth.dto.request.RefreshTokenRequestDTO;
 import com.auth.dto.request.RegisterRequestDTO;
 import com.auth.dto.response.AuthResponseDTO;
 import com.auth.dto.response.UserInfoDTO;
 import com.auth.exception.AppException;
+import com.auth.service.AuthService;
 import com.auth.config.KeycloakProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,9 +39,9 @@ import java.util.Map;
  * All methods are reactive using WebClient and return Mono/Flux.
  */
 @Slf4j
-@Service
+@Service("keycloakService")
 @RequiredArgsConstructor
-public class KeycloakService {
+public class KeycloakService implements AuthService {
 
     private final WebClient keycloakWebClient;
     private final KeycloakProperties keycloakProperties;
@@ -79,7 +82,7 @@ public class KeycloakService {
             // Step 4: Login the user to get tokens
             .flatMap(userId -> {
                 log.info("User created with ID: {}, logging in...", userId);
-                return login(request.email(), request.password());
+                return login(new LoginRequestDTO(request.email(), request.password()));
             });
     }
 
@@ -97,7 +100,10 @@ public class KeycloakService {
      * @return AuthResponseDTO with tokens and user info
      * @throws AppException if credentials are invalid (401)
      */
-    public Mono<AuthResponseDTO> login(String email, String password) {
+    public Mono<AuthResponseDTO> login(LoginRequestDTO request) {
+
+        String email = request.email();
+        String password = request.password();
         log.info("Login attempt for user: {}", email);
         
         // Step 1: Build request body with credentials
@@ -157,7 +163,8 @@ public class KeycloakService {
      * @return AuthResponseDTO with new access token and user info
      * @throws AppException if refresh token is invalid (401)
      */
-    public Mono<AuthResponseDTO> refreshToken(String refreshToken) {
+    public Mono<AuthResponseDTO> refreshToken(RefreshTokenRequestDTO request) {
+        String refreshToken = request.refreshToken();
         log.info("Refreshing access token...");
         
         // Step 1: Build request body
@@ -208,7 +215,8 @@ public class KeycloakService {
      * @param refreshToken Refresh token to invalidate
      * @return Mono<Void> indicating completion
      */
-    public Mono<Void> logout(String refreshToken) {
+    public Mono<Void> logout(RefreshTokenRequestDTO request) {
+        String refreshToken = request.refreshToken();
         log.info("Logging out user...");
         
         // Step 1: Build request body
@@ -253,7 +261,7 @@ public class KeycloakService {
     }
 
     // ================================================================
-    // PRIVATE METHODS (Admin operations)
+    // -- PRIVATE METHODS (Admin operations)
     // ================================================================
 
     /**

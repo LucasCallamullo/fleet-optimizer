@@ -17,6 +17,13 @@ app:
     admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
     jwks-uri: ${KEYCLOAK_URI}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
 
+  auth0:
+    domain: ${AUTH0_DOMAIN}
+    client-id: ${AUTH0_CLIENT_ID}
+    client-secret: ${AUTH0_CLIENT_SECRET}
+    audience: ${AUTH0_AUDIENCE}
+    jwks-uri: ${AUTH0_DOMAIN}/.well-known/jwks.json
+
 # ================================================================
 # LOGGING - Less verbose in Docker
 # ================================================================
