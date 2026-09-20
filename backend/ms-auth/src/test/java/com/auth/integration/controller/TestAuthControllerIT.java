@@ -1,7 +1,8 @@
 package com.auth.integration.controller;
 
 import com.auth.dto.response.UserInfoDTO;
-import com.auth.service.KeycloakService;
+import com.auth.service.AuthService;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,10 @@ class TestAuthControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean  // ← Mock de KeycloakService
-    private KeycloakService keycloakService;
+    // Mock the INTERFACE, not the implementation.
+    // Spring will inject this mock wherever AuthService is required.
+    @MockBean(name = "auth0Service")
+    private AuthService authService;
 
     // ================================================================
     // PUBLIC ENDPOINTS (no authentication required)
@@ -233,7 +236,7 @@ class TestAuthControllerIT {
             List.of("USER")
         );
 
-        when(keycloakService.getUserInfo(anyString()))
+        when(authService.getUserInfo(anyString()))
             .thenReturn(Mono.just(mockUserInfo));
 
         webTestClient.get()

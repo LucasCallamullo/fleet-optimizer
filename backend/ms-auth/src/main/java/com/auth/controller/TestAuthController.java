@@ -1,17 +1,17 @@
 package com.auth.controller;
 
 import com.auth.dto.response.UserInfoDTO;
-import com.auth.service.impl.KeycloakService;
+import com.auth.service.AuthService;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
-
 import reactor.core.publisher.Mono;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.server.ServerWebExchange;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -35,10 +35,14 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/auth/test")
-@RequiredArgsConstructor
 public class TestAuthController {
 
-    private final KeycloakService keycloakService;
+    private final AuthService authService;
+
+    // Explicit injection via constructor and @Qualifier
+    public TestAuthController(@Qualifier("auth0Service") AuthService authService) {
+        this.authService = authService;
+    }
 
     // ================================================================
     // PUBLIC ENDPOINTS (no authentication required)
@@ -254,6 +258,6 @@ public class TestAuthController {
     @PreAuthorize("isAuthenticated()")
     public Mono<UserInfoDTO> profileEndpoint(@RequestHeader("Authorization") String authHeader) {
         log.info("Profile endpoint accessed");
-        return keycloakService.getUserInfo(authHeader);
+        return authService.getUserInfo(authHeader);
     }
 }

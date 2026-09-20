@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,6 +26,7 @@ import java.util.*;
  * Replaces Keycloak while preserving the reactive contract defined in AuthService.
  */
 @Slf4j
+@Primary
 @Service("auth0Service")
 @RequiredArgsConstructor
 public class Auth0ServiceImpl implements AuthService {
