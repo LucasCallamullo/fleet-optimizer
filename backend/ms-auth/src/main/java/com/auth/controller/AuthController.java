@@ -88,7 +88,6 @@ public class AuthController {
      * @return AuthResponseDTO with new access token
      */
     @PostMapping("/refresh")
-    @PreAuthorize("isAuthenticated()")
     public Mono<AuthResponseDTO> refresh(@Valid @RequestBody RefreshTokenRequestDTO request) {
         log.info("Refreshing token");
         return authService.refreshToken(request);

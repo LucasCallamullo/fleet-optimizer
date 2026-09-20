@@ -87,7 +87,8 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
             ex.getStatusCode(),
             ex.getMessage(),
-            path
+            path,
+            ex.getErrors()
         );
         
         // Step 3: Return as ResponseEntity with proper status

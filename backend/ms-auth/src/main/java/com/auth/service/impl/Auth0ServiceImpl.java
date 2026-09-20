@@ -94,18 +94,10 @@ public class Auth0ServiceImpl implements AuthService {
             .bodyValue(body)
             .retrieve()
             // Step 3: Handle HTTP client error statuses
-            /* .onStatus(status -> status.is4xxClientError(), response -> {
-                log.error("Auth0 login failed with status: {}", response.statusCode());
-                if (response.statusCode().value() == 401 || response.statusCode().value() == 403) {
-                    throw new AppException("Invalid credentials", 401);
-                }
-                throw new AppException("Authentication service error", 500);
-            }) */
             .onStatus(status -> status.is4xxClientError(), response -> {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
-                        log.error("Auth0 error response: {}", errorBody); 
-                        return Mono.error(new AppException("Auth0 error: " + errorBody, 400));
+                        return Mono.error(this.handleErrors(errorBody));
                     });
             })
             // Step 4: Deserialize JSON response
@@ -124,11 +116,8 @@ public class Auth0ServiceImpl implements AuthService {
                 
                 int expiresIn = response.get("expires_in").asInt();
 
-                log.debug("idToken token present: {}", idToken);
-                log.debug("idToken token present: {}", response);
-
                 // Step 6: Decode the Access Token to build user profile claims
-                UserInfoDTO userInfo = decodeTokens(idToken != null ? idToken : accessToken, accessToken);
+                UserInfoDTO userInfo = decodeToken(idToken != null ? idToken : accessToken);
 
                 // Step 7: Return populated response DTO
                 return new AuthResponseDTO(accessToken, refreshToken, expiresIn, userInfo);
@@ -185,7 +174,7 @@ public class Auth0ServiceImpl implements AuthService {
                 int expiresIn = response.get("expires_in").asInt();
 
                 // Step 6: Decode the Access Token to build user profile claims
-                UserInfoDTO userInfo = decodeTokens(idToken != null ? idToken : accessToken, accessToken);
+                UserInfoDTO userInfo = decodeToken(idToken != null ? idToken : accessToken);
 
                 // Step 7: Return populated DTO
                 return new AuthResponseDTO(accessToken, newRefreshToken, expiresIn, userInfo);
@@ -228,7 +217,7 @@ public class Auth0ServiceImpl implements AuthService {
         String token = authHeader.replace("Bearer ", "");
 
         // Step 2 & 3: Decode the token locally and wrap inside a Mono publisher
-        return Mono.just(decodeTokens(token, token));
+        return Mono.just(decodeToken(token));
     }
 
     // ================================================================
@@ -308,17 +297,10 @@ public class Auth0ServiceImpl implements AuthService {
             .retrieve()
 
             // Step 4: Handle registration errors
-            /* .onStatus(status -> status.is4xxClientError(), response -> {
-                if (response.statusCode().value() == 409) {
-                    throw new AppException("Email already registered in Auth0", 409);
-                }
-                throw new AppException("Failed to create user in Auth0", 400);
-            }) */
             .onStatus(status -> status.is4xxClientError(), response -> {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
-                        log.error("Auth0 error response: {}", errorBody); 
-                        return Mono.error(new AppException("Auth0 error: " + errorBody, 400));
+                        return Mono.error(this.handleErrors(errorBody));
                     });
             })
 
@@ -337,11 +319,10 @@ public class Auth0ServiceImpl implements AuthService {
      * / Gateway OAuth2 Resource Server filters). It extracts standard OpenID Connect claims
      * as well as custom Auth0 namespace role claims.
      *
-     * @param token the raw JWT token string (without the "Bearer " prefix)
+     * @param idToken the raw JWT token string (without the "Bearer " prefix)
      * @return a {@link UserInfoDTO} populated with decoded claims, or an empty DTO if parsing fails
      */
-    private UserInfoDTO decodeTokens(String idToken, String accessToken) {
-
+    private UserInfoDTO decodeToken(String idToken) {
         try {
             // Step 1: Decode the ID token (contains user data)
             JsonNode idClaims = parseJwtPayload(idToken);
@@ -356,8 +337,6 @@ public class Auth0ServiceImpl implements AuthService {
             } else {
                 List.of("User", "No Roles");
             }
-
-            // List<String> roles = extractRoles(accessToken);
 
             // Step 3: Extract standard claims
             String userId = idClaims.path("sub").asText(null);
@@ -395,7 +374,6 @@ public class Auth0ServiceImpl implements AuthService {
     }
 
     private JsonNode parseJwtPayload(String token) throws Exception {
-
         // Step 1: Split JWT into Header, Payload, and Signature parts
         String[] parts = token.split("\\.");
         if (parts.length != 3) {
@@ -410,23 +388,153 @@ public class Auth0ServiceImpl implements AuthService {
         return objectMapper.readTree(payload);
     }
 
-    /* 
-    private List<String> extractRoles(String accessToken) {
-        try {
-            JsonNode json = parseJwtPayload(accessToken);
-            JsonNode rolesNode = json.path(Auth0ServiceImpl.claimCustomRoles + "/roles");
+    // ================================================================
+    // -- HANDLE ERRORS FROM API OAUTH0
+    // ================================================================
 
-            // Step 2: Extract roles from custom Auth0 namespace claim or set default
-            if (rolesNode.isArray() && !rolesNode.isEmpty()) {
-                List<String> roles = new ArrayList<>();
-                rolesNode.forEach(r -> roles.add(r.asText()));
-                return roles;
+    /**
+     * Parses an Auth0 error response body and converts it into an AppException.
+     *
+     * Auth0 returns errors in two different formats depending on the endpoint:
+     * - /oauth/token (login, refresh): { "error": "...", "error_description": "..." }
+     * - /dbconnections/signup (register): { "code": "...", "name": "...", "message": "..." }
+     *
+     * This method extracts the common fields from both formats, builds a list of
+     * technical error details for debugging, and maps the error code to a
+     * user-friendly message via mapAuth0ErrorToMessage.
+     *
+     * @param errorBody the raw JSON error body returned by Auth0
+     * @return an AppException with a user-friendly message and technical details
+     */
+    private AppException handleErrors(String errorBody) {
+        /* .onStatus(status -> status.is4xxClientError(), response -> {
+            if (response.statusCode().value() == 409) {
+                throw new AppException("Email already registered in Auth0", 409);
             }
+            throw new AppException("Failed to create user in Auth0", 400);
+        }) */
+
+        log.error("Auth0 error response: {}", errorBody);
+
+        // 1. Extract common fields from the Auth0 error JSON
+        String errorCode = null;
+        String errorDesc = null;
+        String errorName = null;
+        String errorMessage = null;
+
+        List<String> errors = new ArrayList<>();
+
+        try {
+            JsonNode json = objectMapper.readTree(errorBody);
+
+            if (json.has("error") && !json.get("error").asText().isBlank()) {
+                errorCode = json.get("error").asText();
+            }
+            if (json.has("error_description") && !json.get("error_description").asText().isBlank()) {
+                errorDesc = json.get("error_description").asText();
+            }
+            if (json.has("code") && !json.get("code").asText().isBlank()) {
+                // "code" overrides "error" when present (e.g. signup errors)
+                errorCode = json.get("code").asText();
+            }
+            if (json.has("name") && !json.get("name").asText().isBlank()) {
+                errorName = json.get("name").asText();
+            }
+            if (json.has("message") && !json.get("message").asText().isBlank()) {
+                errorMessage = json.get("message").asText();
+            }
+
+            // 2. Build the list of technical error details (for debugging)
+            for (String field : List.of("error", "error_description", "code", "name", "message")) {
+                if (json.has(field) && !json.get(field).asText().isBlank()) {
+                    errors.add(field + ": " + json.get(field).asText());
+                }
+            }
+
         } catch (Exception e) {
-            // Handle decoding errors gracefully
-            log.error("Failed to extract roles: {}", e.getMessage());
+            // If the body is not valid JSON, store the raw string
+            errors.add(errorBody);
         }
-        return List.of("User");   // fallback
+
+        if (errors.isEmpty()) {
+            errors.add(errorBody);
+        }
+
+        // 3. Map the error code to a user-friendly message
+        String userMessage = mapAuth0ErrorToMessage(errorCode, errorName, errorDesc, errorMessage);
+
+        return new AppException(userMessage, 400, errors);
     }
-    */
+
+    /**
+     * Maps an Auth0 error code to a user-friendly message in English.
+     *
+     * Falls back to the provided description/message, or a generic message
+     * if the error code is unknown.
+     *
+     * @param code    the error code (e.g. "invalid_grant", "user_exists")
+     * @param name    the error name from Auth0 (e.g. "PasswordStrengthError")
+     * @param desc    the error description, if any
+     * @param message the error message, if any
+     * @return a user-friendly message ready to be shown to the end user
+     */
+    private String mapAuth0ErrorToMessage(String code, String name, String desc, String message) {
+        // Normalize: prefer "code", fall back to "name", then "unknown"
+        String key = code != null ? code : (name != null ? name : "unknown");
+
+        return switch (key) {
+            // LOGIN
+            case "invalid_grant" ->
+                "Invalid credentials. Please check your email and password.";
+            case "invalid_request" ->
+                "Invalid request. Please check the submitted data.";
+            case "unauthorized_client" ->
+                "Application not authorized for this flow.";
+            case "unsupported_grant_type" ->
+                "Unsupported authentication type.";
+            case "invalid_client" ->
+                "Invalid authentication client.";
+
+            // REGISTER
+            case "user_exists" ->
+                "This email is already registered.";
+            case "PasswordStrengthError" ->
+                "The password does not meet the minimum security requirements.";
+            case "invalid_password" ->
+                "Invalid password.";
+            case "invalid_signup" ->
+                "Sign up could not be completed. Please check the submitted data.";
+
+            // TOKENS
+            case "invalid_token" ->
+                "Invalid or expired token. Please sign in again.";
+            case "expired_token" ->
+                "The token has expired. Please sign in again.";
+            case "invalid_refresh_token" ->
+                "The refresh token is invalid or expired. Please sign in again.";
+
+            // PERMISSIONS
+            case "access_denied" ->
+                "Access denied. You do not have permission for this action.";
+            case "forbidden" ->
+                "You do not have permission for this action.";
+            case "insufficient_scope" ->
+                "Insufficient permissions for this operation.";
+
+            // GENERIC
+            case "server_error" ->
+                "Internal authentication server error. Please try again later.";
+            case "temporarily_unavailable" ->
+                "The authentication service is unavailable. Please try again later.";
+            case "too_many_requests" ->
+                "Too many attempts. Please wait a moment before trying again.";
+
+            // FALLBACK
+            default -> {
+                if (desc != null && !desc.isBlank()) yield "Authentication error: " + desc;
+                if (message != null && !message.isBlank()) yield "Authentication error: " + message;
+                yield "Authentication error. Please try again.";
+            }
+        };
+    }
 }
