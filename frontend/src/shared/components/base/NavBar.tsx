@@ -19,6 +19,9 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { useTheme, type Mode, type BrandTheme } from '@/shared/theme/ThemeProvider';
 
+import { useAuth } from '@features/auth/hooks/useAuth';
+import LogoutButton from '@features/auth/components/LogoutButton';
+
 interface NavItem {
   path: string;
   label: string;
@@ -27,6 +30,8 @@ interface NavItem {
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { mode, setMode, theme, setTheme } = useTheme();
+
+  const { isAuthenticated } = useAuth();
 
   const navItems: NavItem[] = [
     { path: '/', label: 'Inicio' },
@@ -57,6 +62,9 @@ export default function Navbar() {
 
           {/* Theme & Mode Controls (Desktop) */}
           <ThemeSelectorDropdown mode={mode} setMode={setMode} theme={theme} setTheme={setTheme} />
+
+          {/* Logout (Desktop, only when authenticated) */}
+          {isAuthenticated && <LogoutButton />}
         </div>
 
         {/* Mobile Controls */}
@@ -85,6 +93,15 @@ export default function Navbar() {
               </div>
             </SheetContent>
           </Sheet>
+
+          {/* Logout (Mobile, only when authenticated) */}
+          {isAuthenticated && (
+            <LogoutButton
+              variant="outline"
+              showLabel
+              onLogout={() => setIsOpen(false)}
+            />
+          )}
         </div>
       </div>
     </nav>

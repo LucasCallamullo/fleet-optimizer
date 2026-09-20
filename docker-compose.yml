@@ -121,6 +121,8 @@ services:
   fleets-service:
     build: ./backend/ms-fleets
     container_name: fleets-service
+    expose:
+      - "8081"
     # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -140,6 +142,8 @@ services:
   routes-service:
     build: ./backend/ms-routes
     container_name: routes-service
+    expose:
+      - "8082"
     # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -169,14 +173,23 @@ services:
   auth-service:
     build: ./backend/ms-auth
     container_name: auth-service
+    expose:
+      - "8083"
     # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      # Now use OAuth0
+      - AUTH0_DOMAIN=${AUTH0_DOMAIN}
+      - AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
+      - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
+      - AUTH0_AUDIENCE=${AUTH0_AUDIENCE}
+      - AUTH0_LOGIN_AUDIENCE=${AUTH0_LOGIN_AUDIENCE}
+      - AUTH0_JWKS_URI=${AUTH0_JWKS_URI}
       # No database configuration needed - uses Keycloak
-      - KEYCLOAK_URI=${KEYCLOAK_URI}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      # - KEYCLOAK_URI=${KEYCLOAK_URI}
+      # - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      # - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      # - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
     # No depends_on needed - no database to wait for
     networks:
       - backend-network
@@ -186,6 +199,8 @@ services:
   packages-service:
     build: ./backend/ms-packages
     container_name: packages-service
+    expose:
+      - "8084"
     # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -205,6 +220,8 @@ services:
   geocoding-service:
     build: ./backend/ms-geocoding
     container_name: geocoding-service
+    expose:
+      - "8085"
     # SPRING_PROFILES_ACTIVE=docker -> Load application-docker.yml
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -224,8 +241,12 @@ services:
   gateway-service:
     build: ./backend/gateway
     container_name: gateway-service
-    ports:
-      - "8080:8080"  # ONLY exposed port - entry point for all external traffic
+    # 'expose' to open port 8080 ONLY to the internal Docker network.
+    expose:
+      - "8080"
+    # ONLY exposed port - entry point for all external traffic
+    # ports:
+    #  "8080:8080" 
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - CORS_ALLOWED_ORIGINS=${CORS_URLS}
@@ -234,9 +255,8 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:8083
       - PACKAGES_SERVICE_URL=http://packages-service:8084
       - GEOCODING_SERVICE_URL=http://geocoding-service:8085
-      - KEYCLOAK_URI=${KEYCLOAK_URI}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_JWKS_URI=${KEYCLOAK_JWKS_URI}
+      - AUTH0_JWKS_URI=${AUTH0_JWKS_URI}
+      # - KEYCLOAK_JWKS_URI=${KEYCLOAK_JWKS_URI}
     depends_on:
       - fleets-service
       - routes-service
@@ -248,7 +268,7 @@ services:
     restart: unless-stopped
 
   # ================================================================
-  # FRONTEND - React TypeScript - server by Nginx
+  # FRONTEND - React | TypeScript - server by Nginx
   # ================================================================
   frontend:
     build: ./frontend

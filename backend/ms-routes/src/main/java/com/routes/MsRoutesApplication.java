@@ -42,11 +42,13 @@ public class MsRoutesApplication {
                 return;
             }
 
+            String userId = "auth0|6aaf437b3de387c0d8f1e01e";
+
             // Step 1: Create a sample route
             Route route = new Route();
             route.setName("Buenos Aires - Cordoba - Mendoza");
             route.setDescription("Sample route for testing");
-            route.setOwnerId("811bbc42-afd8-4e58-ab51-5cb97c9ec347");
+            route.setOwnerId(userId);
             route.setStatus(RouteStatus.PLANNED);
             route.setEstimatedDistanceKm(1350.0);
             route.setEstimatedDurationMinutes(900);
